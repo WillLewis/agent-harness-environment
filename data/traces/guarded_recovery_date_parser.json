@@ -1,0 +1,187 @@
+{
+  "task_id": "bugfix_date_parser_001",
+  "task_title": "Bugfix: timezone parser regression",
+  "repo_snapshot": "toy_repo_date_utils_v1",
+  "success_command": "npm test -- dateParser",
+  "known_files": [
+    "src/dateParser.ts",
+    "tests/dateParser.test.ts",
+    "package.json"
+  ],
+  "run_id": "run_guarded_date_parser_001",
+  "policy": "guarded_recovery",
+  "verdict": "accepted",
+  "events": [
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 1,
+      "timestamp": "2026-06-04T14:05:00.000Z",
+      "actor": "router",
+      "action_type": "POLICY_DECISION",
+      "input_summary": "Classify task as bugfix with failed-test recovery risk.",
+      "output_summary": "Selected guarded_recovery because recent failures include ignored_test_output loops.",
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "selected_policy": "guarded_recovery",
+        "expected_reward": 4.6
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 2,
+      "timestamp": "2026-06-04T14:05:05.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Fix timezone parser regression.",
+      "output_summary": "Plan: inspect failing test, inspect parser, patch narrowly, run target and regression tests.",
+      "harness_policy": "guarded_recovery",
+      "model": "demo-agent",
+      "tokens": 540,
+      "latency_ms": 1350,
+      "cost_cents": 1,
+      "raw": {
+        "plan_quality_hint": "evidence first"
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 3,
+      "timestamp": "2026-06-04T14:05:11.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read failing test before editing.",
+      "output_summary": "Test expects `2026-06-04T00:00:00+05:30` to parse as UTC minus five and a half hours.",
+      "files_touched": [
+        "tests/dateParser.test.ts"
+      ],
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "path": "tests/dateParser.test.ts"
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 4,
+      "timestamp": "2026-06-04T14:05:18.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read parser implementation.",
+      "output_summary": "Parser strips punctuation too broadly before delegating to Date.",
+      "files_touched": [
+        "src/dateParser.ts"
+      ],
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "path": "src/dateParser.ts"
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 5,
+      "timestamp": "2026-06-04T14:05:28.000Z",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Patch only timezone offset normalization.",
+      "output_summary": "Added a small normalizer for trailing timezone offsets, preserving time separators.",
+      "files_touched": [
+        "src/dateParser.ts"
+      ],
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "diff": "+ const normalized = normalizeTimezoneOffset(input)\n+ return new Date(normalized)",
+        "patch_risk": "narrow"
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 6,
+      "timestamp": "2026-06-04T14:05:41.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run target date parser test.",
+      "output_summary": "One assertion failed for negative offsets; harness requires inspecting output before retry.",
+      "command": "npm test -- dateParser",
+      "exit_code": 1,
+      "harness_policy": "guarded_recovery",
+      "failure_label": "failed_recovery_guard_triggered",
+      "raw": {
+        "terminal_output": "FAIL tests/dateParser.test.ts\nExpected offset -04:00 to parse correctly.\nHarness: inspect failing assertion before retry."
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 7,
+      "timestamp": "2026-06-04T14:05:48.000Z",
+      "actor": "critic",
+      "action_type": "READ_FILE",
+      "input_summary": "Inspect failing assertion after test failure.",
+      "output_summary": "Negative offsets need sign-preserving normalization; no command retry allowed until evidence is used.",
+      "files_touched": [
+        "tests/dateParser.test.ts"
+      ],
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "evidence_after_failure": true
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 8,
+      "timestamp": "2026-06-04T14:06:00.000Z",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Patch sign-preserving offset normalization.",
+      "output_summary": "Adjusted normalizer to preserve plus/minus sign and remove only the offset colon.",
+      "files_touched": [
+        "src/dateParser.ts"
+      ],
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "diff": "+ return input.replace(/([+-]\\d{2}):(\\d{2})$/, '$1$2')",
+        "patch_risk": "narrow"
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 9,
+      "timestamp": "2026-06-04T14:06:12.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run target and regression tests.",
+      "output_summary": "Target date parser tests and full regression suite passed.",
+      "command": "npm test -- dateParser && npm test",
+      "exit_code": 0,
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "terminal_output": "PASS tests/dateParser.test.ts\nPASS tests/regression.test.ts",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_guarded_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 10,
+      "timestamp": "2026-06-04T14:06:20.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit final result for scoring.",
+      "output_summary": "Accepted: target tests passed, regression free, no loop, expected file touched.",
+      "harness_policy": "guarded_recovery",
+      "raw": {
+        "verdict": "accepted",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+id: high_reasoning_on_failure
+description: Escalates to stronger/slower reasoning after evidence of failure.
+max_retries: 2
+requires_evidence_after_failure: true
+constraints:
+  - start low-cost
+  - detect failure or uncertainty
+  - log explicit escalation reason

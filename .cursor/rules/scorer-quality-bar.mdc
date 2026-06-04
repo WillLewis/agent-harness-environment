@@ -1,0 +1,29 @@
+---
+description: Quality bar for deterministic, heuristic, and LLM-assisted scorers
+globs: "packages/evals/**"
+alwaysApply: false
+---
+
+# Scorer Quality Bar
+
+Scorers should be boring, explicit, and testable.
+
+Requirements:
+
+- Deterministic scorers should return numbers or booleans plus a short reason.
+- Heuristic scorers should explain thresholds.
+- LLM-assisted scorers must be optional and must not block local evals.
+- Scorers should consume trace JSON, not UI state.
+- Scorers should expose enough evidence to debug the score.
+- Add fixture tests when changing loop detection, unsafe tool detection, hallucinated file detection, patch minimality, or recovery scoring.
+
+Preferred output shape:
+
+```json
+{
+  "name": "loop_score",
+  "score": 0.91,
+  "passed": false,
+  "reason": "Same failing command repeated 3 times without intervening evidence."
+}
+```

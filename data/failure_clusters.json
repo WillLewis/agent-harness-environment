@@ -1,0 +1,41 @@
+[
+  {
+    "id": "repeated_terminal_command",
+    "label": "Looping",
+    "frequency": 14,
+    "severity": "high",
+    "pattern": "Agent reruns the same failing command without reading the assertion, stderr, or source file.",
+    "detectionRule": "Same TEST command exits non-zero twice, with no intervening READ_FILE or SEARCH event.",
+    "affectedTasks": [
+      "bugfix_date_parser_001",
+      "api_validation_error_003",
+      "package_script_mismatch_002"
+    ],
+    "recommendedHarnessChange": "After the same command fails twice, force evidence gathering: inspect stderr, inspect failing test, ask for help, or switch policy.",
+    "datasetCandidate": {
+      "task_id": "bugfix_date_parser_loop_001",
+      "failure_mode": "ignored_test_output",
+      "expected_policy_behavior": "inspect failing assertion before retry",
+      "success_command": "npm test -- dateParser"
+    }
+  },
+  {
+    "id": "hallucinated_file",
+    "label": "Hallucinated file",
+    "frequency": 18,
+    "severity": "medium",
+    "pattern": "Agent references a plausible source path that does not exist in the repository snapshot.",
+    "detectionRule": "Any referenced file path is absent from known_files unless event action_type is BLOCKED_ACTION.",
+    "affectedTasks": [
+      "validation_refactor_002",
+      "docs_site_nav_001"
+    ],
+    "recommendedHarnessChange": "Require search or file-existence check before referencing or editing a path.",
+    "datasetCandidate": {
+      "task_id": "hallucinated_file_guard_001",
+      "failure_mode": "hallucinated_file",
+      "expected_policy_behavior": "verify path exists before edit",
+      "success_command": "pnpm test"
+    }
+  }
+]

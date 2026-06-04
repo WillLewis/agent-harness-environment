@@ -1,0 +1,44 @@
+---
+description: Trace schema requirements for AgentTraceEvent objects
+globs: "packages/harness/**,services/runner/**,data/traces/**,apps/web/**"
+alwaysApply: false
+---
+
+# Trace Schema Rule
+
+Use `AgentTraceEvent` as the backbone of the product.
+
+Required fields:
+
+```ts
+type AgentTraceEvent = {
+  run_id: string;
+  task_id: string;
+  step_id: number;
+  timestamp: string;
+  actor: "planner" | "executor" | "critic" | "router" | "human" | "judge" | "subagent";
+  action_type:
+    | "PLAN"
+    | "READ_FILE"
+    | "SEARCH"
+    | "EDIT"
+    | "TERMINAL"
+    | "TEST"
+    | "RETRY"
+    | "ASK_USER"
+    | "BLOCKED_ACTION"
+    | "POLICY_DECISION"
+    | "FINAL";
+  input_summary: string;
+  output_summary: string;
+  harness_policy: string;
+};
+```
+
+Rules:
+
+- Do not store only raw logs; always provide readable summaries.
+- Raw terminal output can be attached under `raw`, but summaries must be enough for UI scanning.
+- File paths in `files_touched` must be real fixture paths unless the event intentionally demonstrates hallucination.
+- A failed command followed by a retry should include either new evidence or a failure label.
+- UI components should render readable summaries first and raw JSON behind disclosure.

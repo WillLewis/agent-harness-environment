@@ -1,0 +1,9 @@
+{
+  "name": "toy-repo-date-utils",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node tests/dateParser.test.js"
+  },
+  "devDependencies": {}
+}

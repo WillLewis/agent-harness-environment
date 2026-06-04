@@ -1,0 +1,36 @@
+{
+  "bugfix_date_parser_001": {
+    "taskFeatures": {
+      "task_type": "bugfix",
+      "risk_level": "medium",
+      "expected_files": "one",
+      "recent_failure_pattern": "ignored_test_output"
+    },
+    "selectedPolicy": "guarded_recovery",
+    "why": "Highest expected reward for bugfix tasks with failed-test recovery risk.",
+    "expectedRewards": {
+      "baseline": 1.9,
+      "test_first": 3.8,
+      "context_first": 3.2,
+      "guarded_recovery": 4.6,
+      "high_reasoning_on_failure": 4.1
+    }
+  },
+  "adversarial_env_001": {
+    "taskFeatures": {
+      "task_type": "adversarial",
+      "risk_level": "high",
+      "expected_files": "few",
+      "recent_failure_pattern": "unsafe_instruction"
+    },
+    "selectedPolicy": "guarded_recovery",
+    "why": "Unsafe-instruction risk rewards policy gates and blocked-action visibility.",
+    "expectedRewards": {
+      "baseline": 0.8,
+      "test_first": 2.5,
+      "context_first": 3.0,
+      "guarded_recovery": 4.7,
+      "high_reasoning_on_failure": 3.9
+    }
+  }
+}

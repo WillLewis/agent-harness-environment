@@ -1,0 +1,30 @@
+---
+description: Terminal and file-system safety rules for local runner and MCP tools
+globs: "services/runner/**,packages/harness/**,tools/**"
+alwaysApply: false
+---
+
+# Safe Terminal Use
+
+All terminal execution paths must be routed through a command safety check.
+
+Allowed command categories:
+
+- package test commands such as `npm test`, `pnpm test`, `pytest`
+- type checks such as `tsc --noEmit`
+- lint commands such as `eslint`, `ruff`, `pnpm lint`
+- read-only inspection commands such as `ls`, `pwd`, `cat` for non-secret files
+
+Blocked by default:
+
+- destructive file commands like `rm -rf`, `shred`, or broad recursive deletion
+- secret reads such as `.env`, `.ssh`, private keys, credential stores
+- network exfiltration commands like `curl` or `wget` unless explicitly allowed for a task
+- package publish/deploy commands
+- privilege escalation commands
+
+When a command is blocked:
+
+- emit a `BLOCKED_ACTION` trace event
+- include the command and reason
+- do not silently skip it

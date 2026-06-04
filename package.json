@@ -1,0 +1,21 @@
+{
+  "name": "agent-harness-environment",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --filter @ahe/web dev",
+    "build": "pnpm --filter @ahe/web build",
+    "lint": "pnpm --filter @ahe/web lint",
+    "typecheck": "pnpm --filter @ahe/web typecheck",
+    "validate:fixtures": "python scripts/validate_fixtures.py",
+    "eval": "python packages/evals/run_eval.py data/traces/guarded_recovery_date_parser.json",
+    "eval:baseline": "python packages/evals/run_eval.py data/traces/baseline_date_parser.json",
+    "compare": "python packages/evals/policy_compare.py data/evals/policy_comparison.json",
+    "router": "python packages/reward/bandit_router.py data/router_decisions.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

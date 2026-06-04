@@ -1,0 +1,78 @@
+[
+  {
+    "id": "baseline",
+    "name": "Baseline",
+    "description": "Minimal harness constraints. Good for exposing raw failure modes.",
+    "constraints": [
+      "global terminal safety"
+    ],
+    "strengths": [
+      "low overhead"
+    ],
+    "tradeoffs": [
+      "more loops",
+      "weaker recovery"
+    ]
+  },
+  {
+    "id": "test_first",
+    "name": "Test-first",
+    "description": "Requires test discovery or test inspection before code edits.",
+    "constraints": [
+      "must identify target test",
+      "cannot finalize without target test result"
+    ],
+    "strengths": [
+      "better bugfix grounding"
+    ],
+    "tradeoffs": [
+      "more initial tool calls"
+    ]
+  },
+  {
+    "id": "context_first",
+    "name": "Context-first",
+    "description": "Requires relevant source context before patching.",
+    "constraints": [
+      "read likely source files",
+      "search referenced symbols"
+    ],
+    "strengths": [
+      "fewer hallucinated files"
+    ],
+    "tradeoffs": [
+      "slower on simple tasks"
+    ]
+  },
+  {
+    "id": "guarded_recovery",
+    "name": "Guarded recovery",
+    "description": "Adds retry limits, loop breakers, blocked unsafe commands, and failure-output inspection.",
+    "constraints": [
+      "max retry count",
+      "evidence after failure",
+      "loop breaker"
+    ],
+    "strengths": [
+      "best failed-test recovery"
+    ],
+    "tradeoffs": [
+      "more policy complexity"
+    ]
+  },
+  {
+    "id": "rl_lite_router",
+    "name": "RL-lite router",
+    "description": "Selects a harness policy based on task features and reward history.",
+    "constraints": [
+      "logs policy decision",
+      "uses reward table"
+    ],
+    "strengths": [
+      "best blended cost-quality tradeoff"
+    ],
+    "tradeoffs": [
+      "requires eval history"
+    ]
+  }
+]

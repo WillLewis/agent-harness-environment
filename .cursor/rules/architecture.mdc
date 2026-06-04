@@ -1,0 +1,25 @@
+---
+description: Architecture boundaries for Agent Harness Environment
+alwaysApply: true
+---
+
+# Agent Harness Environment Architecture
+
+This repo has two product surfaces:
+
+1. Hosted demo surface using static fixtures.
+2. Local developer surface that can run tasks, emit traces, and score runs.
+
+Keep these boundaries:
+
+- `apps/web` renders the hosted product demo. It should default to static data and never require live LLM calls.
+- `packages/harness` owns TypeScript trace schema, policy definitions, tool contracts, and harness primitives.
+- `packages/evals` owns deterministic and heuristic scoring code.
+- `packages/reward` owns RL-lite policy routing and reward calculation.
+- `services/runner` owns local task execution, sandboxing, command allow-listing, and trace emission.
+- `tools/mcp_server.py` exposes local project data and eval tools to Cursor.
+- `data` contains static fixtures used by the hosted demo.
+
+When implementing a feature, prefer the smallest vertical slice that preserves this architecture.
+
+Do not move live runner concerns into the hosted demo. Do not make the hosted demo depend on external APIs.

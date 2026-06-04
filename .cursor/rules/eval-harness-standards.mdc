@@ -1,0 +1,27 @@
+---
+description: Standards for eval harness code and agent trace instrumentation
+globs: "packages/harness/**,packages/evals/**,services/runner/**,data/traces/**"
+alwaysApply: false
+---
+
+# Eval Harness Standards
+
+When changing the agent harness:
+
+- Every new policy must emit `AgentTraceEvent` records.
+- Every new policy must include at least one deterministic or heuristic scorer.
+- Never treat LLM judge scores as the only success criterion.
+- All terminal commands must pass through a command safety classifier.
+- Any retry policy must define `max_attempts` and a loop-break condition.
+- Every blocked command or blocked file access must appear in the trace.
+- Every final answer must be grounded in actual diff and test-result data.
+- Prefer small, inspectable policy objects over hidden prompt-only behavior.
+- Keep fixture traces deterministic and reviewable.
+
+Before submitting changes, run:
+
+```bash
+pnpm validate:fixtures
+pnpm eval:baseline
+pnpm eval
+```

@@ -1,0 +1,7 @@
+id: baseline
+description: Broad freedom with minimal harness structure.
+max_retries: 3
+requires_evidence_after_failure: false
+constraints:
+  - global safety layer blocks dangerous commands
+  - trace every tool action

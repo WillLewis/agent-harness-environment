@@ -1,0 +1,154 @@
+{
+  "task_id": "bugfix_date_parser_001",
+  "task_title": "Bugfix: timezone parser regression",
+  "repo_snapshot": "toy_repo_date_utils_v1",
+  "success_command": "npm test -- dateParser",
+  "known_files": [
+    "src/dateParser.ts",
+    "tests/dateParser.test.ts",
+    "package.json"
+  ],
+  "run_id": "run_baseline_date_parser_001",
+  "policy": "baseline",
+  "verdict": "rejected",
+  "events": [
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 1,
+      "timestamp": "2026-06-04T14:00:00.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Fix date parser regression for timezone offsets with a colon.",
+      "output_summary": "Plan: inspect parser, patch likely offset handling, run dateParser tests.",
+      "harness_policy": "baseline",
+      "model": "demo-agent",
+      "tokens": 480,
+      "latency_ms": 1200,
+      "cost_cents": 1,
+      "raw": {
+        "plan_quality_hint": "too coarse"
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 2,
+      "timestamp": "2026-06-04T14:00:05.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read source parser file.",
+      "output_summary": "Found parser delegates directly to Date constructor after a small string cleanup.",
+      "files_touched": [
+        "src/dateParser.ts"
+      ],
+      "harness_policy": "baseline",
+      "raw": {
+        "path": "src/dateParser.ts"
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 3,
+      "timestamp": "2026-06-04T14:00:12.000Z",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Patch offset handling before reading failing test.",
+      "output_summary": "Replaced colon characters globally before constructing Date.",
+      "files_touched": [
+        "src/dateParser.ts"
+      ],
+      "harness_policy": "baseline",
+      "failure_label": "premature_edit",
+      "raw": {
+        "diff": "- return new Date(input)\n+ return new Date(input.replace(/:/g, \"\"))",
+        "patch_risk": "brittle transform; also mutates HH:mm:ss separators"
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 4,
+      "timestamp": "2026-06-04T14:00:20.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run target test.",
+      "output_summary": "Target test failed: offset +05:30 still returns Invalid Date.",
+      "command": "npm test -- dateParser",
+      "exit_code": 1,
+      "harness_policy": "baseline",
+      "failure_label": "ignored_test_output",
+      "raw": {
+        "terminal_output": "FAIL tests/dateParser.test.ts\nExpected: 2026-06-03T18:30:00.000Z\nReceived: Invalid Date"
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 5,
+      "timestamp": "2026-06-04T14:00:31.000Z",
+      "actor": "executor",
+      "action_type": "RETRY",
+      "input_summary": "Retry the same failing command without inspecting assertion.",
+      "output_summary": "No new evidence gathered before retry.",
+      "command": "npm test -- dateParser",
+      "exit_code": 1,
+      "harness_policy": "baseline",
+      "failure_label": "ignored_test_output",
+      "raw": {
+        "retry_count": 1
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 6,
+      "timestamp": "2026-06-04T14:00:42.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run target test again.",
+      "output_summary": "Same target test failed again with same assertion.",
+      "command": "npm test -- dateParser",
+      "exit_code": 1,
+      "harness_policy": "baseline",
+      "failure_label": "loop_detected",
+      "raw": {
+        "terminal_output": "FAIL tests/dateParser.test.ts\nExpected offset +05:30 to parse correctly.",
+        "repeat_count": 3
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 7,
+      "timestamp": "2026-06-04T14:00:46.000Z",
+      "actor": "critic",
+      "action_type": "BLOCKED_ACTION",
+      "input_summary": "Detect repeated command loop.",
+      "output_summary": "Run rejected: repeated failed command without new information.",
+      "harness_policy": "baseline",
+      "failure_label": "loop_detected",
+      "raw": {
+        "better_policy": "guarded_recovery would require reading failing test or source before another retry."
+      }
+    },
+    {
+      "run_id": "run_baseline_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 8,
+      "timestamp": "2026-06-04T14:00:50.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit final result for scoring.",
+      "output_summary": "Rejected: target test failed and loop was detected.",
+      "harness_policy": "baseline",
+      "failure_label": "loop_detected",
+      "raw": {
+        "verdict": "rejected",
+        "target_tests_passed": false,
+        "regression_free": false
+      }
+    }
+  ]
+}

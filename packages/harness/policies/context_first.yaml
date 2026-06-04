@@ -1,0 +1,8 @@
+id: context_first
+description: Requires relevant source context before patching.
+max_retries: 3
+requires_evidence_after_failure: true
+constraints:
+  - read likely source files
+  - search referenced symbols
+  - verify files exist before edit

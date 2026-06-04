@@ -1,0 +1,8 @@
+id: guarded_recovery
+description: Adds loop breakers, retry limits, unsafe-command blocking, and failure-output inspection.
+max_retries: 2
+requires_evidence_after_failure: true
+constraints:
+  - block repeated failed command without evidence
+  - force failure-output inspection after failed test
+  - escalate to human steering after repeated uncertainty

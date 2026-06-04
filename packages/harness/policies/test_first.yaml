@@ -1,0 +1,8 @@
+id: test_first
+description: Requires test discovery or inspection before code edits.
+max_retries: 3
+requires_evidence_after_failure: true
+constraints:
+  - identify success command
+  - inspect or run target test before edit
+  - cannot finalize without target test result

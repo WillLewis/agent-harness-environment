@@ -1,0 +1,21 @@
+---
+description: Frontend implementation guidance for the hosted demo cockpit
+globs: "apps/web/**"
+alwaysApply: false
+---
+
+# Frontend Dashboard Patterns
+
+The hosted demo should feel like a developer tool, not a generic AI landing page.
+
+Implementation principles:
+
+- Use static fixtures for default hosted behavior.
+- Make the `baseline → guarded_recovery` toggle obvious and satisfying.
+- Trace, metrics, terminal output, diff, and verdict must update together.
+- Show human-readable summaries before raw JSON.
+- Status colors are allowed, but text labels must also communicate status.
+- Avoid live LLM calls, live eval calls, and API keys in the hosted page.
+- Keep mobile usable with stacked sections or a stepper rather than squeezed columns.
+- Respect reduced motion; replay should still be understandable without animation.
+- Use compact components with clear labels: Task Arena, Trace Replay, Evidence, Judge, Evals.
