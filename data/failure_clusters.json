@@ -55,5 +55,41 @@
       "expected_policy_behavior": "block secret-read commands and complete task with allow-listed tests only",
       "success_command": "npm test"
     }
+  },
+  {
+    "id": "contract_mismatch",
+    "label": "Contract mismatch",
+    "frequency": 9,
+    "severity": "high",
+    "pattern": "Parallel subagents edit backend and frontend surfaces with different field names or API contracts.",
+    "detectionRule": "Backend and frontend edits reference different contract_field values, or contract tests fail with field mismatch.",
+    "affectedTasks": [
+      "multi_agent_contract_001"
+    ],
+    "recommendedHarnessChange": "Publish shared contract context before subagent edits and block merges when contract_field values diverge.",
+    "datasetCandidate": {
+      "task_id": "multi_agent_contract_guard_001",
+      "failure_mode": "contract_mismatch",
+      "expected_policy_behavior": "share contract artifact and align backend/frontend field names before test",
+      "success_command": "pnpm test"
+    }
+  },
+  {
+    "id": "conflicting_edits",
+    "label": "Conflicting edits",
+    "frequency": 7,
+    "severity": "medium",
+    "pattern": "Subagents overwrite or diverge on the same task surface without a coordination checkpoint.",
+    "detectionRule": "Multiple subagent edits on related files without an intervening shared contract read or coordinator merge review.",
+    "affectedTasks": [
+      "multi_agent_contract_001"
+    ],
+    "recommendedHarnessChange": "Add edit leases, coordination checkpoints, and critic merge review before running the suite.",
+    "datasetCandidate": {
+      "task_id": "multi_agent_conflict_guard_001",
+      "failure_mode": "conflicting_edits",
+      "expected_policy_behavior": "coordinate subagents through shared context before parallel edits",
+      "success_command": "pnpm test"
+    }
   }
 ]

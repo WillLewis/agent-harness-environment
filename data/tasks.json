@@ -49,6 +49,13 @@
     "repo": "toy_repo_issue_tracker_v1",
     "issue": "Add priority field to backend API and frontend form without contract drift.",
     "successCommand": "pnpm test",
+    "expectedFiles": [
+      "contracts/issue-priority.json",
+      "backend/issueApi.js",
+      "frontend/issueForm.js",
+      "package.json",
+      "tests/contract.test.js"
+    ],
     "tags": [
       "multi_agent",
       "frontend",

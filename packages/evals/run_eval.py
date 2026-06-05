@@ -12,6 +12,7 @@ if str(CURRENT_DIR) not in sys.path:
 
 from scorers import (  # noqa: E402
     score_command_allowlist,
+    score_contract_consistency,
     score_expected_files_touched,
     score_hallucinated_file,
     score_loop,
@@ -60,6 +61,7 @@ def run_eval(trace_path: Path) -> dict[str, Any]:
         score_recovery(trace),
         score_expected_files_touched(trace),
         score_command_allowlist(trace),
+        score_contract_consistency(trace),
     ]
     scores = [result.to_dict() for result in scorer_results]
     return {

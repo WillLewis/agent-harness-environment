@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from scorers.command_allowlist import score_command_allowlist
+from scorers.contract_consistency import score_contract_consistency
 from scorers.expected_files_touched import score_expected_files_touched
 from scorers.hallucinated_file import score_hallucinated_file
 from scorers.loop_score import score_loop
@@ -301,3 +302,26 @@ def test_guarded_recovery_fixture_eval_signals():
     assert recovery.passed is True
     assert expected_files.passed is True
     assert allowlist.passed is True
+
+
+def test_contract_consistency_skips_non_multi_agent_tasks():
+    trace = {"task_id": "bugfix_date_parser_001", "events": []}
+    result = score_contract_consistency(trace)
+    assert result.passed is True
+    assert "skipped" in result.reason.lower()
+
+
+def test_contract_consistency_detects_mismatch_label():
+    trace = {
+        "task_id": "multi_agent_contract_001",
+        "events": [
+            {
+                "action_type": "EDIT",
+                "actor": "subagent",
+                "files_touched": ["frontend/issueForm.js"],
+                "failure_label": "contract_mismatch",
+            }
+        ],
+    }
+    result = score_contract_consistency(trace)
+    assert result.passed is False

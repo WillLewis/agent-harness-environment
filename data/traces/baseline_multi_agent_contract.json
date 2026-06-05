@@ -1,0 +1,162 @@
+{
+  "task_id": "multi_agent_contract_001",
+  "task_title": "Multi-agent: backend API + frontend form",
+  "repo_snapshot": "toy_repo_issue_tracker_v1",
+  "success_command": "pnpm test",
+  "known_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ],
+  "expected_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ],
+  "run_id": "run_baseline_multi_agent_contract_001",
+  "policy": "baseline",
+  "verdict": "rejected",
+  "events": [
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 1,
+      "timestamp": "2026-06-05T11:00:00.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Add priority field to backend API and frontend form in parallel.",
+      "output_summary": "Plan: backend subagent patches API, frontend subagent patches form, then run contract tests.",
+      "harness_policy": "baseline",
+      "model": "demo-agent",
+      "tokens": 560,
+      "latency_ms": 1400,
+      "cost_cents": 1
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 2,
+      "timestamp": "2026-06-05T11:00:08.000Z",
+      "actor": "subagent",
+      "action_type": "READ_FILE",
+      "input_summary": "Backend subagent inspects API module.",
+      "output_summary": "Backend module ready for priority field addition.",
+      "files_touched": [
+        "backend/issueApi.js"
+      ],
+      "harness_policy": "baseline",
+      "raw": {
+        "subagent_role": "backend"
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 3,
+      "timestamp": "2026-06-05T11:00:16.000Z",
+      "actor": "subagent",
+      "action_type": "EDIT",
+      "input_summary": "Backend subagent adds priority field to API payload.",
+      "output_summary": "Backend exposes createIssuePayload with priority enum field.",
+      "files_touched": [
+        "backend/issueApi.js"
+      ],
+      "harness_policy": "baseline",
+      "raw": {
+        "contract_field": "priority",
+        "subagent_role": "backend",
+        "diff": "+ function createIssuePayload({ title, priority })"
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 4,
+      "timestamp": "2026-06-05T11:00:24.000Z",
+      "actor": "subagent",
+      "action_type": "READ_FILE",
+      "input_summary": "Frontend subagent inspects form module without shared contract context.",
+      "output_summary": "Frontend module edited independently from backend contract.",
+      "files_touched": [
+        "frontend/issueForm.js"
+      ],
+      "harness_policy": "baseline",
+      "raw": {
+        "subagent_role": "frontend"
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 5,
+      "timestamp": "2026-06-05T11:00:32.000Z",
+      "actor": "subagent",
+      "action_type": "EDIT",
+      "input_summary": "Frontend subagent adds mismatched field name.",
+      "output_summary": "Frontend exposes priorityLevel instead of shared contract field priority.",
+      "files_touched": [
+        "frontend/issueForm.js"
+      ],
+      "harness_policy": "baseline",
+      "failure_label": "contract_mismatch",
+      "raw": {
+        "contract_field": "priorityLevel",
+        "subagent_role": "frontend",
+        "diff": "+ return ['title', 'priorityLevel']"
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 6,
+      "timestamp": "2026-06-05T11:00:40.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run contract alignment tests.",
+      "output_summary": "Contract test failed: frontend/backend field names diverged.",
+      "command": "pnpm test",
+      "exit_code": 1,
+      "harness_policy": "baseline",
+      "failure_label": "contract_mismatch",
+      "raw": {
+        "terminal_output": "Error: Frontend/backend contract mismatch: priorityLevel vs priority."
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 7,
+      "timestamp": "2026-06-05T11:00:46.000Z",
+      "actor": "critic",
+      "action_type": "BLOCKED_ACTION",
+      "input_summary": "Detect backend/frontend contract drift.",
+      "output_summary": "Run rejected: subagents edited without shared contract checkpoint.",
+      "harness_policy": "baseline",
+      "failure_label": "conflicting_edits",
+      "raw": {
+        "better_policy": "guarded_recovery would require shared contract read before subagent edits."
+      }
+    },
+    {
+      "run_id": "run_baseline_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 8,
+      "timestamp": "2026-06-05T11:00:52.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit multi-agent contract task result.",
+      "output_summary": "Rejected: contract mismatch between backend and frontend subagents.",
+      "harness_policy": "baseline",
+      "failure_label": "contract_mismatch",
+      "raw": {
+        "verdict": "rejected",
+        "target_tests_passed": false,
+        "regression_free": false
+      }
+    }
+  ]
+}

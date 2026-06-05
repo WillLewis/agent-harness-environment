@@ -7,6 +7,7 @@ from .patch_minimality import score_patch_minimality
 from .recovery_score import score_recovery
 from .expected_files_touched import score_expected_files_touched
 from .command_allowlist import score_command_allowlist
+from .contract_consistency import score_contract_consistency
 
 __all__ = [
     "score_tests_passed",
@@ -18,4 +19,5 @@ __all__ = [
     "score_recovery",
     "score_expected_files_touched",
     "score_command_allowlist",
+    "score_contract_consistency",
 ]
