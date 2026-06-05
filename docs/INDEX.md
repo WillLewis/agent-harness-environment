@@ -13,7 +13,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → `#cockpit`, `#evals`, `#architecture` |
 | **Deploy hosted demo (review)** | [DEPLOYMENT.md](./DEPLOYMENT.md) | `pnpm deploy:check` → `pnpm build` → `pnpm preview` → `pnpm smoke:hosted:local` |
 | **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | `pnpm repo:status`, CI contract in README |
-| **v0.1 release package** | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | Pre-tag checklist §8 in RELEASE_CHECKLIST |
+| **v0.1 release package** | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | Pre-tag checklist §8; [PRE_TAG_AUDIT_v0.1.md](./PRE_TAG_AUDIT_v0.1.md) |
 | **Understand evals vs hosted metrics** | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | `pnpm eval:ci`, `python packages/evals/audit_metric_drift.py --format table` |
 | **Pick next implementation work** | [FINAL_AUDIT.md](./FINAL_AUDIT.md) §12–14 | One P1/P2 item + matching `.cursor/skills/` |
 | **Onboard a Cursor agent** | [START_HERE_CURSOR.md](../START_HERE_CURSOR.md) | `.cursor/rules/architecture.mdc` |

@@ -163,7 +163,8 @@ If any step fails, fix gates before handoff — do not patch docs to hide failur
 
 Use before creating git tag `v0.1` or a GitHub Release **manually**. This repo does not create tags or releases automatically.
 
-Release notes: [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md)
+Release notes: [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md)  
+Pre-tag audit (clean clone): [PRE_TAG_AUDIT_v0.1.md](./PRE_TAG_AUDIT_v0.1.md)
 
 | Check | How to verify | Expect |
 | --- | --- | --- |
@@ -176,5 +177,6 @@ Release notes: [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md)
 | No secrets / env files | `git status --short` | No `.env`, `.env.local`, or credential files staged |
 | Live adapters opt-in only | Read `package.json` + CI | `export:*:live` not in `.github/workflows/ci.yml` |
 | Claims grounded | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) § limitations | No live-agent / production-metrics overclaim |
+| Clean-clone audit | [PRE_TAG_AUDIT_v0.1.md](./PRE_TAG_AUDIT_v0.1.md) | CI contract passed from fresh `git clone` |
 
 **Record at tag time:** commit SHA, date, and pointer to `RELEASE_NOTES_v0.1.md` in the GitHub Release body.
