@@ -87,9 +87,18 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | Surface | Purpose |
 | --- | --- |
 | `pnpm eval:ci` / GitHub Actions | Deterministic smoke gate: fixture validation, static trace scorers, suite gates, pytest, typecheck, build. |
-| Braintrust / W&B (future) | Optional export and experiment tracking when configured; failures there must not block the local demo or this workflow. |
+| `pnpm export:braintrust:dry-run` | Optional Braintrust export preview (no API key, no network). |
+| Braintrust / W&B live export (future) | Upload when `braintrust` is installed and `BRAINTRUST_API_KEY` is set; not required for CI or local dev. |
 
 The hosted demo and CI both rely on static fixtures under `data/` only.
+
+**Braintrust dry-run** — previews dataset rows, trace examples, scorer metadata, and suite batch shapes:
+
+```bash
+pnpm export:braintrust:dry-run
+```
+
+Implementation: `packages/evals/adapters/braintrust_adapter.py`. Live upload is intentionally unimplemented in this phase; missing package or API key returns a structured `not_configured` result instead of failing local workflows.
 
 ## Repo map
 

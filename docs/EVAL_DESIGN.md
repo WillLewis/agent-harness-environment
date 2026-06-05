@@ -57,7 +57,19 @@ Per-fixture expectations are keyed by trace filename stem in `FIXTURE_EXPECTATIO
 
 `.github/workflows/ci.yml` runs `pnpm eval:ci` plus fixture validation, single-trace evals, policy compare, pytest, typecheck, and build. It does not call Braintrust, W&B, or live model APIs.
 
+### Braintrust adapter (local-only default)
+
+`packages/evals/adapters/braintrust_adapter.py` maps AHE tasks, `coding_tasks.jsonl`, trace fixtures, `run_eval` scores, and `run_suite` summaries to Braintrust-oriented shapes. Pure transforms are unit-tested without network access.
+
+```bash
+pnpm export:braintrust:dry-run
+```
+
+- Default: compact JSON dry-run (`mode: dry_run`); no SDK calls.
+- Missing `braintrust` package or `BRAINTRUST_API_KEY`: structured `not_configured` when live export is requested.
+- Live upload is reserved for a later phase; CI and `pnpm eval:ci` stay fully local.
+
 ## Next eval work
 
 1. Add optional `plan_quality` and `final_answer_groundedness` LLM judge interfaces.
-2. Add Braintrust/W&B export adapters behind optional configuration.
+2. Implement live Braintrust/W&B upload behind optional configuration.
