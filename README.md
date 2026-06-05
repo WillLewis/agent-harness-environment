@@ -22,7 +22,8 @@ For external reviewers or portfolio walkthroughs:
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
 | Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |
-| Audit metric source drift | `python packages/evals/audit_metric_drift.py` |
+| Audit metric source drift | `pnpm eval:audit` |
+| Check local generated artifacts | `pnpm repo:status` |
 | Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
 | Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
 | Promote runner trace to candidate | `python scripts/promote_run_trace.py runs/<run_id>.json` |
@@ -74,6 +75,8 @@ pnpm eval:suite               # Same scoring + human-readable table
 pnpm eval                     # Score one trace (guarded date-parser)
 pnpm eval:baseline            # Score one trace (baseline date-parser)
 pnpm compare                  # Synthetic policy comparison table
+pnpm eval:audit               # Metric drift report (hosted vs trace scorers)
+pnpm repo:status              # Local generated-artifact hygiene (read-only)
 pnpm export:braintrust:dry-run
 pnpm export:braintrust:live       # optional; requires braintrust + BRAINTRUST_API_KEY
 pnpm export:weave:dry-run

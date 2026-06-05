@@ -27,9 +27,24 @@ Optional but recommended for demos:
 pnpm eval:suite
 pnpm export:braintrust:dry-run
 pnpm export:weave:dry-run
+pnpm repo:status
 ```
 
-**Expect:** all commands exit 0; `pnpm eval:ci` prints `"gates_ok":true`; pytest reports all tests passing (110+ at last green run).
+**Expect:** all commands exit 0; `pnpm eval:ci` prints `"gates_ok":true`; pytest reports all tests passing (110+ at last green run). `pnpm repo:status` should report `ok=true` and no tracked generated files.
+
+### Local generated artifacts (do not commit)
+
+These paths are **gitignored** and recreated by local tools. They should never appear in `git status` as tracked files:
+
+| Path | Produced by |
+| --- | --- |
+| `runs/` | `services/runner/`, `pnpm runner:batch` |
+| `data/trace_candidates/` | `scripts/promote_run_trace.py`, `pnpm runner:batch:promote` |
+| `data/datasets/generated_candidates.jsonl` | MCP `promote_trace_to_dataset` or promote script |
+| `apps/web/.next/` | `pnpm dev` / `pnpm build` |
+| `**/*.tsbuildinfo`, `__pycache__/`, `.pytest_cache/` | TypeScript / Python tooling |
+
+Before handoff, run `pnpm repo:status` (read-only; does not delete files). If generated files were ever committed, remove from the index with `git rm --cached <path>` — do not use `git clean` on a developer checkout.
 
 ---
 
@@ -81,14 +96,17 @@ These work in a developer checkout but are **not** required for CI or the hosted
 
 | Capability | Location | Notes |
 | --- | --- | --- |
-| Local runner MVP | `services/runner/run_task.py` | Copies toy repo to `runs/sandboxes/`; writes trace JSON |
+| Local runner | `services/runner/run_task.py`, `pnpm runner:batch` | Writes traces under `runs/` (gitignored) |
+| Trace promotion | `scripts/promote_run_trace.py` | Optional `data/trace_candidates/` (gitignored) |
 | MCP tools | `tools/mcp_server.py` | Cursor integration; trace/eval helpers |
 | Eval suite report | `pnpm eval:suite` | Human-readable table + JSON |
-| Braintrust adapter dry-run | `pnpm export:braintrust:dry-run` | No `BRAINTRUST_API_KEY` needed |
-| Weave adapter dry-run | `pnpm export:weave:dry-run` | No `WANDB_API_KEY` needed |
+| Metric drift audit | `pnpm eval:audit` | Hosted synthetic vs trace scorer report |
+| Repo hygiene check | `pnpm repo:status` | Lists local generated artifacts; flags accidental tracking |
+| Braintrust adapter | `pnpm export:braintrust:dry-run` / `:live` | Dry-run default; live opt-in + API key |
+| Weave adapter | `pnpm export:weave:dry-run` / `:live` | Dry-run default; live opt-in + API key |
 | Real per-trace scoring | `pnpm eval`, `run_eval.py` | Deterministic Python scorers on fixtures |
 
-**Adapter dry-run vs external integration:** dry-run prints JSON describing what *would* be exported. Live upload returns `not_configured` or `live_export_not_implemented` — intentionally not shipped yet.
+**Adapter dry-run vs live:** dry-run prints JSON with no network. Live upload is opt-in (`:live` + SDK + API key) and is **not** part of CI.
 
 **Synthetic metrics vs real local scoring:**
 
@@ -101,7 +119,7 @@ These work in a developer checkout but are **not** required for CI or the hosted
 
 Do not expect or promise:
 
-- Live Braintrust or W&B Weave upload
+- Live Braintrust or W&B Weave upload **in CI** (opt-in locally only)
 - GitHub deployment workflow / hosted URL provisioning
 - Live LLM judges as gate criteria
 - Production trace ingestion

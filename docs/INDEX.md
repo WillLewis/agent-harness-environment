@@ -11,7 +11,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | I want to… | Read first | Then run |
 | --- | --- | --- |
 | **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → `#cockpit`, `#evals`, `#architecture` |
-| **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | CI contract in README Verification section |
+| **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | `pnpm repo:status`, CI contract in README |
 | **Understand evals vs hosted metrics** | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | `pnpm eval:ci`, `python packages/evals/audit_metric_drift.py --format table` |
 | **Pick next implementation work** | [FINAL_AUDIT.md](./FINAL_AUDIT.md) §12–14 | One P1/P2 item + matching `.cursor/skills/` |
 | **Onboard a Cursor agent** | [START_HERE_CURSOR.md](../START_HERE_CURSOR.md) | `.cursor/rules/architecture.mdc` |
@@ -34,7 +34,8 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | --- | --- | --- | --- |
 | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | Scorer list, aggregate formula, suite gates, metric sources | Changing scorers, gates, or explaining CI | `pnpm eval:suite`, `pnpm eval:ci`, `packages/evals/suite_gates.py` |
 | [FINAL_AUDIT.md](./FINAL_AUDIT.md) §3, §6 | Verification status, eval quality risks | Auditing eval claims | `python -m pytest`, `packages/evals/audit_metric_drift.py` |
-| — | Metric drift audit (no separate doc) | When hosted table vs trace scores confuse reviewers | `python packages/evals/audit_metric_drift.py` |
+| — | Metric drift audit (no separate doc) | When hosted table vs trace scores confuse reviewers | `pnpm eval:audit` |
+| — | Repo hygiene (no separate doc) | Before commit; confirm generated paths stay untracked | `pnpm repo:status` |
 | — | Fixture truth | Scoring or adding traces | `data/traces/*.json`, `pnpm validate:fixtures` |
 
 ### Architecture / product design
@@ -87,7 +88,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | `data/evals/policy_comparison.json` | **Synthetic** hosted eval table — not `eval:ci` output |
 | `data/failure_clusters.json` | Failure cluster drawer + MCP |
 | `data/tasks.json`, `data/policies.json` | Task/policy catalog |
-| `runs/` | Local runner output (gitignored) |
+| `runs/` | Local runner output (gitignored); check with `pnpm repo:status` |
 | `data/trace_candidates/` | Promoted runner traces (gitignored) |
 | `.github/workflows/ci.yml` | Deterministic CI contract |
 

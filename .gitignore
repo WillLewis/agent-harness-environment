@@ -1,17 +1,33 @@
-node_modules
-.next
-.turbo
-dist
-coverage
-.venv
-__pycache__
-.pytest_cache
-*.pyc
+# Dependencies
+node_modules/
+
+# Build / bundler
+.next/
+.turbo/
+dist/
+coverage/
 *.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+
+# Environment
 .env
 .env.local
 .env.*.local
+
+# OS
 .DS_Store
-data/datasets/generated_candidates.jsonl
+
+# Local / generated (runner, promote, MCP) — do not commit
+runs/
 data/trace_candidates/
-runs
+data/datasets/generated_candidates.jsonl
