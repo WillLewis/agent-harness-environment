@@ -87,9 +87,9 @@ export function ImplementationEvidence() {
           {systemCapabilities.map((capability) => {
             const styles = statusStyles[capability.status];
             return (
-              <li key={capability.id} className="p-5">
+              <li key={capability.id} className="min-w-0 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <h4 className="text-base font-semibold text-white">{capability.title}</h4>
+                  <h4 className="min-w-0 flex-1 text-base font-semibold text-white">{capability.title}</h4>
                   <span
                     className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${styles.badge}`}
                   >
@@ -98,11 +98,11 @@ export function ImplementationEvidence() {
                   </span>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-slate-400">{capability.description}</p>
-                <p className="mt-3 font-mono text-xs text-slate-500">
+                <p className="mt-3 break-all font-mono text-xs leading-5 text-slate-500">
                   {capability.repoPaths.join(' · ')}
                 </p>
                 {capability.commands?.length ? (
-                  <p className="mt-2 font-mono text-xs text-cyan-100/90">
+                  <p className="mt-2 break-all font-mono text-xs leading-5 text-cyan-100/90">
                     {capability.commands.join(' · ')}
                   </p>
                 ) : null}
@@ -123,7 +123,7 @@ export function ImplementationEvidence() {
             {keyCommands.map(({ label, command }) => (
               <li key={command} className="rounded-2xl border border-white/10 bg-black/20 p-3">
                 <p className="text-xs uppercase tracking-wider text-slate-500">{label}</p>
-                <p className="mt-1 font-mono text-sm text-slate-200">{command}</p>
+                <p className="mt-1 break-all font-mono text-sm text-slate-200">{command}</p>
               </li>
             ))}
           </ul>

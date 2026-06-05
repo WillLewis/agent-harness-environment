@@ -30,7 +30,7 @@ function MetricCell({ value, clickable, onClick, ariaLabel }: MetricCellProps) {
   return (
     <button
       type="button"
-      className="focus-ring rounded-md border border-cyan-300/20 bg-cyan-300/5 px-2 py-1 font-mono text-cyan-100 underline decoration-cyan-300/40 underline-offset-4 hover:bg-cyan-300/10"
+      className="focus-ring rounded-md border border-cyan-300/20 bg-cyan-300/5 px-2 py-1.5 font-mono text-cyan-100 underline decoration-cyan-300/40 underline-offset-4 hover:bg-cyan-300/10"
       onClick={onClick}
       aria-label={ariaLabel}
     >
@@ -55,8 +55,11 @@ export function EvalTable() {
           </p>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm" aria-describedby="eval-fixture-note">
+        <p className="border-b border-white/10 px-5 py-3 text-xs text-slate-500 md:hidden">
+          Swipe horizontally to view all policy columns.
+        </p>
+        <div className="overflow-x-auto overscroll-x-contain">
+          <table className="w-full min-w-[720px] text-left text-sm sm:min-w-[860px]" aria-describedby="eval-fixture-note">
             <caption id="eval-fixture-note" className="sr-only">
               Synthetic policy comparison fixture with clickable baseline loop and unsafe-attempt metrics opening
               failure cluster drawers.

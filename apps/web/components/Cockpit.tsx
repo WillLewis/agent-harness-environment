@@ -153,23 +153,32 @@ export function Cockpit() {
           </h2>
         </div>
         <p className="max-w-2xl text-sm leading-6 text-slate-400">
-          Hosted demo uses precomputed traces for bugfix, adversarial safety, and multi-agent contract tasks. Toggle
-          task and policy to replay trace, metrics, evidence, and verdict together.
+          Precomputed fixtures from <span className="font-mono text-slate-300">data/traces/</span>. Select task and
+          policy to replay trace, metrics, evidence, and verdict together — no network requests.
         </p>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)_340px]">
-        <aside className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,340px)]">
+        <aside className="min-w-0 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
           <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4">
             <div className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-100">{task.label}</div>
             <h3 className="mt-2 text-xl font-semibold text-white">{task.title}</h3>
             <p className="mt-3 text-sm leading-6 text-slate-300">{task.issue}</p>
-            <div className="mt-4 rounded-xl bg-black/30 p-3 font-mono text-xs text-slate-300">{task.successCommand}</div>
+            <div className="mt-4 break-all rounded-xl bg-black/30 p-3 font-mono text-xs text-slate-300">
+              {task.successCommand}
+            </div>
           </div>
 
           <div className="mt-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Task</div>
-            <div className="mt-3 space-y-2" role="group" aria-label="Coding task">
+            <div id="cockpit-task-label" className="text-xs uppercase tracking-[0.22em] text-slate-500">
+              Task
+            </div>
+            <div
+              className="mt-3 space-y-2"
+              role="group"
+              aria-labelledby="cockpit-task-label"
+              aria-describedby="cockpit-task-hint"
+            >
               {cockpitTaskOrder.map((id) => {
                 const option = getCockpitTask(id);
                 return (
@@ -177,6 +186,7 @@ export function Cockpit() {
                     key={id}
                     type="button"
                     aria-pressed={id === taskId}
+                    aria-label={`${option.label}: ${option.title}`}
                     onClick={() => selectTask(id)}
                     className={clsx(
                       'focus-ring w-full rounded-2xl border p-3 text-left transition',
@@ -194,8 +204,10 @@ export function Cockpit() {
           </div>
 
           <div className="mt-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Policy</div>
-            <div className="mt-3 space-y-2" role="group" aria-label="Harness policy">
+            <div id="cockpit-policy-label" className="text-xs uppercase tracking-[0.22em] text-slate-500">
+              Policy
+            </div>
+            <div className="mt-3 space-y-2" role="group" aria-labelledby="cockpit-policy-label">
               {task.policyOrder.map((id, index) => {
                 const policyRun = task.policies[id];
                 if (!policyRun) return null;
@@ -204,6 +216,7 @@ export function Cockpit() {
                     key={id}
                     type="button"
                     aria-pressed={id === policyId}
+                    aria-label={`${policyRun.name}. ${policyRun.description}`}
                     onClick={() => selectPolicy(id)}
                     className={clsx(
                       'focus-ring w-full rounded-2xl border p-3 text-left transition',
@@ -234,14 +247,15 @@ export function Cockpit() {
             </div>
           </div>
 
-          <p className="mt-5 text-[11px] leading-5 text-slate-500">
-            Keyboard: <span className="font-mono">[ ]</span> tasks · <span className="font-mono">1-{task.policyOrder.length}</span>{' '}
-            policies · <span className="font-mono">← →</span> steps · <span className="font-mono">f t d j r</span> evidence
+          <p id="cockpit-task-hint" className="mt-5 text-[11px] leading-5 text-slate-500">
+            Keyboard: <span className="font-mono">[ ]</span> tasks ·{' '}
+            <span className="font-mono">1-{task.policyOrder.length}</span> policies ·{' '}
+            <span className="font-mono">← →</span> steps · <span className="font-mono">f t d j r</span> evidence tabs
           </p>
         </aside>
 
-        <main className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-          <div className="mb-4 flex items-center justify-between gap-4">
+        <main className="min-w-0 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Trace replay</div>
               <h3 className="mt-1 text-xl font-semibold text-white">{run.name}</h3>
@@ -249,7 +263,7 @@ export function Cockpit() {
                 {task.label} · {run.events.length} steps · {run.verdict} verdict
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <button
                 type="button"
                 className="focus-ring rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300"
@@ -274,11 +288,13 @@ export function Cockpit() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.25 }}
           >
-            <TraceTimeline events={run.events} activeStep={activeStep} onSelect={selectStep} policyName={run.name} />
+            <div className="max-h-[min(70vh,720px)] overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible">
+              <TraceTimeline events={run.events} activeStep={activeStep} onSelect={selectStep} policyName={run.name} />
+            </div>
           </motion.div>
         </main>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 space-y-4">
           <VerdictStamp
             policyKey={`${taskId}-${policyId}`}
             verdict={run.verdict}

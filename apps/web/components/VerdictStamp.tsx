@@ -50,7 +50,7 @@ export function VerdictStamp({ policyKey, verdict, label, reason }: VerdictStamp
       >
         {label}
       </motion.div>
-      <p className="mt-3 text-sm leading-6 text-slate-200">{reason}</p>
+      <p className="mt-3 break-words text-sm leading-6 text-slate-200">{reason}</p>
     </motion.div>
   );
 }

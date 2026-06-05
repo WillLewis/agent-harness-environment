@@ -36,6 +36,26 @@ const policyMeta = Object.fromEntries(
   (policies as Array<{ id: string; name: string; description: string }>).map((policy) => [policy.id, policy])
 ) as Record<string, { id: string; name: string; description: string }>;
 
+const cockpitPolicyLabels: Record<PolicyId, string> = {
+  baseline: 'Baseline',
+  guarded_recovery: 'Guarded recovery',
+  baseline_with_steering: 'Baseline with steering'
+};
+
+const cockpitPolicyDescriptions: Partial<Record<PolicyId, string>> = {
+  baseline_with_steering:
+    'Human steering at a failure point; demonstrates assisted success, not autonomous recovery.'
+};
+
+function resolvePolicyMeta(policyId: PolicyId) {
+  const fromCatalog = policyMeta[policyId];
+  return {
+    id: policyId,
+    name: fromCatalog?.name ?? cockpitPolicyLabels[policyId],
+    description: fromCatalog?.description ?? cockpitPolicyDescriptions[policyId] ?? ''
+  };
+}
+
 const taskPolicyMeta: Record<TaskId, Partial<Record<PolicyId, TaskPolicyMeta>>> = {
   bugfix_date_parser_001: {
     baseline: {
@@ -241,7 +261,7 @@ function buildMetrics(taskId: TaskId, policyId: PolicyId, events: AgentTraceEven
 }
 
 function buildPolicyRun(taskId: TaskId, policyId: PolicyId, fixture: TraceFixture): PolicyRun {
-  const meta = policyMeta[policyId] ?? { id: policyId, name: policyId, description: '' };
+  const meta = resolvePolicyMeta(policyId);
   const story = taskPolicyMeta[taskId][policyId];
   const events = fixture.events.map(adaptEvent);
 
