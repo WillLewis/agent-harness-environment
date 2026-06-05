@@ -202,6 +202,174 @@ def build_export_batch(project_root: Path) -> dict[str, Any]:
     }
 
 
+def _not_configured_result(config: dict[str, Any]) -> dict[str, Any]:
+    missing: list[str] = []
+    if not config["packages"]["weave"]:
+        missing.append("weave package")
+    if not config["api_key_present"]:
+        missing.append("WANDB_API_KEY")
+    return {
+        "ok": False,
+        "mode": "not_configured",
+        "code": "not_configured",
+        "message": f"Weave export not configured; missing: {', '.join(missing)}.",
+        "config": config,
+    }
+
+
+def _dry_run_summary(batch: dict[str, Any]) -> dict[str, Any]:
+    """Summary fields for dry-run JSON (stable contract)."""
+    span_count = sum(len(trace.get("spans", [])) for trace in batch.get("traces", []))
+    feedback_count = sum(len(trace.get("feedback", [])) for trace in batch.get("traces", []))
+    return {
+        "trace_count": len(batch.get("traces", [])),
+        "span_count": span_count,
+        "feedback_count": feedback_count,
+        "suite_trace_count": batch.get("eval_batch", {}).get("trace_count"),
+        "suite_evaluation_count": len(batch.get("eval_batch", {}).get("evaluations", [])),
+    }
+
+
+def _weave_project_name(config: dict[str, Any], batch: dict[str, Any]) -> str:
+    entity = (batch.get("entity") or config.get("entity") or "").strip()
+    project = batch.get("project") or config["project"]
+    if entity:
+        return f"{entity}/{project}"
+    return project
+
+
+def _import_weave_module() -> Any:
+    import weave  # noqa: PLC0415
+
+    return weave
+
+
+def _attach_weave_feedback(call: Any, feedback: dict[str, Any]) -> None:
+    """Best-effort score feedback on a Weave call (skipped when API unavailable)."""
+    feedback_api = getattr(call, "feedback", None)
+    if feedback_api is None or not hasattr(feedback_api, "add"):
+        return
+    name = feedback.get("name", "score")
+    payload: dict[str, Any] = {"value": feedback.get("value")}
+    attributes = feedback.get("attributes")
+    if isinstance(attributes, dict):
+        payload.update(attributes)
+    feedback_api.add(name, payload)
+
+
+def perform_live_export(
+    batch: dict[str, Any],
+    *,
+    weave_module: Any | None = None,
+) -> dict[str, Any]:
+    """
+    Upload the static export batch to W&B Weave (network; requires weave + WANDB_API_KEY).
+
+    `weave_module` is injectable for unit tests (fake client; no network).
+    """
+    config = get_weave_config()
+    if not config["packages"]["weave"] or not config["api_key_present"]:
+        return _not_configured_result(config)
+
+    weave = weave_module if weave_module is not None else _import_weave_module()
+    project_name = _weave_project_name(config, batch)
+
+    uploaded_traces: list[dict[str, Any]] = []
+    uploaded_evaluations: list[dict[str, Any]] = []
+    try:
+        client = weave.init(project_name)
+
+        for trace in batch.get("traces", []):
+            attributes = dict(trace.get("attributes") or {})
+            root = client.create_call(
+                op=trace.get("op_name", "ahe.run"),
+                inputs={
+                    "trace_id": trace.get("id"),
+                    "task_id": attributes.get("task_id"),
+                    "policy": attributes.get("policy"),
+                    "verdict": attributes.get("verdict"),
+                },
+                attributes={"source": "ahe_static_export", "ahe_trace_id": trace.get("id")},
+            )
+            span_count = 0
+            for span in trace.get("spans", []):
+                client.create_call(
+                    op=span.get("name", "ahe.span"),
+                    inputs=dict(span.get("attributes") or {}),
+                    parent=root,
+                    attributes={"ahe_span_id": span.get("id")},
+                )
+                span_count += 1
+            client.finish_call(
+                root,
+                output={
+                    "trace_id": trace.get("id"),
+                    "verdict": attributes.get("verdict"),
+                    "failure_labels": attributes.get("failure_labels", []),
+                    "aggregate_run_quality": attributes.get("aggregate_run_quality"),
+                },
+            )
+            for feedback in trace.get("feedback", []):
+                _attach_weave_feedback(root, feedback)
+            uploaded_traces.append(
+                {
+                    "id": trace.get("id"),
+                    "span_count": span_count,
+                    "feedback_count": len(trace.get("feedback", [])),
+                }
+            )
+
+        for evaluation in batch.get("eval_batch", {}).get("evaluations", []):
+            attrs = dict(evaluation.get("attributes") or {})
+            call = client.create_call(
+                op="ahe.suite_evaluation",
+                inputs=attrs,
+                attributes={"source": "ahe_static_suite", "ahe_eval_id": evaluation.get("id")},
+            )
+            client.finish_call(
+                call,
+                output={
+                    "evaluation_id": evaluation.get("id"),
+                    "verdict": attrs.get("verdict"),
+                    "gate_ok": attrs.get("gate_ok"),
+                },
+            )
+            for feedback in evaluation.get("feedback", []):
+                _attach_weave_feedback(call, feedback)
+            uploaded_evaluations.append(
+                {
+                    "id": evaluation.get("id"),
+                    "feedback_count": len(evaluation.get("feedback", [])),
+                }
+            )
+
+        if hasattr(client, "flush"):
+            client.flush()
+    except Exception as exc:  # noqa: BLE001 — surface SDK/network failures to CLI
+        return {
+            "ok": False,
+            "mode": "live",
+            "code": "live_export_failed",
+            "message": f"Weave live export failed: {exc}",
+            "config": config,
+        }
+
+    eval_batch = batch.get("eval_batch") or {}
+    return {
+        "ok": True,
+        "mode": "live",
+        "code": "live_export_ok",
+        "message": "Static AHE fixtures uploaded to W&B Weave.",
+        "config": config,
+        "summary": {
+            "project": project_name,
+            "traces": uploaded_traces,
+            "evaluations": uploaded_evaluations,
+            "suite_trace_count": eval_batch.get("trace_count"),
+        },
+    }
+
+
 def export_to_weave(
     batch: dict[str, Any],
     *,
@@ -210,12 +378,11 @@ def export_to_weave(
     """
     Export batch to W&B Weave when configured, or return a structured status.
 
-    Default is dry-run only (no network, no SDK calls).
+    Default is dry-run only (no network, no SDK import).
+    Live upload requires dry_run=False plus weave package and WANDB_API_KEY.
     """
     config = get_weave_config()
     if dry_run:
-        span_count = sum(len(trace.get("spans", [])) for trace in batch.get("traces", []))
-        feedback_count = sum(len(trace.get("feedback", [])) for trace in batch.get("traces", []))
         return {
             "ok": True,
             "mode": "dry_run",
@@ -223,38 +390,13 @@ def export_to_weave(
             "message": "Dry run only; no network calls made.",
             "config": config,
             "batch": batch,
-            "summary": {
-                "trace_count": len(batch.get("traces", [])),
-                "span_count": span_count,
-                "feedback_count": feedback_count,
-                "suite_trace_count": batch.get("eval_batch", {}).get("trace_count"),
-                "suite_evaluation_count": len(
-                    batch.get("eval_batch", {}).get("evaluations", [])
-                ),
-            },
+            "summary": _dry_run_summary(batch),
         }
 
-    if not config["configured"]:
-        missing: list[str] = []
-        if not config["package_installed"]:
-            missing.append("weave or wandb package")
-        if not config["api_key_present"]:
-            missing.append("WANDB_API_KEY")
-        return {
-            "ok": False,
-            "mode": "not_configured",
-            "code": "not_configured",
-            "message": f"Weave export not configured; missing: {', '.join(missing)}.",
-            "config": config,
-        }
+    if not config["packages"]["weave"] or not config["api_key_present"]:
+        return _not_configured_result(config)
 
-    return {
-        "ok": False,
-        "mode": "not_implemented",
-        "code": "live_export_not_implemented",
-        "message": "Live Weave upload is not implemented yet; use --dry-run.",
-        "config": config,
-    }
+    return perform_live_export(batch)
 
 
 def run_dry_run(project_root: Path) -> dict[str, Any]:
@@ -262,15 +404,25 @@ def run_dry_run(project_root: Path) -> dict[str, Any]:
     return export_to_weave(batch, dry_run=True)
 
 
+def run_live_export(project_root: Path) -> dict[str, Any]:
+    batch = build_export_batch(project_root)
+    return export_to_weave(batch, dry_run=False)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Export AHE fixtures to W&B Weave (dry-run by default; no network)."
     )
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--dry-run",
         action="store_true",
-        default=True,
         help="Print compact JSON of the export batch without uploading (default).",
+    )
+    mode.add_argument(
+        "--live",
+        action="store_true",
+        help="Upload static fixtures to Weave (requires --live, weave package, WANDB_API_KEY).",
     )
     parser.add_argument(
         "--project-root",
@@ -285,11 +437,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if args.dry_run:
-        result = run_dry_run(args.project_root.resolve())
+    root = args.project_root.resolve()
+    if args.live:
+        result = run_live_export(root)
     else:
-        batch = build_export_batch(args.project_root.resolve())
-        result = export_to_weave(batch, dry_run=False)
+        result = run_dry_run(root)
 
     indent = 2 if args.pretty else None
     print(

@@ -4,3 +4,4 @@ pyyaml
 pydantic
 
 # Optional live Braintrust export (not required for CI): pip install -r requirements-braintrust.txt
+# Optional live Weave export (not required for CI): pip install -r requirements-weave.txt

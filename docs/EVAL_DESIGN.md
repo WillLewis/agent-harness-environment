@@ -88,19 +88,36 @@ Live export uploads the current static suite only: task/coding-task datasets, pe
 
 **Why not in `pnpm eval:ci`:** CI must stay deterministic, secret-free, and dependency-light. Braintrust is an optional operator tool for exporting fixture shapes to an external project.
 
-### W&B Weave adapter (local-only default)
+### W&B Weave adapter (dry-run default; opt-in live)
 
 `packages/evals/adapters/weave_adapter.py` maps trace fixtures to Weave trace/span metadata, `AgentTraceEvent` records to span/call shapes, `run_eval` scores to feedback records, and `run_suite` summaries to evaluation batches.
 
 ```bash
-pnpm export:weave:dry-run
+pnpm export:weave:dry-run    # default — compact JSON, no SDK import
+pnpm export:weave:live       # explicit upload (optional weave + API key)
 ```
 
-- Default: compact JSON dry-run; no SDK calls or network.
-- Missing `weave`/`wandb` package or `WANDB_API_KEY`: structured `not_configured` when live export is requested.
-- Live upload is reserved for a later phase; CI remains unchanged.
+| Mode | Command | Network | Exit on failure |
+| --- | --- | --- | --- |
+| Dry-run | `--dry-run` (default) | No | No |
+| Live | `--live` only | Yes | Yes (`not_configured` or `live_export_failed`) |
+
+**Live setup (optional, not in CI):**
+
+```bash
+pip install -r requirements-weave.txt
+export WANDB_API_KEY=...
+export WANDB_PROJECT=agent-harness-environment   # optional
+export WANDB_ENTITY=your-team                    # optional (entity/project path)
+pnpm export:weave:live
+```
+
+Live export uploads static trace trees (root call + span children), scorer feedback, and suite evaluation rows via `weave.init` + `create_call` / `finish_call`. It does **not** re-run the runner or call LLMs.
+
+**Non-claims:** not production telemetry, not in the hosted demo, not part of `pnpm eval:ci`. Live mode requires the **`weave`** package (not `wandb` alone).
+
+**Why not in `pnpm eval:ci`:** same as Braintrust — deterministic, secret-free CI.
 
 ## Next eval work
 
 1. Add optional `plan_quality` and `final_answer_groundedness` LLM judge interfaces.
-2. Implement live Braintrust/Weave upload behind optional configuration.
