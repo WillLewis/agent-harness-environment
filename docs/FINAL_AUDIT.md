@@ -250,8 +250,8 @@ These follow naturally after the current release handoff and preserve architectu
 **Deliverables:**
 - Runner plans for `adversarial_env_001` and `multi_agent_contract_001` (deterministic scripts)
 - CLI: `run_task.py <policy> <task_id>`
-- Promote command: validate trace, write to `data/traces/` or `runs/` with human-readable diff summary
-- MCP tool alias for promote
+- Promote command: `python scripts/promote_run_trace.py runs/<run_id>.json` → `data/trace_candidates/` + `generated_candidates.jsonl` (optional `--write-fixture`)
+- MCP `promote_trace_to_dataset` shares promotion helper with the script
 - Suite gates updated when new stems added
 
 **Exit criteria:** One command produces a valid trace for each task; `pnpm eval:ci` passes after intentional fixture updates.

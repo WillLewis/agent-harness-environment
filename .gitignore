@@ -13,4 +13,5 @@ __pycache__
 .env.*.local
 .DS_Store
 data/datasets/generated_candidates.jsonl
+data/trace_candidates/
 runs

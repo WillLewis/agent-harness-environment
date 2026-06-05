@@ -122,6 +122,8 @@ def test_promote_trace_to_dataset_writes_and_deduplicates(project_root: Path, tm
     assert first["ok"] is True
     assert first["written"] is True
     assert first["already_exists"] is False
+    assert first["candidate_trace_path"].startswith("data/trace_candidates/")
+    assert (root / first["candidate_trace_path"]).exists()
     assert first["candidate"]["source_run_id"] == "run_baseline_date_parser_001"
     assert first["candidate"]["failure_mode"] == "loop_detected"
     assert first["candidate"]["expected_policy_behavior"] == "inspect failing assertion before retry"

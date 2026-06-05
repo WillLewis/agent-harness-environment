@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import copy
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
+
+TERMINAL_OUTPUT_MAX_CHARS = 500
+CANDIDATE_TIMESTAMP_BASE = datetime(2026, 6, 5, 12, 0, 0, tzinfo=timezone.utc)
 
 
 def ok(**payload: Any) -> dict[str, Any]:
@@ -229,6 +233,51 @@ def compact_eval_summary(eval_result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def extract_failure_labels(trace: dict[str, Any]) -> list[str]:
+    labels = {
+        label
+        for event in trace.get("events", [])
+        for label in [event.get("failure_label")]
+        if isinstance(label, str) and label
+    }
+    return sorted(labels)
+
+
+def _truncate_terminal_output(text: str, limit: int = TERMINAL_OUTPUT_MAX_CHARS) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: limit - 20].rstrip() + "\n...[truncated]"
+
+
+def normalize_trace_for_candidate(trace: dict[str, Any], project_root: Path) -> dict[str, Any]:
+    """Strip transient runner fields and compact raw payloads for fixture review."""
+    normalized = copy.deepcopy(trace)
+    normalized.pop("sandbox_path", None)
+
+    root = str(project_root.resolve())
+    events = normalized.get("events", [])
+    for index, event in enumerate(events):
+        event["timestamp"] = (CANDIDATE_TIMESTAMP_BASE + timedelta(seconds=6 * index)).strftime(
+            "%Y-%m-%dT%H:%M:%S.000Z"
+        )
+        raw = event.get("raw")
+        if not isinstance(raw, dict):
+            continue
+        if "terminal_output" in raw and isinstance(raw["terminal_output"], str):
+            raw["terminal_output"] = _truncate_terminal_output(raw["terminal_output"])
+        for key, value in list(raw.items()):
+            if isinstance(value, str) and value.startswith(root):
+                raw[key] = str(Path(value).relative_to(project_root))
+
+    return normalized
+
+
+def write_dataset_candidates(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    content = "".join(json.dumps(row) + "\n" for row in rows)
+    path.write_text(content, encoding="utf-8")
+
+
 def read_dataset_candidates(path: Path) -> list[dict[str, Any]]:
     if not path.exists():
         return []
@@ -239,6 +288,34 @@ def read_dataset_candidates(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def build_promotion_metadata(
+    *,
+    trace: dict[str, Any],
+    source_path: str,
+    candidate_trace_path: str,
+    run_id: str,
+    eval_result: dict[str, Any],
+    clusters: list[dict[str, Any]],
+) -> dict[str, Any]:
+    failure_mode = primary_failure_label(trace)
+    expected_behavior = recommended_policy_behavior(trace, clusters) or "derive from failure cluster review"
+    return {
+        "promoted_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "source_run_id": run_id,
+        "source_path": source_path,
+        "candidate_trace_path": candidate_trace_path,
+        "task_id": trace.get("task_id"),
+        "policy": trace.get("policy"),
+        "verdict": trace.get("verdict"),
+        "aggregate_run_quality": eval_result.get("aggregate_run_quality"),
+        "failure_labels": extract_failure_labels(trace),
+        "failure_mode": failure_mode,
+        "expected_policy_behavior": expected_behavior,
+        "success_command": trace.get("success_command"),
+        "eval_summary": compact_eval_summary(eval_result),
+    }
+
+
 def build_dataset_candidate(
     *,
     trace: dict[str, Any],
@@ -247,6 +324,7 @@ def build_dataset_candidate(
     clusters: list[dict[str, Any]],
     eval_summary: dict[str, Any] | None,
 ) -> dict[str, Any]:
+    """Legacy dataset-row shape; prefer build_promotion_metadata for new promotions."""
     failure_mode = primary_failure_label(trace)
     expected_behavior = recommended_policy_behavior(trace, clusters) or "derive from failure cluster review"
     candidate: dict[str, Any] = {
@@ -263,10 +341,122 @@ def build_dataset_candidate(
     return candidate
 
 
+def promote_run_trace(
+    project_root: Path,
+    trace_path: str,
+    run_eval_impl: Callable[[Path], dict[str, Any]],
+    *,
+    candidate_dir: str = "data/trace_candidates",
+    datasets_path: str = "data/datasets/generated_candidates.jsonl",
+    write_fixture: bool = False,
+    fixture_name: str | None = None,
+    validate_trace_impl: Callable[[dict[str, Any], str], list[str]] | None = None,
+) -> dict[str, Any]:
+    """
+    Validate and score a runner trace, write a reviewable candidate JSON, and append metadata.
+
+    Idempotent by source_run_id: re-promotion refreshes the candidate file but does not
+    duplicate generated_candidates.jsonl rows. Curated fixtures are untouched unless
+    write_fixture=True with an explicit fixture_name.
+    """
+    if write_fixture and not fixture_name:
+        return err(
+            "fixture_name_required",
+            "--fixture-name is required when --write-fixture is set.",
+        )
+
+    absolute = (project_root / trace_path).resolve()
+    if not absolute.exists():
+        return err(
+            "trace_path_not_found",
+            f"Trace path not found: {trace_path}",
+            trace_path=trace_path,
+        )
+
+    try:
+        relative_source = str(absolute.relative_to(project_root.resolve()))
+    except ValueError:
+        relative_source = trace_path
+
+    trace = json.loads(absolute.read_text(encoding="utf-8"))
+    run_id = trace.get("run_id")
+    if not isinstance(run_id, str) or not run_id:
+        return err("invalid_trace", "Trace is missing run_id.", trace_path=relative_source)
+
+    if validate_trace_impl is not None:
+        validation_errors = validate_trace_impl(trace, relative_source)
+        if validation_errors:
+            return err(
+                "trace_validation_failed",
+                "Trace failed fixture validation.",
+                trace_path=relative_source,
+                validation_errors=validation_errors,
+            )
+
+    eval_result = run_eval_impl(absolute)
+
+    candidate_dir_path = project_root / candidate_dir
+    candidate_dir_path.mkdir(parents=True, exist_ok=True)
+    candidate_filename = f"{run_id}.json"
+    candidate_absolute = candidate_dir_path / candidate_filename
+    relative_candidate = str(candidate_absolute.relative_to(project_root))
+
+    normalized = normalize_trace_for_candidate(trace, project_root)
+    candidate_absolute.write_text(json.dumps(normalized, indent=2) + "\n", encoding="utf-8")
+
+    datasets_file = project_root / datasets_path
+    existing_rows = read_dataset_candidates(datasets_file)
+    existing = next((row for row in existing_rows if row.get("source_run_id") == run_id), None)
+
+    clusters = read_json(project_root, "data/failure_clusters.json")
+    metadata = build_promotion_metadata(
+        trace=trace,
+        source_path=relative_source,
+        candidate_trace_path=relative_candidate,
+        run_id=run_id,
+        eval_result=eval_result,
+        clusters=clusters,
+    )
+
+    metadata_written = False
+    if existing is None:
+        write_dataset_candidates(datasets_file, [*existing_rows, metadata])
+        metadata_written = True
+
+    fixture_written = False
+    relative_fixture: str | None = None
+    if write_fixture and fixture_name:
+        fixtures_dir = project_root / "data" / "traces"
+        fixture_absolute = fixtures_dir / fixture_name
+        if fixture_absolute.exists():
+            return err(
+                "fixture_exists",
+                f"Refusing to overwrite existing curated fixture: {fixture_name}",
+                fixture_path=str(fixture_absolute.relative_to(project_root)),
+            )
+        fixture_absolute.write_text(json.dumps(normalized, indent=2) + "\n", encoding="utf-8")
+        fixture_written = True
+        relative_fixture = str(fixture_absolute.relative_to(project_root))
+
+    return ok(
+        source_run_id=run_id,
+        source_path=relative_source,
+        candidate_trace_path=relative_candidate,
+        metadata_path=str(datasets_file.relative_to(project_root)),
+        metadata=existing or metadata,
+        metadata_written=metadata_written,
+        already_exists=existing is not None,
+        candidate_refreshed=True,
+        fixture_written=fixture_written,
+        fixture_path=relative_fixture,
+        eval=eval_result,
+    )
+
+
 def promote_trace_to_dataset(
     project_root: Path,
     run_id: str,
-    run_eval_impl,
+    run_eval_impl: Callable[[Path], dict[str, Any]],
 ) -> dict[str, Any]:
     found = find_trace(project_root, run_id)
     if found is None:
@@ -277,44 +467,18 @@ def promote_trace_to_dataset(
             available_run_ids=list_known_run_ids(project_root),
         )
 
-    trace, path = found
+    _trace, path = found
     trace_path = str(path.relative_to(project_root))
-    output = project_root / "data" / "datasets" / "generated_candidates.jsonl"
-    output.parent.mkdir(parents=True, exist_ok=True)
-
-    existing_rows = read_dataset_candidates(output)
-    for row in existing_rows:
-        if row.get("source_run_id") == run_id:
-            return ok(
-                written=False,
-                already_exists=True,
-                written_to=str(output.relative_to(project_root)),
-                candidate=row,
-            )
-
-    clusters = read_json(project_root, "data/failure_clusters.json")
-    eval_summary = None
-    try:
-        eval_summary = compact_eval_summary(run_eval_impl(path))
-    except Exception:
-        eval_summary = None
-
-    candidate = build_dataset_candidate(
-        trace=trace,
-        trace_path=trace_path,
-        run_id=run_id,
-        clusters=clusters,
-        eval_summary=eval_summary,
-    )
-
-    with output.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(candidate) + "\n")
+    result = promote_run_trace(project_root, trace_path, run_eval_impl)
+    if not result.get("ok"):
+        return result
 
     return ok(
-        written=True,
-        already_exists=False,
-        written_to=str(output.relative_to(project_root)),
-        candidate=candidate,
+        written=result.get("metadata_written", False),
+        already_exists=result.get("already_exists", False),
+        written_to=result.get("metadata_path"),
+        candidate_trace_path=result.get("candidate_trace_path"),
+        candidate=result.get("metadata"),
     )
 
 

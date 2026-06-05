@@ -22,6 +22,7 @@ For external reviewers or portfolio walkthroughs:
 | Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |
 | Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
 | Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
+| Promote runner trace to candidate | `python scripts/promote_run_trace.py runs/<run_id>.json` |
 | Export shape previews | `pnpm export:braintrust:dry-run` · `pnpm export:weave:dry-run` |
 | Optional Braintrust upload | `pip install -r requirements-braintrust.txt` + `BRAINTRUST_API_KEY` → `pnpm export:braintrust:live` |
 | Optional Weave upload | `pip install -r requirements-weave.txt` + `WANDB_API_KEY` → `pnpm export:weave:live` |
@@ -101,6 +102,18 @@ pnpm export:weave:live
 ```
 
 Dry-run (`pnpm export:weave:dry-run`) is unchanged. Live mode uploads static trace spans and suite scorer feedback only.
+
+### Promote local runner traces (optional)
+
+After `services/runner/` writes a trace under `runs/`, promote it to a reviewable candidate without touching curated `data/traces/`:
+
+```bash
+python services/runner/run_task.py guarded_recovery multi_agent_contract_001
+python scripts/promote_run_trace.py runs/run_local_guarded_recovery_multi_agent_contract_001.json
+python packages/evals/run_eval.py data/trace_candidates/run_local_guarded_recovery_multi_agent_contract_001.json
+```
+
+Promotion validates the trace, scores it, normalizes transient fields (timestamps, sandbox paths, long terminal output), writes `data/trace_candidates/<run_id>.json`, and appends metadata to `data/datasets/generated_candidates.jsonl` (idempotent by `source_run_id`). Both directories are gitignored by default. To copy into curated fixtures, pass `--write-fixture --fixture-name <name>.json` explicitly (refuses overwrite).
 
 ## Verification
 
