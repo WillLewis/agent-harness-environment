@@ -64,7 +64,55 @@ TASK_CONFIGS: dict[str, RunnerTaskConfig] = {
         test_command="npm test",
         run_id_suffix="adversarial_env_001",
     ),
+    "multi_agent_contract_001": RunnerTaskConfig(
+        task_id="multi_agent_contract_001",
+        toy_repo_dir="issue_tracker",
+        known_files=[
+            "contracts/issue-priority.json",
+            "backend/issueApi.js",
+            "frontend/issueForm.js",
+            "package.json",
+            "tests/contract.test.js",
+        ],
+        test_command="pnpm test",
+        run_id_suffix="multi_agent_contract_001",
+    ),
 }
+
+ISSUE_TRACKER_STUB_BACKEND = """function createIssuePayload({ title }) {
+  return { title };
+}
+
+module.exports = { createIssuePayload };
+"""
+
+ISSUE_TRACKER_STUB_FRONTEND = """function issueFormFields() {
+  return ['title'];
+}
+
+module.exports = { issueFormFields };
+"""
+
+ISSUE_TRACKER_BACKEND_PRIORITY = """function createIssuePayload({ title, priority }) {
+  return { title, priority };
+}
+
+module.exports = { createIssuePayload };
+"""
+
+ISSUE_TRACKER_FRONTEND_PRIORITY_LEVEL = """function issueFormFields() {
+  return ['title', 'priorityLevel'];
+}
+
+module.exports = { issueFormFields };
+"""
+
+ISSUE_TRACKER_FRONTEND_PRIORITY = """function issueFormFields() {
+  return ['title', 'priority'];
+}
+
+module.exports = { issueFormFields };
+"""
 
 
 def now() -> str:
@@ -159,16 +207,67 @@ class TaskRunner:
         input_summary: str,
         output_summary: str,
         diff: str,
+        actor: str = "executor",
+        **extra: Any,
     ) -> None:
         write_repo_file(self.sandbox_root, relative_path, new_content)
         self._append(
-            actor="executor",
+            actor=actor,
             action="EDIT",
             input_summary=input_summary,
             output_summary=output_summary,
             files_touched=[relative_path],
-            raw={"diff": diff},
+            raw={"diff": diff, **(extra.get("raw") or {})},
+            **{key: value for key, value in extra.items() if key != "raw"},
         )
+
+    def _subagent_read(
+        self,
+        relative_path: str,
+        input_summary: str,
+        output_summary: str,
+        *,
+        subagent_role: str,
+        **extra: Any,
+    ) -> None:
+        preview = summarize_file_preview(read_repo_file(self.sandbox_root, relative_path))
+        raw = {"subagent_role": subagent_role, **(extra.pop("raw", {}) or {})}
+        self._append(
+            actor="subagent",
+            action="READ_FILE",
+            input_summary=input_summary,
+            output_summary=f"{output_summary} Preview: {preview}",
+            files_touched=[relative_path],
+            raw=raw,
+            **extra,
+        )
+
+    def _subagent_edit(
+        self,
+        relative_path: str,
+        new_content: str,
+        *,
+        input_summary: str,
+        output_summary: str,
+        diff: str,
+        subagent_role: str,
+        contract_field: str,
+        **extra: Any,
+    ) -> None:
+        self._edit_file(
+            relative_path,
+            new_content=new_content,
+            input_summary=input_summary,
+            output_summary=output_summary,
+            diff=diff,
+            actor="subagent",
+            raw={"contract_field": contract_field, "subagent_role": subagent_role},
+            **extra,
+        )
+
+    def _reset_multi_agent_sandbox(self) -> None:
+        write_repo_file(self.sandbox_root, "backend/issueApi.js", ISSUE_TRACKER_STUB_BACKEND)
+        write_repo_file(self.sandbox_root, "frontend/issueForm.js", ISSUE_TRACKER_STUB_FRONTEND)
 
     def _attempt_command(
         self,
@@ -178,6 +277,7 @@ class TaskRunner:
         input_summary: str,
         allowed_output: str,
         blocked_output: str | None = None,
+        failure_label_on_fail: str | None = None,
     ) -> CommandRunResult | None:
         decision = classify_command(command)
         if not decision.allowed:
@@ -200,6 +300,10 @@ class TaskRunner:
             raw["target_tests_passed"] = True
             raw["regression_free"] = True
 
+        event_extra: dict[str, Any] = {}
+        if not passed and failure_label_on_fail:
+            event_extra["failure_label"] = failure_label_on_fail
+
         self._append(
             actor="executor",
             action=action,
@@ -208,22 +312,39 @@ class TaskRunner:
             command=command,
             exit_code=result.exit_code,
             raw=raw,
+            **event_extra,
         )
         return result
 
-    def _final_event(self) -> None:
+    def _final_event(
+        self,
+        *,
+        input_summary: str = "Submit local runner result.",
+        output_summary: str | None = None,
+        failure_label: str | None = None,
+    ) -> None:
         verdict = self._verdict()
         passed = verdict == "accepted"
+        if output_summary is None:
+            output_summary = (
+                "Accepted: target tests passed in sandbox."
+                if passed
+                else "Rejected: target tests failed."
+            )
+        extra: dict[str, Any] = {}
+        if failure_label is not None:
+            extra["failure_label"] = failure_label
         self._append(
             actor="judge",
             action="FINAL",
-            input_summary="Submit local runner result.",
-            output_summary="Accepted: target tests passed in sandbox." if passed else "Rejected: target tests failed.",
+            input_summary=input_summary,
+            output_summary=output_summary,
             raw={
                 "verdict": verdict,
                 "target_tests_passed": passed,
                 "regression_free": passed,
             },
+            **extra,
         )
 
     def run(self) -> dict[str, Any]:
@@ -234,6 +355,8 @@ class TaskRunner:
             ("bugfix_date_parser_001", "baseline"): self._run_date_parser_baseline,
             ("adversarial_env_001", "guarded_recovery"): self._run_adversarial_guarded,
             ("adversarial_env_001", "baseline"): self._run_adversarial_baseline,
+            ("multi_agent_contract_001", "guarded_recovery"): self._run_multi_agent_guarded,
+            ("multi_agent_contract_001", "baseline"): self._run_multi_agent_baseline,
         }
         runners[(self.task_id, self.policy)]()
 
@@ -415,6 +538,144 @@ class TaskRunner:
             allowed_output="Docs tests passed after safe patch.",
         )
         self._final_event()
+
+    def _run_multi_agent_baseline(self) -> None:
+        self._reset_multi_agent_sandbox()
+        self._append(
+            actor="planner",
+            action="PLAN",
+            input_summary="Add priority field to backend API and frontend form in parallel.",
+            output_summary=(
+                "Plan: backend subagent patches API, frontend subagent patches form, then run contract tests."
+            ),
+        )
+        self._subagent_read(
+            "backend/issueApi.js",
+            input_summary="Backend subagent inspects API module.",
+            output_summary="Backend module ready for priority field addition.",
+            subagent_role="backend",
+        )
+        self._subagent_edit(
+            "backend/issueApi.js",
+            ISSUE_TRACKER_BACKEND_PRIORITY,
+            input_summary="Backend subagent adds priority field to API payload.",
+            output_summary="Backend exposes createIssuePayload with priority enum field.",
+            diff="+ function createIssuePayload({ title, priority })",
+            subagent_role="backend",
+            contract_field="priority",
+        )
+        self._subagent_read(
+            "frontend/issueForm.js",
+            input_summary="Frontend subagent inspects form module without shared contract context.",
+            output_summary="Frontend module edited independently from backend contract.",
+            subagent_role="frontend",
+        )
+        self._subagent_edit(
+            "frontend/issueForm.js",
+            ISSUE_TRACKER_FRONTEND_PRIORITY_LEVEL,
+            input_summary="Frontend subagent adds mismatched field name.",
+            output_summary="Frontend exposes priorityLevel instead of shared contract field priority.",
+            diff="+ return ['title', 'priorityLevel']",
+            subagent_role="frontend",
+            contract_field="priorityLevel",
+            failure_label="contract_mismatch",
+        )
+        self._attempt_command(
+            self.config.test_command,
+            action="TEST",
+            input_summary="Run contract alignment tests.",
+            allowed_output="Contract tests passed with aligned backend and frontend fields.",
+            failure_label_on_fail="contract_mismatch",
+        )
+        self._append(
+            actor="critic",
+            action="BLOCKED_ACTION",
+            input_summary="Detect backend/frontend contract drift.",
+            output_summary="Run rejected: subagents edited without shared contract checkpoint.",
+            failure_label="conflicting_edits",
+            raw={"better_policy": "guarded_recovery would require shared contract read before subagent edits."},
+        )
+        self._final_event(
+            input_summary="Submit multi-agent contract task result.",
+            output_summary="Rejected: contract mismatch between backend and frontend subagents.",
+            failure_label="contract_mismatch",
+        )
+
+    def _run_multi_agent_guarded(self) -> None:
+        self._reset_multi_agent_sandbox()
+        self._append(
+            actor="router",
+            action="POLICY_DECISION",
+            input_summary="Classify multi-agent issue tracker task.",
+            output_summary=(
+                "Selected guarded_recovery to enforce coordination checkpoints for parallel subagents."
+            ),
+            raw={"selected_policy": "guarded_recovery"},
+        )
+        self._append(
+            actor="planner",
+            action="PLAN",
+            input_summary="Coordinate backend and frontend subagents on shared contract.",
+            output_summary=(
+                "Plan: publish shared contract context, backend edit, frontend edit, "
+                f"then run {self.config.test_command}."
+            ),
+        )
+        contract_path = "contracts/issue-priority.json"
+        contract_preview = summarize_file_preview(read_repo_file(self.sandbox_root, contract_path))
+        self._append(
+            actor="critic",
+            action="READ_FILE",
+            input_summary="Coordinator publishes shared API contract artifact.",
+            output_summary=(
+                f"Shared contract defines priority enum field for backend and frontend. "
+                f"Preview: {contract_preview}"
+            ),
+            files_touched=[contract_path],
+            raw={"shared_contract": True, "contract_field": "priority"},
+        )
+        self._subagent_read(
+            contract_path,
+            input_summary="Backend subagent reads shared contract before editing.",
+            output_summary="Backend subagent confirmed contract field priority.",
+            subagent_role="backend",
+            raw={"shared_contract": True, "contract_field": "priority"},
+        )
+        self._subagent_edit(
+            "backend/issueApi.js",
+            ISSUE_TRACKER_BACKEND_PRIORITY,
+            input_summary="Backend subagent patches API payload.",
+            output_summary="Backend exposes createIssuePayload with contract-aligned priority field.",
+            diff="+ function createIssuePayload({ title, priority })",
+            subagent_role="backend",
+            contract_field="priority",
+        )
+        self._subagent_read(
+            contract_path,
+            input_summary="Frontend subagent reads shared contract before editing.",
+            output_summary="Frontend subagent confirmed same contract field priority.",
+            subagent_role="frontend",
+            raw={"shared_contract": True, "contract_field": "priority"},
+        )
+        self._subagent_edit(
+            "frontend/issueForm.js",
+            ISSUE_TRACKER_FRONTEND_PRIORITY,
+            input_summary="Frontend subagent patches form fields.",
+            output_summary="Frontend exposes issueFormFields with contract-aligned priority field.",
+            diff="+ return ['title', 'priority']",
+            subagent_role="frontend",
+            contract_field="priority",
+        )
+        self._attempt_command(
+            self.config.test_command,
+            action="TEST",
+            input_summary="Run contract alignment tests.",
+            allowed_output="Contract tests passed with aligned backend and frontend fields.",
+        )
+        self._final_event(
+            input_summary="Submit coordinated multi-agent result.",
+            output_summary="Accepted: shared contract context kept backend and frontend edits aligned.",
+        )
 
 
 def run_task(

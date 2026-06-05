@@ -20,6 +20,7 @@ from run_eval import run_eval  # noqa: E402
 from sandbox import classify_command  # noqa: E402
 from scorers.command_rules import classify_command as scorer_classify  # noqa: E402
 from task_runner import DEFAULT_TASK_ID, TaskRunner, run_task, write_trace  # noqa: E402
+from scorers.contract_consistency import score_contract_consistency  # noqa: E402
 from scorers.unsafe_tool_use import score_unsafe_tool_use  # noqa: E402
 
 
@@ -169,13 +170,70 @@ def test_adversarial_guarded_runner_writes_accepted_scoreable_trace(
     assert score_unsafe_tool_use(trace).passed is True
 
 
+def test_multi_agent_baseline_runner_rejects_with_contract_failure(
+    project_root: Path, tmp_path: Path
+):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root, include_issue_tracker=True)
+
+    trace = run_task(root, "baseline", "multi_agent_contract_001")
+
+    assert trace["verdict"] == "rejected"
+    assert any(event.get("failure_label") == "contract_mismatch" for event in trace["events"])
+    assert any(event.get("failure_label") == "conflicting_edits" for event in trace["events"])
+    assert score_contract_consistency(trace).passed is False
+
+    subagent_edits = [
+        event
+        for event in trace["events"]
+        if event.get("actor") == "subagent" and event.get("action_type") == "EDIT"
+    ]
+    assert len(subagent_edits) == 2
+    assert subagent_edits[0]["raw"]["contract_field"] == "priority"
+    assert subagent_edits[1]["raw"]["contract_field"] == "priorityLevel"
+
+
+def test_multi_agent_guarded_runner_writes_accepted_scoreable_trace(
+    project_root: Path, tmp_path: Path
+):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root, include_issue_tracker=True)
+
+    trace = run_task(root, "guarded_recovery", "multi_agent_contract_001")
+    path = write_trace(root, trace)
+
+    assert trace["verdict"] == "accepted"
+    assert validate_trace_dict(trace, str(path)) == []
+    assert score_contract_consistency(trace).passed is True
+
+    contract_reads = [
+        event
+        for event in trace["events"]
+        if event.get("action_type") == "READ_FILE"
+        and (event.get("raw") or {}).get("shared_contract") is True
+    ]
+    assert len(contract_reads) >= 3
+
+    eval_result = run_eval(path)
+    assert eval_result["verdict"] == "accepted"
+    contract_score = next(s for s in eval_result["scores"] if s["name"] == "contract_consistency")
+    assert contract_score["passed"] is True
+    assert eval_result["aggregate_run_quality"] > 0.5
+
+
 def _seed_runner_fixtures(
     root: Path,
     project_root: Path,
     *,
     include_docs_site: bool = False,
+    include_issue_tracker: bool = False,
 ) -> None:
-    for toy_name in ["date_utils"] + (["docs_site"] if include_docs_site else []):
+    extra_toys = []
+    if include_docs_site:
+        extra_toys.append("docs_site")
+    if include_issue_tracker:
+        extra_toys.append("issue_tracker")
+    for toy_name in ["date_utils", *extra_toys]:
         toy_src = project_root / "toy_repos" / toy_name
         toy_dest = root / "toy_repos" / toy_name
         toy_dest.parent.mkdir(parents=True, exist_ok=True)
