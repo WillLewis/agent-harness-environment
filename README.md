@@ -80,6 +80,8 @@ pnpm eval:audit               # Metric drift report (hosted vs trace scorers)
 pnpm repo:status              # Local generated-artifact hygiene (read-only)
 pnpm deploy:check             # Hosted demo deployment readiness (local)
 pnpm preview                  # Serve production build locally (after pnpm build)
+pnpm smoke:hosted:local       # HTML smoke vs http://localhost:3000 (needs preview/dev)
+pnpm smoke:hosted -- --url URL  # HTML smoke vs local or deployed demo URL
 pnpm export:braintrust:dry-run
 pnpm export:braintrust:live       # optional; requires braintrust + BRAINTRUST_API_KEY
 pnpm export:weave:dry-run

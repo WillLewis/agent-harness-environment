@@ -110,6 +110,45 @@ Development server (hot reload): `pnpm dev`.
 
 ---
 
+## Automated HTML smoke (no browser)
+
+`scripts/smoke_hosted_demo.py` fetches the page HTML and checks server-rendered shell signals (title, section anchors, static-demo copy, cockpit/eval/architecture headings, task-class labels). **No Playwright**, no screenshots, no external services.
+
+**Limitation:** validates the Next.js HTML shell only — it does **not** execute client JavaScript or verify policy-toggle interactivity. Use [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for manual click-through.
+
+### Local (after preview)
+
+```bash
+pnpm build
+pnpm preview   # terminal 1 — serves http://localhost:3000
+pnpm smoke:hosted:local   # terminal 2
+```
+
+Equivalent:
+
+```bash
+pnpm smoke:hosted -- --url http://localhost:3000
+pnpm smoke:hosted -- --url http://localhost:3000 --timeout 30 --format json
+```
+
+`pnpm dev` also works if preview is not running:
+
+```bash
+pnpm smoke:hosted -- --url http://localhost:3000
+```
+
+### Deployed URL
+
+```bash
+pnpm smoke:hosted -- --url https://your-demo.example.com
+```
+
+Exit code **0** = all checks passed; **nonzero** = missing required HTML signals or HTTP error.
+
+Not part of CI (requires a running HTTP server). Unit tests mock fetch against a small HTML fixture.
+
+---
+
 ## Pre-deploy checklist (local)
 
 ```bash
@@ -119,25 +158,31 @@ pnpm validate:fixtures
 pnpm eval:ci               # optional; not required for static hosting
 pnpm typecheck
 pnpm build
-pnpm preview               # manual browser smoke
+pnpm preview               # terminal 1
+pnpm smoke:hosted:local    # terminal 2 — automated HTML smoke
 ```
 
 `pnpm deploy:check` verifies monorepo layout, fixture paths, no required env vars, and no API routes — it does **not** deploy or call external services.
 
 ---
 
-## Post-deploy smoke checklist (browser)
+## Post-deploy smoke checklist
 
-After your platform reports a successful deploy:
+### Automated (recommended first)
 
-1. **Landing** — hero loads; links to `#cockpit`, `#evals`, `#architecture` work.
-2. **Cockpit** (`#cockpit`) — default bugfix + baseline shows **Rejected**; trace timeline and evidence tabs populate.
-3. **Policy toggle** — switch to **Guarded recovery** on bugfix → **Accepted**, metrics/terminal/diff update together.
-4. **Task switch** — adversarial + multi-agent tasks load distinct traces (keyboard `[` `]` optional).
-5. **Eval table** (`#evals`) — policy rows render; disclaimer mentions synthetic fixtures.
-6. **Failure drawer** — click baseline loop or unsafe metric → cluster drawer opens.
-7. **Implementation evidence** (`#architecture`) — static counts (3 tasks, 7 traces) visible.
-8. **No network dependency** — disable offline after first load; toggles still work (all data bundled).
+```bash
+pnpm smoke:hosted -- --url https://your-deployed-url.example.com
+```
+
+### Manual browser (interactive behavior)
+
+After automated smoke passes, optionally verify in a browser:
+
+1. **Cockpit** (`#cockpit`) — default bugfix + baseline shows **Rejected**; trace timeline and evidence tabs populate.
+2. **Policy toggle** — switch to **Guarded recovery** on bugfix → **Accepted**, metrics/terminal/diff update together.
+3. **Task switch** — adversarial + multi-agent tasks load distinct traces (keyboard `[` `]` optional).
+4. **Failure drawer** — click baseline loop or unsafe metric → cluster drawer opens.
+5. **Offline** — after first load, toggles still work (all data bundled).
 
 Walkthrough detail: [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
 
