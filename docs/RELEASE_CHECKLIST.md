@@ -136,6 +136,7 @@ Do not expect or promise:
 | Doc | Audience |
 | --- | --- |
 | [README.md](../README.md) | Quick start + demo handoff links |
+| [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | v0.1 milestone handoff |
 | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Click-by-click hosted walkthrough |
 | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | Scorers, suite gates, adapters |
 | [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Product thesis and phased plan |
@@ -155,3 +156,25 @@ A reviewer with no context should be able to:
 6. Understand that external eval SaaS is **adapter scaffolding only**
 
 If any step fails, fix gates before handoff — do not patch docs to hide failures.
+
+---
+
+## 8. v0.1 release readiness (pre-tag)
+
+Use before creating git tag `v0.1` or a GitHub Release **manually**. This repo does not create tags or releases automatically.
+
+Release notes: [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md)
+
+| Check | How to verify | Expect |
+| --- | --- | --- |
+| CI green | GitHub Actions on target commit | All deterministic-gates steps pass |
+| Local CI contract | §1 commands | Exit 0; `gates_ok: true` |
+| Hosted smoke | `pnpm preview` then `pnpm smoke:hosted:local` | `ok=True`; 11/11 HTML checks |
+| Repo hygiene | `pnpm repo:status` | `ok=true`; no tracked generated files |
+| Deploy readiness | `pnpm deploy:check` | `ok=True`; no required env vars |
+| No generated artifacts staged | `git status --short` | No `runs/`, `.next/`, `trace_candidates/`, `generated_candidates.jsonl` |
+| No secrets / env files | `git status --short` | No `.env`, `.env.local`, or credential files staged |
+| Live adapters opt-in only | Read `package.json` + CI | `export:*:live` not in `.github/workflows/ci.yml` |
+| Claims grounded | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) § limitations | No live-agent / production-metrics overclaim |
+
+**Record at tag time:** commit SHA, date, and pointer to `RELEASE_NOTES_v0.1.md` in the GitHub Release body.

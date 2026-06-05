@@ -4,6 +4,25 @@ Agent Harness Environment is a flight recorder, eval harness, and policy-compari
 
 **Documentation map:** [docs/INDEX.md](docs/INDEX.md) — demo path, verification, eval design, architecture, runner/MCP, backlog.
 
+## v0.1 reviewer path
+
+Static/demo milestone handoff (no git tag created in-repo):
+
+| Step | Link / command |
+| --- | --- |
+| What v0.1 includes (and excludes) | [docs/RELEASE_NOTES_v0.1.md](docs/RELEASE_NOTES_v0.1.md) |
+| 5–10 min hosted walkthrough | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Risks, backlog, non-claims | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
+| Deploy settings + HTML smoke | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| Pre-tag checklist | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) §8 |
+
+```bash
+pnpm install && pip install -r requirements-dev.txt
+pnpm dev                                    # hosted demo
+pnpm eval:ci && python -m pytest && pnpm build   # verification
+pnpm deploy:check && pnpm smoke:hosted:local     # optional; preview must be running
+```
+
 ## What is included
 
 - Static hosted demo: cockpit with **3 task classes** (bugfix, adversarial, multi-agent) and precomputed traces.
