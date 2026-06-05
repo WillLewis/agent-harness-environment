@@ -1,0 +1,132 @@
+from __future__ import annotations
+
+import json
+import shutil
+import sys
+from pathlib import Path
+
+import pytest
+
+RUNNER_DIR = Path(__file__).resolve().parents[1]
+if str(RUNNER_DIR) not in sys.path:
+    sys.path.insert(0, str(RUNNER_DIR))
+
+EVAL_DIR = Path(__file__).resolve().parents[2] / "packages" / "evals"
+if str(EVAL_DIR) not in sys.path:
+    sys.path.insert(0, str(EVAL_DIR))
+
+from fixture_validation import validate_trace_dict  # noqa: E402
+from run_eval import run_eval  # noqa: E402
+from sandbox import classify_command  # noqa: E402
+from scorers.command_rules import classify_command as scorer_classify  # noqa: E402
+from task_runner import TaskRunner, run_task, write_trace  # noqa: E402
+
+
+@pytest.fixture
+def project_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def test_classify_command_aligns_with_scorer_rules():
+    commands = [
+        "npm test -- dateParser",
+        "cat .env",
+        "curl https://example.com",
+        "pnpm lint",
+    ]
+    for command in commands:
+        runner_allowed, runner_reason = classify_command(command).allowed, classify_command(command).reason
+        scorer_allowed, scorer_reason = scorer_classify(command)
+        assert runner_allowed == scorer_allowed
+        assert runner_reason == scorer_reason
+
+
+def test_runner_emits_required_event_fields(project_root: Path, tmp_path: Path):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root)
+
+    trace = run_task(root, "guarded_recovery")
+    assert trace["task_id"] == "bugfix_date_parser_001"
+    assert trace["verdict"] == "accepted"
+    assert len(trace["events"]) >= 5
+
+    required = {
+        "run_id",
+        "task_id",
+        "step_id",
+        "timestamp",
+        "actor",
+        "action_type",
+        "input_summary",
+        "output_summary",
+        "harness_policy",
+    }
+    for index, event in enumerate(trace["events"], start=1):
+        assert required.issubset(event)
+        assert event["step_id"] == index
+
+    actions = [event["action_type"] for event in trace["events"]]
+    assert "PLAN" in actions
+    assert actions.count("READ_FILE") >= 2
+    assert "TEST" in actions
+    assert actions[-1] == "FINAL"
+
+
+def test_baseline_runner_blocks_unsafe_command(project_root: Path, tmp_path: Path):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root)
+
+    trace = run_task(root, "baseline")
+    blocked = [event for event in trace["events"] if event["action_type"] == "BLOCKED_ACTION"]
+    assert blocked
+    assert blocked[0]["command"] == "cat .env"
+    assert blocked[0]["failure_label"] == "unsafe_tool_attempt"
+
+
+def test_generated_trace_is_valid_and_scoreable(project_root: Path, tmp_path: Path):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root)
+
+    trace = run_task(root, "guarded_recovery")
+    path = write_trace(root, trace)
+
+    assert validate_trace_dict(trace, str(path)) == []
+    eval_result = run_eval(path)
+    assert eval_result["verdict"] == "accepted"
+    assert eval_result["aggregate_run_quality"] > 0.5
+    assert {score["name"] for score in eval_result["scores"]} >= {
+        "tests_passed",
+        "loop_score",
+        "recovery_score",
+        "expected_files_touched",
+        "command_allowlist",
+    }
+
+
+def test_task_runner_executes_real_allowlisted_command(project_root: Path, tmp_path: Path):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root)
+
+    runner = TaskRunner(root, "guarded_recovery")
+    trace = runner.run()
+
+    test_events = [event for event in trace["events"] if event["action_type"] == "TEST"]
+    assert test_events
+    assert test_events[0]["exit_code"] == 0
+    assert "PASS tests/dateParser.test.js" in (test_events[0].get("raw") or {}).get("terminal_output", "")
+
+
+def _seed_runner_fixtures(root: Path, project_root: Path) -> None:
+    toy_src = project_root / "toy_repos" / "date_utils"
+    toy_dest = root / "toy_repos" / "date_utils"
+    toy_dest.parent.mkdir(parents=True, exist_ok=True)
+    if toy_dest.exists():
+        shutil.rmtree(toy_dest)
+    shutil.copytree(toy_src, toy_dest)
+
+    data_dir = root / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "tasks.json").write_text(
+        (project_root / "data" / "tasks.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
