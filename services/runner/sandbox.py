@@ -45,6 +45,12 @@ def read_repo_file(sandbox_root: Path, relative_path: str) -> str:
     return (sandbox_root / relative_path).read_text(encoding="utf-8")
 
 
+def write_repo_file(sandbox_root: Path, relative_path: str, content: str) -> None:
+    path = sandbox_root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
 def summarize_file_preview(content: str, limit: int = 120) -> str:
     first_line = content.strip().splitlines()[0] if content.strip() else "(empty file)"
     if len(first_line) > limit:
