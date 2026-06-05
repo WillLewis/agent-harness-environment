@@ -4,9 +4,7 @@
       "command": "python",
       "args": ["${workspaceFolder}/tools/mcp_server.py"],
       "env": {
-        "AHE_PROJECT_ROOT": "${workspaceFolder}",
-        "BRAINTRUST_API_KEY": "${env:BRAINTRUST_API_KEY}",
-        "WANDB_API_KEY": "${env:WANDB_API_KEY}"
+        "AHE_PROJECT_ROOT": "${workspaceFolder}"
       }
     }
   }
