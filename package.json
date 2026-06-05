@@ -15,6 +15,7 @@
     "eval:suite": "python packages/evals/run_suite.py --report table",
     "eval:ci": "python packages/evals/run_suite.py --ci",
     "export:braintrust:dry-run": "python packages/evals/adapters/braintrust_adapter.py --dry-run",
+    "export:weave:dry-run": "python packages/evals/adapters/weave_adapter.py --dry-run",
     "compare": "python packages/evals/policy_compare.py data/evals/policy_comparison.json",
     "router": "python packages/reward/bandit_router.py data/router_decisions.json"
   },

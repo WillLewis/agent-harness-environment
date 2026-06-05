@@ -69,7 +69,19 @@ pnpm export:braintrust:dry-run
 - Missing `braintrust` package or `BRAINTRUST_API_KEY`: structured `not_configured` when live export is requested.
 - Live upload is reserved for a later phase; CI and `pnpm eval:ci` stay fully local.
 
+### W&B Weave adapter (local-only default)
+
+`packages/evals/adapters/weave_adapter.py` maps trace fixtures to Weave trace/span metadata, `AgentTraceEvent` records to span/call shapes, `run_eval` scores to feedback records, and `run_suite` summaries to evaluation batches.
+
+```bash
+pnpm export:weave:dry-run
+```
+
+- Default: compact JSON dry-run; no SDK calls or network.
+- Missing `weave`/`wandb` package or `WANDB_API_KEY`: structured `not_configured` when live export is requested.
+- Live upload is reserved for a later phase; CI remains unchanged.
+
 ## Next eval work
 
 1. Add optional `plan_quality` and `final_answer_groundedness` LLM judge interfaces.
-2. Implement live Braintrust/W&B upload behind optional configuration.
+2. Implement live Braintrust/Weave upload behind optional configuration.

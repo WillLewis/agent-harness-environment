@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import importlib.util
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Any
+
+EVAL_DIR = Path(__file__).resolve().parents[1]
+if str(EVAL_DIR) not in sys.path:
+    sys.path.insert(0, str(EVAL_DIR))
+
+from run_eval import run_eval  # noqa: E402
+from run_suite import discover_traces, run_suite  # noqa: E402
+
+ADAPTER_NAME = "weave"
+FORMAT_VERSION = "1"
+DEFAULT_PROJECT = "agent-harness-environment"
+
+
+def _failure_labels(trace: dict[str, Any]) -> list[str]:
+    labels: list[str] = []
+    for event in trace.get("events", []):
+        label = event.get("failure_label")
+        if label and label not in labels:
+            labels.append(label)
+    return labels
+
+
+def _weave_packages_installed() -> dict[str, bool]:
+    weave = importlib.util.find_spec("weave") is not None
+    wandb = importlib.util.find_spec("wandb") is not None
+    return {"weave": weave, "wandb": wandb, "any": weave or wandb}
+
+
+def get_weave_config() -> dict[str, Any]:
+    api_key = os.environ.get("WANDB_API_KEY", "").strip()
+    packages = _weave_packages_installed()
+    return {
+        "adapter": ADAPTER_NAME,
+        "packages": packages,
+        "package_installed": packages["any"],
+        "api_key_present": bool(api_key),
+        "configured": bool(packages["any"] and api_key),
+        "project": os.environ.get("WANDB_PROJECT", DEFAULT_PROJECT),
+        "entity": os.environ.get("WANDB_ENTITY", ""),
+    }
+
+
+def agent_trace_event_to_weave_span(event: dict[str, Any]) -> dict[str, Any]:
+    """Map an AHE AgentTraceEvent to a Weave-oriented span/call record."""
+    run_id = event.get("run_id", "unknown")
+    step_id = event.get("step_id", 0)
+    actor = event.get("actor", "unknown")
+    action_type = event.get("action_type", "UNKNOWN")
+
+    attributes: dict[str, Any] = {
+        "actor": actor,
+        "action_type": action_type,
+        "harness_policy": event.get("harness_policy"),
+        "input_summary": event.get("input_summary"),
+        "output_summary": event.get("output_summary"),
+        "task_id": event.get("task_id"),
+        "run_id": run_id,
+        "step_id": step_id,
+    }
+    if event.get("failure_label"):
+        attributes["failure_label"] = event["failure_label"]
+    if event.get("command"):
+        attributes["command"] = event["command"]
+    if event.get("files_touched"):
+        attributes["files_touched"] = event["files_touched"]
+    if event.get("exit_code") is not None:
+        attributes["exit_code"] = event["exit_code"]
+    if event.get("model"):
+        attributes["model"] = event["model"]
+    if event.get("latency_ms") is not None:
+        attributes["latency_ms"] = event["latency_ms"]
+
+    return {
+        "kind": "weave_span",
+        "id": f"{run_id}:{step_id}",
+        "name": f"{actor}.{action_type}",
+        "call_type": action_type.lower(),
+        "start_time": event.get("timestamp"),
+        "attributes": attributes,
+    }
+
+
+def trace_to_weave_trace(
+    trace: dict[str, Any],
+    eval_result: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Map a trace fixture to a Weave trace/call metadata tree."""
+    weave_trace: dict[str, Any] = {
+        "kind": "weave_trace",
+        "id": trace.get("run_id"),
+        "op_name": f"ahe.run/{trace.get('policy', 'unknown')}",
+        "attributes": {
+            "task_id": trace.get("task_id"),
+            "task_title": trace.get("task_title"),
+            "repo_snapshot": trace.get("repo_snapshot"),
+            "policy": trace.get("policy"),
+            "verdict": trace.get("verdict"),
+            "success_command": trace.get("success_command"),
+            "failure_labels": _failure_labels(trace),
+            "known_files": trace.get("known_files", []),
+            "source": "ahe_trace_fixture",
+        },
+        "spans": [agent_trace_event_to_weave_span(event) for event in trace.get("events", [])],
+    }
+    if eval_result is not None:
+        weave_trace["feedback"] = scorer_output_to_weave_feedback(eval_result)
+        weave_trace["attributes"]["aggregate_run_quality"] = eval_result.get(
+            "aggregate_run_quality"
+        )
+        weave_trace["attributes"]["trace_path"] = eval_result.get("trace_path")
+    return weave_trace
+
+
+def scorer_output_to_weave_feedback(eval_result: dict[str, Any]) -> list[dict[str, Any]]:
+    """Map `run_eval` output to Weave feedback / evaluation score records."""
+    return [
+        {
+            "kind": "weave_feedback",
+            "feedback_type": "score",
+            "name": score["name"],
+            "value": score["score"],
+            "attributes": {
+                "passed": score["passed"],
+                "reason": score.get("reason", ""),
+            },
+        }
+        for score in eval_result.get("scores", [])
+    ]
+
+
+def suite_output_to_weave_eval_batch(suite_summary: dict[str, Any]) -> dict[str, Any]:
+    """Map `run_suite` JSON summary to a Weave-oriented evaluation batch."""
+    evaluations = []
+    for row in suite_summary.get("traces", []):
+        evaluations.append(
+            {
+                "kind": "weave_evaluation",
+                "id": row.get("run_id") or row.get("trace_stem"),
+                "attributes": {
+                    "task_id": row.get("task_id"),
+                    "policy": row.get("policy"),
+                    "verdict": row.get("verdict"),
+                    "trace_stem": row.get("trace_stem"),
+                    "failure_labels": row.get("failure_labels", []),
+                    "aggregate_run_quality": row.get("aggregate_run_quality"),
+                    "gate_ok": row.get("gate_ok"),
+                },
+                "feedback": [
+                    {
+                        "kind": "weave_feedback",
+                        "feedback_type": "score",
+                        "name": name,
+                        "value": meta["score"],
+                        "attributes": {"passed": meta["passed"]},
+                    }
+                    for name, meta in (row.get("scorer_summary") or {}).items()
+                ],
+            }
+        )
+
+    return {
+        "kind": "ahe_weave_eval_batch",
+        "format_version": FORMAT_VERSION,
+        "suite_version": suite_summary.get("suite_version"),
+        "trace_count": suite_summary.get("trace_count"),
+        "validation_ok": suite_summary.get("validation_ok"),
+        "gates_ok": suite_summary.get("gates_ok"),
+        "evaluations": evaluations,
+    }
+
+
+def build_export_batch(project_root: Path) -> dict[str, Any]:
+    """Assemble a full local Weave export batch from static AHE fixtures (no network)."""
+    traces_dir = project_root / "data" / "traces"
+    weave_traces: list[dict[str, Any]] = []
+
+    for path in discover_traces(traces_dir):
+        trace = json.loads(path.read_text(encoding="utf-8"))
+        eval_result = run_eval(path)
+        weave_traces.append(trace_to_weave_trace(trace, eval_result))
+
+    suite_summary = run_suite(traces_dir)
+    config = get_weave_config()
+
+    return {
+        "adapter": ADAPTER_NAME,
+        "format_version": FORMAT_VERSION,
+        "project": config["project"],
+        "entity": config["entity"],
+        "traces": weave_traces,
+        "eval_batch": suite_output_to_weave_eval_batch(suite_summary),
+    }
+
+
+def export_to_weave(
+    batch: dict[str, Any],
+    *,
+    dry_run: bool = True,
+) -> dict[str, Any]:
+    """
+    Export batch to W&B Weave when configured, or return a structured status.
+
+    Default is dry-run only (no network, no SDK calls).
+    """
+    config = get_weave_config()
+    if dry_run:
+        span_count = sum(len(trace.get("spans", [])) for trace in batch.get("traces", []))
+        feedback_count = sum(len(trace.get("feedback", [])) for trace in batch.get("traces", []))
+        return {
+            "ok": True,
+            "mode": "dry_run",
+            "code": "dry_run",
+            "message": "Dry run only; no network calls made.",
+            "config": config,
+            "batch": batch,
+            "summary": {
+                "trace_count": len(batch.get("traces", [])),
+                "span_count": span_count,
+                "feedback_count": feedback_count,
+                "suite_trace_count": batch.get("eval_batch", {}).get("trace_count"),
+                "suite_evaluation_count": len(
+                    batch.get("eval_batch", {}).get("evaluations", [])
+                ),
+            },
+        }
+
+    if not config["configured"]:
+        missing: list[str] = []
+        if not config["package_installed"]:
+            missing.append("weave or wandb package")
+        if not config["api_key_present"]:
+            missing.append("WANDB_API_KEY")
+        return {
+            "ok": False,
+            "mode": "not_configured",
+            "code": "not_configured",
+            "message": f"Weave export not configured; missing: {', '.join(missing)}.",
+            "config": config,
+        }
+
+    return {
+        "ok": False,
+        "mode": "not_implemented",
+        "code": "live_export_not_implemented",
+        "message": "Live Weave upload is not implemented yet; use --dry-run.",
+        "config": config,
+    }
+
+
+def run_dry_run(project_root: Path) -> dict[str, Any]:
+    batch = build_export_batch(project_root)
+    return export_to_weave(batch, dry_run=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Export AHE fixtures to W&B Weave (dry-run by default; no network)."
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        default=True,
+        help="Print compact JSON of the export batch without uploading (default).",
+    )
+    parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=Path(__file__).resolve().parents[3],
+        help="Repository root (default: auto-detected)",
+    )
+    parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON output",
+    )
+    args = parser.parse_args()
+
+    if args.dry_run:
+        result = run_dry_run(args.project_root.resolve())
+    else:
+        batch = build_export_batch(args.project_root.resolve())
+        result = export_to_weave(batch, dry_run=False)
+
+    indent = 2 if args.pretty else None
+    print(
+        json.dumps(
+            result,
+            indent=indent,
+            separators=None if args.pretty else (",", ":"),
+        )
+    )
+    return 0 if result.get("ok") else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

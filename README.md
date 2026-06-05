@@ -88,7 +88,8 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | --- | --- |
 | `pnpm eval:ci` / GitHub Actions | Deterministic smoke gate: fixture validation, static trace scorers, suite gates, pytest, typecheck, build. |
 | `pnpm export:braintrust:dry-run` | Optional Braintrust export preview (no API key, no network). |
-| Braintrust / W&B live export (future) | Upload when `braintrust` is installed and `BRAINTRUST_API_KEY` is set; not required for CI or local dev. |
+| `pnpm export:weave:dry-run` | Optional W&B Weave export preview (no API key, no network). |
+| Braintrust / W&B live export (future) | Upload when SDK + API key are configured; not required for CI or local dev. |
 
 The hosted demo and CI both rely on static fixtures under `data/` only.
 
@@ -99,6 +100,14 @@ pnpm export:braintrust:dry-run
 ```
 
 Implementation: `packages/evals/adapters/braintrust_adapter.py`. Live upload is intentionally unimplemented in this phase; missing package or API key returns a structured `not_configured` result instead of failing local workflows.
+
+**Weave dry-run** — previews trace/span trees, scorer feedback, and suite evaluation batches:
+
+```bash
+pnpm export:weave:dry-run
+```
+
+Implementation: `packages/evals/adapters/weave_adapter.py`. Requires `weave` or `wandb` plus `WANDB_API_KEY` only for future live export; dry-run needs neither.
 
 ## Repo map
 
