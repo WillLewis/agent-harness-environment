@@ -1,0 +1,3 @@
+# Optional: live Braintrust export only (not used by CI or requirements-dev.txt).
+# Install: pip install -r requirements-braintrust.txt
+braintrust>=0.21.0

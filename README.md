@@ -6,7 +6,7 @@ Agent Harness Environment is a flight recorder, eval harness, and policy-compari
 
 - Static hosted demo: cockpit with **3 task classes** (bugfix, adversarial, multi-agent) and precomputed traces.
 - Deterministic Python scorers, static eval suite + CI gate, and synthetic policy-comparison fixture for the hosted table.
-- Local runner MVP, MCP tools, and Braintrust/Weave **dry-run** export adapters (no live external upload).
+- Local runner MVP, MCP tools, and Braintrust/Weave export adapters (dry-run by default; optional live Braintrust upload).
 - Cursor rules, skills, MCP config, and product/UX/eval docs.
 
 ## Demo handoff
@@ -23,10 +23,11 @@ For external reviewers or portfolio walkthroughs:
 | Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
 | Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
 | Export shape previews | `pnpm export:braintrust:dry-run` · `pnpm export:weave:dry-run` |
+| Optional Braintrust upload | `pip install -r requirements-braintrust.txt` + `BRAINTRUST_API_KEY` → `pnpm export:braintrust:live` |
 
 **Hosted page:** replays static fixtures only — no live LLM, runner, or external APIs in the browser.  
 **Eval table metrics:** synthetic portfolio fixture, not production telemetry.  
-**Adapters:** dry-run JSON locally; live Braintrust/W&B upload is not implemented.
+**Adapters:** dry-run JSON locally by default. Live Braintrust upload is opt-in (`--live` + API key + optional `requirements-braintrust.txt`). Weave live upload is not implemented.
 
 ## Fast start
 
@@ -68,8 +69,22 @@ pnpm eval                     # Score one trace (guarded date-parser)
 pnpm eval:baseline            # Score one trace (baseline date-parser)
 pnpm compare                  # Synthetic policy comparison table
 pnpm export:braintrust:dry-run
+pnpm export:braintrust:live       # optional; requires braintrust + BRAINTRUST_API_KEY
 pnpm export:weave:dry-run
 ```
+
+### Optional Braintrust live export
+
+Not part of `pnpm eval:ci` or GitHub Actions. Install the optional SDK, set an API key, then pass `--live` explicitly:
+
+```bash
+pip install -r requirements-braintrust.txt
+export BRAINTRUST_API_KEY=your_key
+export BRAINTRUST_PROJECT=agent-harness-environment   # optional
+pnpm export:braintrust:live
+```
+
+Dry-run (`pnpm export:braintrust:dry-run`) prints the same compact JSON as before — no SDK import, no network. Live mode uploads static task datasets, trace fixture examples, and the suite summary experiment from local fixtures only; it does not run the runner or claim production eval coverage.
 
 ## Verification
 
@@ -105,8 +120,9 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | Hosted cockpit / eval table / router | `data/traces/`, `data/evals/` JSON | Demo replay; no network |
 | `pnpm eval` / `pnpm eval:ci` | Same fixtures | **Real** deterministic scorer output |
 | `services/runner/` | Toy repos → `runs/` | Local execution; not used by hosted page |
-| Adapter dry-runs | Fixtures → export JSON | Shape preview only; not external integration |
-| Braintrust / W&B live upload | — | **Not implemented**; adapters return `not_configured` without SDK + API key |
+| Adapter dry-runs | Fixtures → export JSON | Shape preview; no network |
+| Braintrust live upload | `pnpm export:braintrust:live` | Opt-in; static fixtures only; not in CI |
+| W&B Weave live upload | — | **Not implemented**; dry-run only |
 
 Details: [docs/EVAL_DESIGN.md](docs/EVAL_DESIGN.md) · [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
 

@@ -59,17 +59,34 @@ Per-fixture expectations are keyed by trace filename stem in `FIXTURE_EXPECTATIO
 
 `.github/workflows/ci.yml` runs `pnpm eval:ci` plus fixture validation, single-trace evals, policy compare, pytest, typecheck, and build. It does not call Braintrust, W&B, or live model APIs.
 
-### Braintrust adapter (local-only default)
+### Braintrust adapter (dry-run default; opt-in live)
 
 `packages/evals/adapters/braintrust_adapter.py` maps AHE tasks, `coding_tasks.jsonl`, trace fixtures, `run_eval` scores, and `run_suite` summaries to Braintrust-oriented shapes. Pure transforms are unit-tested without network access.
 
 ```bash
-pnpm export:braintrust:dry-run
+pnpm export:braintrust:dry-run    # default — compact JSON, no SDK import
+pnpm export:braintrust:live       # explicit upload (optional SDK + API key)
 ```
 
-- Default: compact JSON dry-run (`mode: dry_run`); no SDK calls.
-- Missing `braintrust` package or `BRAINTRUST_API_KEY`: structured `not_configured` when live export is requested.
-- Live upload is reserved for a later phase; CI and `pnpm eval:ci` stay fully local.
+| Mode | Command | Network | Exit on failure |
+| --- | --- | --- | --- |
+| Dry-run | `--dry-run` (default) | No | No (always prints JSON) |
+| Live | `--live` only | Yes | Yes (`not_configured` or `live_export_failed`) |
+
+**Live setup (optional, not in CI):**
+
+```bash
+pip install -r requirements-braintrust.txt
+export BRAINTRUST_API_KEY=...          # required
+export BRAINTRUST_PROJECT=agent-harness-environment   # optional
+pnpm export:braintrust:live
+```
+
+Live export uploads the current static suite only: task/coding-task datasets, per-trace fixture examples, and the `run_suite` summary experiment. It does **not** re-run the runner or call LLMs.
+
+**Non-claims:** live export is not production telemetry, not wired to the hosted demo, and not part of `pnpm eval:ci`. Missing `braintrust` or `BRAINTRUST_API_KEY` returns structured `not_configured` (exit 1) only when `--live` is passed.
+
+**Why not in `pnpm eval:ci`:** CI must stay deterministic, secret-free, and dependency-light. Braintrust is an optional operator tool for exporting fixture shapes to an external project.
 
 ### W&B Weave adapter (local-only default)
 

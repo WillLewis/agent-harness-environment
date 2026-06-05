@@ -5,11 +5,13 @@ from pathlib import Path
 
 import pytest
 
+from adapters import braintrust_adapter
 from adapters.braintrust_adapter import (
     build_export_batch,
     coding_task_row_to_braintrust_dataset_row,
     export_to_braintrust,
     get_braintrust_config,
+    perform_live_export,
     run_dry_run,
     scorer_output_to_braintrust_scores,
     suite_output_to_export_batch,
@@ -155,6 +157,144 @@ def test_run_dry_run_summarizes_all_tasks_traces_scores(project_root: Path):
     assert result["summary"]["dataset_row_count"] == 6
     assert result["summary"]["example_count"] >= 7
     assert result["summary"]["suite_trace_count"] >= 7
+
+
+def test_export_dry_run_never_calls_live_export(monkeypatch: pytest.MonkeyPatch):
+    live_called = False
+
+    def fail_live(*_a: object, **_k: object) -> dict:
+        nonlocal live_called
+        live_called = True
+        raise AssertionError("perform_live_export must not run during dry-run")
+
+    def fail_import() -> object:
+        raise AssertionError("braintrust module must not be imported during dry-run")
+
+    monkeypatch.setattr(braintrust_adapter, "perform_live_export", fail_live)
+    monkeypatch.setattr(braintrust_adapter, "_import_braintrust_module", fail_import)
+
+    result = export_to_braintrust({"datasets": [], "experiments": []}, dry_run=True)
+
+    assert result["ok"] is True
+    assert result["code"] == "dry_run"
+    assert live_called is False
+
+
+def test_export_live_refuses_missing_package_and_key(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.delenv("BRAINTRUST_API_KEY", raising=False)
+    monkeypatch.setattr(braintrust_adapter, "_braintrust_package_installed", lambda: False)
+
+    result = export_to_braintrust({"datasets": []}, dry_run=False)
+
+    assert result["ok"] is False
+    assert result["code"] == "not_configured"
+    assert "braintrust package" in result["message"]
+    assert "BRAINTRUST_API_KEY" in result["message"]
+
+
+def test_perform_live_export_calls_fake_client(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("BRAINTRUST_API_KEY", "test-key")
+    monkeypatch.setattr(braintrust_adapter, "_braintrust_package_installed", lambda: True)
+
+    class FakeDataset:
+        def __init__(self) -> None:
+            self.inserts: list[dict] = []
+
+        def insert(self, **kwargs: object) -> None:
+            self.inserts.append(dict(kwargs))
+
+        def flush(self) -> None:
+            pass
+
+    class FakeExperiment:
+        def __init__(self) -> None:
+            self.logs: list[dict] = []
+
+        def log(self, **kwargs: object) -> None:
+            self.logs.append(dict(kwargs))
+
+        def flush(self) -> None:
+            pass
+
+    fake_datasets: list[FakeDataset] = []
+    fake_experiments: list[FakeExperiment] = []
+
+    class FakeBraintrust:
+        @staticmethod
+        def init_dataset(*, project: str, name: str) -> FakeDataset:
+            assert project == "test-project"
+            assert name == "ahe_tasks"
+            ds = FakeDataset()
+            fake_datasets.append(ds)
+            return ds
+
+        @staticmethod
+        def init(*, project: str, experiment: str) -> FakeExperiment:
+            assert project == "test-project"
+            assert experiment in {"ahe_static_trace_fixtures", "ahe_static_suite"}
+            exp = FakeExperiment()
+            fake_experiments.append(exp)
+            return exp
+
+    batch = {
+        "project": "test-project",
+        "datasets": [
+            {
+                "name": "ahe_tasks",
+                "rows": [
+                    {
+                        "id": "task_1",
+                        "input": {"task_id": "task_1"},
+                        "expected": {"success_command": "npm test"},
+                        "metadata": {"source": "test"},
+                    }
+                ],
+            }
+        ],
+        "experiments": [
+            {
+                "name": "ahe_static_trace_fixtures",
+                "examples": [
+                    {
+                        "id": "run_1",
+                        "input": {"task_id": "task_1"},
+                        "expected": {"verdict": "accepted"},
+                        "scores": [{"name": "tests_passed", "score": 1.0}],
+                        "metadata": {"source": "test"},
+                    }
+                ],
+            }
+        ],
+        "suite_batch": {
+            "experiments": [
+                {
+                    "name": "ahe_static_suite",
+                    "examples": [
+                        {
+                            "id": "suite_1",
+                            "input": {"task_id": "task_1"},
+                            "expected": {"verdict": "rejected"},
+                            "scores": [{"name": "tests_passed", "score": 0.0}],
+                        }
+                    ],
+                }
+            ],
+            "trace_count": 1,
+        },
+    }
+
+    result = perform_live_export(batch, braintrust_module=FakeBraintrust)
+
+    assert result["ok"] is True
+    assert result["code"] == "live_export_ok"
+    assert len(fake_datasets) == 1
+    assert fake_datasets[0].inserts[0]["input"] == {"task_id": "task_1"}
+    assert fake_datasets[0].inserts[0]["metadata"]["ahe_row_id"] == "task_1"
+    assert len(fake_experiments) == 2
+    assert fake_experiments[0].logs[0]["scores"] == {"tests_passed": 1.0}
+    assert fake_experiments[1].logs[0]["scores"] == {"tests_passed": 0.0}
+    assert result["summary"]["datasets"][0]["row_count"] == 1
+    assert result["summary"]["experiments"][1]["name"] == "ahe_static_suite"
 
 
 @pytest.fixture

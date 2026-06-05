@@ -2,3 +2,5 @@ mcp
 pytest
 pyyaml
 pydantic
+
+# Optional live Braintrust export (not required for CI): pip install -r requirements-braintrust.txt

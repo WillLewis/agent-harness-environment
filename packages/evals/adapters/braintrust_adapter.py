@@ -234,6 +234,137 @@ def build_export_batch(project_root: Path) -> dict[str, Any]:
     }
 
 
+def _not_configured_result(config: dict[str, Any]) -> dict[str, Any]:
+    missing: list[str] = []
+    if not config["package_installed"]:
+        missing.append("braintrust package")
+    if not config["api_key_present"]:
+        missing.append("BRAINTRUST_API_KEY")
+    return {
+        "ok": False,
+        "mode": "not_configured",
+        "code": "not_configured",
+        "message": f"Braintrust export not configured; missing: {', '.join(missing)}.",
+        "config": config,
+    }
+
+
+def _dry_run_summary(batch: dict[str, Any]) -> dict[str, Any]:
+    """Summary fields for dry-run JSON (stable contract; excludes suite_batch experiments)."""
+    return {
+        "dataset_count": len(batch.get("datasets", [])),
+        "dataset_row_count": sum(
+            len(dataset.get("rows", [])) for dataset in batch.get("datasets", [])
+        ),
+        "experiment_count": len(batch.get("experiments", [])),
+        "example_count": sum(
+            len(experiment.get("examples", []))
+            for experiment in batch.get("experiments", [])
+        ),
+        "suite_trace_count": batch.get("suite_batch", {}).get("trace_count"),
+    }
+
+
+def _import_braintrust_module() -> Any:
+    import braintrust  # noqa: PLC0415
+
+    return braintrust
+
+
+def _dataset_insert_kwargs(row: dict[str, Any]) -> dict[str, Any]:
+    metadata = dict(row.get("metadata") or {})
+    if row.get("id") is not None:
+        metadata.setdefault("ahe_row_id", row["id"])
+    kwargs: dict[str, Any] = {
+        "input": row["input"],
+        "expected": row.get("expected"),
+        "metadata": metadata or None,
+    }
+    return {key: value for key, value in kwargs.items() if value is not None}
+
+
+def _example_log_kwargs(example: dict[str, Any]) -> dict[str, Any]:
+    scores_list = example.get("scores") or []
+    scores = {item["name"]: item["score"] for item in scores_list if "name" in item}
+    metadata = dict(example.get("metadata") or {})
+    if example.get("id") is not None:
+        metadata.setdefault("ahe_example_id", example["id"])
+    kwargs: dict[str, Any] = {
+        "input": example.get("input"),
+        "expected": example.get("expected"),
+        "scores": scores or None,
+        "metadata": metadata or None,
+    }
+    return {key: value for key, value in kwargs.items() if value is not None}
+
+
+def perform_live_export(
+    batch: dict[str, Any],
+    *,
+    braintrust_module: Any | None = None,
+) -> dict[str, Any]:
+    """
+    Upload the static export batch to Braintrust (network; requires SDK + API key).
+
+    `braintrust_module` is injectable for unit tests (fake client; no network).
+    """
+    config = get_braintrust_config()
+    if not config["configured"]:
+        return _not_configured_result(config)
+
+    bt = braintrust_module if braintrust_module is not None else _import_braintrust_module()
+    project = batch.get("project") or config["project"]
+
+    uploaded_datasets: list[dict[str, Any]] = []
+    try:
+        for dataset_spec in batch.get("datasets", []):
+            dataset = bt.init_dataset(project=project, name=dataset_spec["name"])
+            row_count = 0
+            for row in dataset_spec.get("rows", []):
+                dataset.insert(**_dataset_insert_kwargs(row))
+                row_count += 1
+            dataset.flush()
+            uploaded_datasets.append({"name": dataset_spec["name"], "row_count": row_count})
+
+        experiment_specs = list(batch.get("experiments", []))
+        suite_batch = batch.get("suite_batch") or {}
+        experiment_specs.extend(suite_batch.get("experiments", []))
+
+        uploaded_experiments: list[dict[str, Any]] = []
+        for experiment_spec in experiment_specs:
+            experiment = bt.init(project=project, experiment=experiment_spec["name"])
+            example_count = 0
+            for example in experiment_spec.get("examples", []):
+                experiment.log(**_example_log_kwargs(example))
+                example_count += 1
+            experiment.flush()
+            uploaded_experiments.append(
+                {"name": experiment_spec["name"], "example_count": example_count}
+            )
+    except Exception as exc:  # noqa: BLE001 — surface SDK/network failures to CLI
+        return {
+            "ok": False,
+            "mode": "live",
+            "code": "live_export_failed",
+            "message": f"Braintrust live export failed: {exc}",
+            "config": config,
+        }
+
+    return {
+        "ok": True,
+        "mode": "live",
+        "code": "live_export_ok",
+        "message": "Static AHE fixtures uploaded to Braintrust.",
+        "config": config,
+        "summary": {
+            "project": project,
+            "datasets": uploaded_datasets,
+            "experiments": uploaded_experiments,
+            "suite_trace_count": suite_batch.get("trace_count"),
+        },
+    }
+
+
 def export_to_braintrust(
     batch: dict[str, Any],
     *,
@@ -242,7 +373,8 @@ def export_to_braintrust(
     """
     Export batch to Braintrust when configured, or return a structured status.
 
-    Default is dry-run only (no network, no SDK calls).
+    Default is dry-run only (no network, no SDK import).
+    Live upload requires dry_run=False plus configured SDK and BRAINTRUST_API_KEY.
     """
     config = get_braintrust_config()
     if dry_run:
@@ -253,41 +385,13 @@ def export_to_braintrust(
             "message": "Dry run only; no network calls made.",
             "config": config,
             "batch": batch,
-            "summary": {
-                "dataset_count": len(batch.get("datasets", [])),
-                "dataset_row_count": sum(
-                    len(dataset.get("rows", [])) for dataset in batch.get("datasets", [])
-                ),
-                "experiment_count": len(batch.get("experiments", [])),
-                "example_count": sum(
-                    len(experiment.get("examples", []))
-                    for experiment in batch.get("experiments", [])
-                ),
-                "suite_trace_count": batch.get("suite_batch", {}).get("trace_count"),
-            },
+            "summary": _dry_run_summary(batch),
         }
 
     if not config["configured"]:
-        missing: list[str] = []
-        if not config["package_installed"]:
-            missing.append("braintrust package")
-        if not config["api_key_present"]:
-            missing.append("BRAINTRUST_API_KEY")
-        return {
-            "ok": False,
-            "mode": "not_configured",
-            "code": "not_configured",
-            "message": f"Braintrust export not configured; missing: {', '.join(missing)}.",
-            "config": config,
-        }
+        return _not_configured_result(config)
 
-    return {
-        "ok": False,
-        "mode": "not_implemented",
-        "code": "live_export_not_implemented",
-        "message": "Live Braintrust upload is not implemented yet; use --dry-run.",
-        "config": config,
-    }
+    return perform_live_export(batch)
 
 
 def run_dry_run(project_root: Path) -> dict[str, Any]:
@@ -295,15 +399,25 @@ def run_dry_run(project_root: Path) -> dict[str, Any]:
     return export_to_braintrust(batch, dry_run=True)
 
 
+def run_live_export(project_root: Path) -> dict[str, Any]:
+    batch = build_export_batch(project_root)
+    return export_to_braintrust(batch, dry_run=False)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Export AHE fixtures to Braintrust (dry-run by default; no network)."
     )
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--dry-run",
         action="store_true",
-        default=True,
         help="Print compact JSON of the export batch without uploading (default).",
+    )
+    mode.add_argument(
+        "--live",
+        action="store_true",
+        help="Upload static fixtures to Braintrust (requires --live, braintrust package, BRAINTRUST_API_KEY).",
     )
     parser.add_argument(
         "--project-root",
@@ -318,11 +432,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    if args.dry_run:
-        result = run_dry_run(args.project_root.resolve())
+    root = args.project_root.resolve()
+    if args.live:
+        result = run_live_export(root)
     else:
-        batch = build_export_batch(args.project_root.resolve())
-        result = export_to_braintrust(batch, dry_run=False)
+        result = run_dry_run(root)
 
     indent = 2 if args.pretty else None
     print(
