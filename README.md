@@ -18,6 +18,7 @@ For external reviewers or portfolio walkthroughs:
 | Run hosted demo locally | `pnpm install` → `pnpm dev` → open `#cockpit`, `#evals`, `#architecture` |
 | Click-by-click script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
+| Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
 | Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |
 | Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
 | Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
