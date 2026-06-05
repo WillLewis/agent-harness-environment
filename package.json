@@ -12,6 +12,8 @@
     "validate:fixtures": "python scripts/validate_fixtures.py",
     "eval": "python packages/evals/run_eval.py data/traces/guarded_recovery_date_parser.json",
     "eval:baseline": "python packages/evals/run_eval.py data/traces/baseline_date_parser.json",
+    "eval:suite": "python packages/evals/run_suite.py --report table",
+    "eval:ci": "python packages/evals/run_suite.py --ci",
     "compare": "python packages/evals/policy_compare.py data/evals/policy_comparison.json",
     "router": "python packages/reward/bandit_router.py data/router_decisions.json"
   },

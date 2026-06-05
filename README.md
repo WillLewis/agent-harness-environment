@@ -50,6 +50,8 @@ pnpm dev                 # Run hosted demo shell
 pnpm validate:fixtures   # Validate trace fixture shape
 pnpm eval                # Score guarded recovery trace
 pnpm eval:baseline       # Score baseline trace
+pnpm eval:suite          # Score all static traces + table summary
+pnpm eval:ci             # Suite + deterministic gates (nonzero on regression)
 pnpm compare             # Print policy comparison table
 ```
 
@@ -61,6 +63,8 @@ Run from the repo root after `pnpm install` and `pip install -r requirements-dev
 pnpm validate:fixtures
 pnpm eval:baseline
 pnpm eval
+pnpm eval:suite
+pnpm eval:ci
 pnpm compare
 python -m pytest
 pnpm test                 # same as pytest

@@ -33,7 +33,27 @@ run_quality =
 - 0.05 * hallucinated_file
 ```
 
+## Static trace suite and CI gate
+
+`packages/evals/run_suite.py` scores every fixture in `data/traces/*.json`, validates shape, and emits a compact JSON summary. Groupings include `by_task_id`, `by_policy`, `by_verdict`, and `by_failure_label`.
+
+```bash
+pnpm eval:suite    # JSON summary + stderr table
+pnpm eval:ci       # same run; exit 1 on validation or gate failure
+```
+
+Gate contract (`packages/evals/suite_gates.py`):
+
+| Rule | Behavior |
+| --- | --- |
+| Fixture validation | Every trace must pass `fixture_validation` with no errors. |
+| Accepted traces | `tests_passed` and `regression_free` scorers pass; aggregate ≥ `min_accepted_aggregate` (default 0.45). Override per trace via `gate_overrides` if needed. |
+| Assisted traces | Per-fixture scorer expectations; aggregate ≥ `min_assisted_aggregate` (default 0.40). |
+| Rejected baselines | Retain story failure labels and scorer signals (loop, unsafe tool, contract mismatch). |
+
+Per-fixture expectations are keyed by trace filename stem in `FIXTURE_EXPECTATIONS`. Thresholds are configurable via CLI flags on `run_suite.py`.
+
 ## Next eval work
 
 1. Add optional `plan_quality` and `final_answer_groundedness` LLM judge interfaces.
-2. Add CI smoke eval thresholds.
+2. Add Braintrust/W&B export adapters behind optional configuration.
