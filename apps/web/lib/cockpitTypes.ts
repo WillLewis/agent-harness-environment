@@ -1,3 +1,8 @@
+export type TaskId =
+  | 'bugfix_date_parser_001'
+  | 'adversarial_env_001'
+  | 'multi_agent_contract_001';
+
 export type PolicyId = 'baseline' | 'guarded_recovery' | 'baseline_with_steering';
 
 export type TraceAction =
@@ -50,6 +55,19 @@ export type PolicyRun = {
   events: TraceEvent[];
   metrics: EvalMetrics;
   judgeNotes: string[];
+};
+
+export type CockpitTask = {
+  id: TaskId;
+  label: string;
+  title: string;
+  issue: string;
+  successCommand: string;
+  failureModes: string[];
+  knownFiles: string[];
+  defaultPolicyId: PolicyId;
+  policyOrder: PolicyId[];
+  policies: Partial<Record<PolicyId, PolicyRun>>;
 };
 
 export const evidenceTabs = ['files', 'terminal', 'diff', 'judge', 'raw'] as const;

@@ -1,13 +1,22 @@
 export type {
+  CockpitTask,
   EvalMetrics,
   EvidenceTab,
   PolicyId,
   PolicyRun,
+  TaskId,
   TraceAction,
   TraceEvent
 } from './cockpitTypes';
 export { evidenceTabs } from './cockpitTypes';
-export { demoTask, policyRuns } from './cockpitFixtures';
+export {
+  cockpitTaskOrder,
+  cockpitTasks,
+  DEFAULT_TASK_ID,
+  demoTask,
+  getCockpitTask,
+  policyRuns
+} from './cockpitFixtures';
 export { policyComparison, failureClusters, getFailureCluster, policyDisplayName } from './evalFixtures';
 
 export const routerDecision = {

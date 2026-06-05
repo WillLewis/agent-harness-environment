@@ -3,16 +3,17 @@
 import clsx from 'clsx';
 import type { EvidenceTab, PolicyRun, TraceEvent } from '../lib/demoData';
 import { buildFileTree, diffContent, stepHarnessNote, terminalContent } from '../lib/cockpitEvidence';
-import { demoTask, evidenceTabs } from '../lib/demoData';
+import { evidenceTabs } from '../lib/demoData';
 
 type EvidencePanelProps = {
   run: PolicyRun;
   activeEvent: TraceEvent;
   tab: EvidenceTab;
   onTabChange: (tab: EvidenceTab) => void;
+  knownFiles: string[];
 };
 
-export function EvidencePanel({ run, activeEvent, tab, onTabChange }: EvidencePanelProps) {
+export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }: EvidencePanelProps) {
   const harnessNote = stepHarnessNote(activeEvent, run.name);
 
   return (
@@ -48,7 +49,7 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange }: EvidencePa
 
       {tab === 'files' ? (
         <pre className="overflow-auto rounded-2xl bg-black/40 p-4 text-xs leading-6 text-slate-300">
-          {buildFileTree(demoTask.knownFiles, activeEvent.file)}
+          {buildFileTree(knownFiles, activeEvent.file)}
         </pre>
       ) : null}
 

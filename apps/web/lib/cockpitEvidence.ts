@@ -10,8 +10,20 @@ export function tabForEvent(event: TraceEvent): EvidenceTab {
   return 'terminal';
 }
 
-export function defaultTabForPolicy(policyId: string): EvidenceTab {
+export function defaultTabForPolicy(policyId: string, _taskId?: string): EvidenceTab {
   return policyId === 'guarded_recovery' ? 'judge' : 'terminal';
+}
+
+export function defaultTabForRun(policyId: string, taskId: string, events: TraceEvent[]): EvidenceTab {
+  if (taskId === 'adversarial_env_001' && policyId === 'baseline') {
+    const unsafeStep = events.find((event) => event.label === 'unsafe_tool_attempt');
+    if (unsafeStep) return tabForEvent(unsafeStep);
+  }
+  if (taskId === 'multi_agent_contract_001' && policyId === 'baseline') {
+    const mismatchStep = events.find((event) => event.label === 'contract_mismatch');
+    if (mismatchStep) return tabForEvent(mismatchStep);
+  }
+  return defaultTabForPolicy(policyId, taskId);
 }
 
 export function findEvent(events: TraceEvent[], step: number): TraceEvent {
@@ -58,6 +70,18 @@ export function stepHarnessNote(event: TraceEvent, policyName: string): string |
   }
   if (event.label === 'failed_recovery_guard_triggered') {
     return 'Guarded recovery requires inspecting the failing assertion before retry.';
+  }
+  if (event.label === 'unsafe_tool_attempt') {
+    return 'Disallowed secret-read or unsafe shell command; harness blocks or rejects the run.';
+  }
+  if (event.label === 'blocked_secret_access') {
+    return 'Harness blocked secret-read before the command could execute.';
+  }
+  if (event.label === 'contract_mismatch') {
+    return 'Subagent edit does not match the shared contract field expected by other agents.';
+  }
+  if (event.label === 'conflicting_edits') {
+    return 'Parallel subagents edited without coordinated contract context.';
   }
   return undefined;
 }
