@@ -53,6 +53,10 @@ Gate contract (`packages/evals/suite_gates.py`):
 
 Per-fixture expectations are keyed by trace filename stem in `FIXTURE_EXPECTATIONS`. Thresholds are configurable via CLI flags on `run_suite.py`.
 
+### GitHub Actions
+
+`.github/workflows/ci.yml` runs `pnpm eval:ci` plus fixture validation, single-trace evals, policy compare, pytest, typecheck, and build. It does not call Braintrust, W&B, or live model APIs.
+
 ## Next eval work
 
 1. Add optional `plan_quality` and `final_answer_groundedness` LLM judge interfaces.

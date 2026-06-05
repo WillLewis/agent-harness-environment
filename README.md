@@ -57,22 +57,39 @@ pnpm compare             # Print policy comparison table
 
 ## Verification
 
-Run from the repo root after `pnpm install` and `pip install -r requirements-dev.txt`:
+Run from the repo root after `pnpm install` and `pip install -r requirements-dev.txt`.
+
+**CI command contract** — GitHub Actions (`.github/workflows/ci.yml`) runs the same deterministic gates on every push and pull request, in this order:
 
 ```bash
 pnpm validate:fixtures
+pnpm eval:ci
 pnpm eval:baseline
 pnpm eval
-pnpm eval:suite
-pnpm eval:ci
 pnpm compare
 python -m pytest
-pnpm test                 # same as pytest
 pnpm typecheck
 pnpm build
 ```
 
-`pnpm typecheck` does not require a prior build. Generated TypeScript metadata (`*.tsbuildinfo`) is gitignored.
+No secrets, live LLM calls, or external eval services are required. `pnpm eval:ci` scores the full static trace suite and enforces fixture gate expectations (see `docs/EVAL_DESIGN.md`).
+
+**Local before PR** — run the CI contract above, then optionally:
+
+```bash
+pnpm eval:suite          # full suite table + JSON summary (same scoring as eval:ci)
+```
+
+`pnpm test` is an alias for `python -m pytest`. `pnpm typecheck` does not require a prior build. Generated TypeScript metadata (`*.tsbuildinfo`) is gitignored.
+
+### Local CI vs external eval adapters
+
+| Surface | Purpose |
+| --- | --- |
+| `pnpm eval:ci` / GitHub Actions | Deterministic smoke gate: fixture validation, static trace scorers, suite gates, pytest, typecheck, build. |
+| Braintrust / W&B (future) | Optional export and experiment tracking when configured; failures there must not block the local demo or this workflow. |
+
+The hosted demo and CI both rely on static fixtures under `data/` only.
 
 ## Repo map
 
