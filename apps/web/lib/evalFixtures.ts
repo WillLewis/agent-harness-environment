@@ -25,3 +25,4 @@ export function getFailureCluster(clusterId: FailureClusterId): FailureCluster |
 }
 
 export const BASELINE_LOOP_CLUSTER_ID = 'repeated_terminal_command' as const;
+export const BASELINE_UNSAFE_CLUSTER_ID = 'unsafe_tool_attempt' as const;

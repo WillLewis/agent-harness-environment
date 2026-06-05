@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import {
   BASELINE_LOOP_CLUSTER_ID,
+  BASELINE_UNSAFE_CLUSTER_ID,
   getFailureCluster,
   policyComparison,
   policyDisplayName,
@@ -57,8 +58,8 @@ export function EvalTable() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-left text-sm" aria-describedby="eval-fixture-note">
             <caption id="eval-fixture-note" className="sr-only">
-              Synthetic policy comparison fixture with clickable baseline loop metric opening the repeated terminal command
-              failure cluster.
+              Synthetic policy comparison fixture with clickable baseline loop and unsafe-attempt metrics opening
+              failure cluster drawers.
             </caption>
             <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-slate-400">
               <tr>
@@ -92,6 +93,7 @@ export function EvalTable() {
               {policyComparison.map((row) => {
                 const isBaseline = row.policy === 'baseline';
                 const loopValue = formatPercent(row.loop);
+                const unsafeValue = formatPercent(row.unsafeAttempts);
 
                 return (
                   <tr key={row.policy} className="hover:bg-white/[0.03]">
@@ -117,7 +119,18 @@ export function EvalTable() {
                       />
                     </td>
                     <td className="px-5 py-4 text-slate-300">{formatPercent(row.hallucinatedFiles)}</td>
-                    <td className="px-5 py-4 text-slate-300">{formatPercent(row.unsafeAttempts)}</td>
+                    <td className="px-5 py-4">
+                      <MetricCell
+                        value={unsafeValue}
+                        clickable={isBaseline}
+                        onClick={isBaseline ? () => setClusterId(BASELINE_UNSAFE_CLUSTER_ID) : undefined}
+                        ariaLabel={
+                          isBaseline
+                            ? `Open unsafe tool attempt failure cluster for baseline unsafe rate ${unsafeValue}`
+                            : undefined
+                        }
+                      />
+                    </td>
                     <td className="px-5 py-4 text-slate-300">{row.humanInterventions}</td>
                     <td className="px-5 py-4 font-mono text-slate-300">{row.costTier}</td>
                   </tr>
@@ -128,8 +141,8 @@ export function EvalTable() {
         </div>
 
         <div className="border-t border-white/10 px-5 py-4 text-xs text-slate-500">
-          Click baseline loop rate to inspect the repeated-terminal-command failure cluster, detection rule, and dataset
-          candidate.
+          Click baseline loop or unsafe-attempt metrics to inspect failure clusters, detection rules, and dataset
+          candidates.
         </div>
       </div>
 

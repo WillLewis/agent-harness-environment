@@ -1,0 +1,8 @@
+{
+  "name": "toy-repo-docs-site",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node tests/docs.test.js"
+  }
+}
