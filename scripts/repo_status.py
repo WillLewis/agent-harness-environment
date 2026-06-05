@@ -74,13 +74,21 @@ def _dir_file_count(path: Path) -> int:
 
 
 def _gitignore_covers(relative: str) -> bool:
-    result = subprocess.run(
-        ["git", "check-ignore", "-q", relative],
-        cwd=PROJECT_ROOT,
-        capture_output=True,
-        check=False,
-    )
-    return result.returncode == 0
+    candidates = [relative]
+    if not relative.endswith("/"):
+        candidates.append(f"{relative}/")
+        candidates.append(f"{relative}/.gitkeep")
+
+    for candidate in candidates:
+        result = subprocess.run(
+            ["git", "check-ignore", "-q", candidate],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            return True
+    return False
 
 
 def _tracked_generated_files() -> list[str]:
