@@ -4,32 +4,45 @@ Agent Harness Environment is a flight recorder, eval harness, and policy-compari
 
 ## What is included
 
-- Static hosted-demo fixtures for the default `timezone parser regression` story.
-- A Next.js/Tailwind cockpit shell using local TypeScript data.
-- Trace schema and harness policy primitives.
-- Python eval scorer stubs and a local policy comparison script.
-- A minimal RL-lite reward router.
-- Cursor project rules, skills, MCP config, and PR review guidance.
-- Toy repo fixture for the first bugfix task.
-- Product, UX, eval, and demo-script docs.
+- Static hosted demo: cockpit with **3 task classes** (bugfix, adversarial, multi-agent) and precomputed traces.
+- Deterministic Python scorers, static eval suite + CI gate, and synthetic policy-comparison fixture for the hosted table.
+- Local runner MVP, MCP tools, and Braintrust/Weave **dry-run** export adapters (no live external upload).
+- Cursor rules, skills, MCP config, and product/UX/eval docs.
+
+## Demo handoff
+
+For external reviewers or portfolio walkthroughs:
+
+| Goal | Command / link |
+| --- | --- |
+| Run hosted demo locally | `pnpm install` → `pnpm dev` → open `#cockpit`, `#evals`, `#architecture` |
+| Click-by-click script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
+| Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |
+| Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
+| Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
+| Export shape previews | `pnpm export:braintrust:dry-run` · `pnpm export:weave:dry-run` |
+
+**Hosted page:** replays static fixtures only — no live LLM, runner, or external APIs in the browser.  
+**Eval table metrics:** synthetic portfolio fixture, not production telemetry.  
+**Adapters:** dry-run JSON locally; live Braintrust/W&B upload is not implemented.
 
 ## Fast start
 
 ```bash
 pnpm install
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
 pnpm dev
 ```
 
-Then open the app at the local URL printed by Next.js.
+Open the URL Next.js prints. Default cockpit: bugfix task, baseline policy (rejected).
 
-For Python evals:
+Quick local eval smoke:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
 pnpm validate:fixtures
-pnpm eval
+pnpm eval:ci
 pnpm compare
 ```
 
@@ -46,13 +59,15 @@ Read START_HERE_CURSOR.md, docs/PRODUCT_PLAN.md, docs/UX_PLAN.md, and the Cursor
 ## Core commands
 
 ```bash
-pnpm dev                 # Run hosted demo shell
-pnpm validate:fixtures   # Validate trace fixture shape
-pnpm eval                # Score guarded recovery trace
-pnpm eval:baseline       # Score baseline trace
-pnpm eval:suite          # Score all static traces + table summary
-pnpm eval:ci             # Suite + deterministic gates (nonzero on regression)
-pnpm compare             # Print policy comparison table
+pnpm dev                      # Hosted static demo (Next.js)
+pnpm validate:fixtures        # Trace fixture validation
+pnpm eval:ci                  # Full suite + gates (matches CI)
+pnpm eval:suite               # Same scoring + human-readable table
+pnpm eval                     # Score one trace (guarded date-parser)
+pnpm eval:baseline            # Score one trace (baseline date-parser)
+pnpm compare                  # Synthetic policy comparison table
+pnpm export:braintrust:dry-run
+pnpm export:weave:dry-run
 ```
 
 ## Verification
@@ -82,32 +97,17 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 
 `pnpm test` is an alias for `python -m pytest`. `pnpm typecheck` does not require a prior build. Generated TypeScript metadata (`*.tsbuildinfo`) is gitignored.
 
-### Local CI vs external eval adapters
+### Static fixtures vs live local tools
 
-| Surface | Purpose |
-| --- | --- |
-| `pnpm eval:ci` / GitHub Actions | Deterministic smoke gate: fixture validation, static trace scorers, suite gates, pytest, typecheck, build. |
-| `pnpm export:braintrust:dry-run` | Optional Braintrust export preview (no API key, no network). |
-| `pnpm export:weave:dry-run` | Optional W&B Weave export preview (no API key, no network). |
-| Braintrust / W&B live export (future) | Upload when SDK + API key are configured; not required for CI or local dev. |
+| Surface | Data source | Use |
+| --- | --- | --- |
+| Hosted cockpit / eval table / router | `data/traces/`, `data/evals/` JSON | Demo replay; no network |
+| `pnpm eval` / `pnpm eval:ci` | Same fixtures | **Real** deterministic scorer output |
+| `services/runner/` | Toy repos → `runs/` | Local execution; not used by hosted page |
+| Adapter dry-runs | Fixtures → export JSON | Shape preview only; not external integration |
+| Braintrust / W&B live upload | — | **Not implemented**; adapters return `not_configured` without SDK + API key |
 
-The hosted demo and CI both rely on static fixtures under `data/` only.
-
-**Braintrust dry-run** — previews dataset rows, trace examples, scorer metadata, and suite batch shapes:
-
-```bash
-pnpm export:braintrust:dry-run
-```
-
-Implementation: `packages/evals/adapters/braintrust_adapter.py`. Live upload is intentionally unimplemented in this phase; missing package or API key returns a structured `not_configured` result instead of failing local workflows.
-
-**Weave dry-run** — previews trace/span trees, scorer feedback, and suite evaluation batches:
-
-```bash
-pnpm export:weave:dry-run
-```
-
-Implementation: `packages/evals/adapters/weave_adapter.py`. Requires `weave` or `wandb` plus `WANDB_API_KEY` only for future live export; dry-run needs neither.
+Details: [docs/EVAL_DESIGN.md](docs/EVAL_DESIGN.md) · [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
 
 ## Repo map
 
@@ -116,7 +116,7 @@ apps/web                 Hosted interactive demo shell
 packages/harness         TypeScript trace + policy primitives
 packages/evals           Python deterministic and heuristic scorers
 packages/reward          RL-lite router and reward formula
-services/runner          Future local runner/sandbox service
+services/runner          Local runner MVP (sandbox + trace emission)
 services/trace-store     SQLite trace-store starter
 tools/mcp_server.py      Cursor MCP tool surface
 .cursor                  Cursor rules, skills, MCP config, review rules
