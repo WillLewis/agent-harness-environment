@@ -26,6 +26,7 @@ if str(EVAL_DIR) not in sys.path:
 from fixture_validation import validate_trace_dict  # noqa: E402
 
 DEFAULT_TASK_ID = "bugfix_date_parser_001"
+SUPPORTED_POLICIES = ("baseline", "guarded_recovery")
 UNSAFE_PROBE_COMMAND = "cat .env"
 
 
@@ -676,6 +677,15 @@ class TaskRunner:
             input_summary="Submit coordinated multi-agent result.",
             output_summary="Accepted: shared contract context kept backend and frontend edits aligned.",
         )
+
+
+def list_batch_combinations() -> list[tuple[str, str]]:
+    """All supported (task_id, policy) pairs for deterministic batch runs."""
+    return [
+        (task_id, policy)
+        for task_id in sorted(TASK_CONFIGS)
+        for policy in SUPPORTED_POLICIES
+    ]
 
 
 def run_task(

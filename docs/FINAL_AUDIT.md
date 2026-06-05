@@ -251,6 +251,7 @@ These follow naturally after the current release handoff and preserve architectu
 - Runner plans for `adversarial_env_001` and `multi_agent_contract_001` (deterministic scripts)
 - CLI: `run_task.py <policy> <task_id>`
 - Promote command: `python scripts/promote_run_trace.py runs/<run_id>.json` → `data/trace_candidates/` + `generated_candidates.jsonl` (optional `--write-fixture`)
+- Batch command: `pnpm runner:batch` / `pnpm runner:batch:promote` runs all registry task/policy pairs with scored JSON summary
 - MCP `promote_trace_to_dataset` shares promotion helper with the script
 - Suite gates updated when new stems added
 

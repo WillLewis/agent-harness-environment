@@ -103,6 +103,17 @@ pnpm export:weave:live
 
 Dry-run (`pnpm export:weave:dry-run`) is unchanged. Live mode uploads static trace spans and suite scorer feedback only.
 
+### Run all local runner tasks (optional)
+
+Batch every supported task/policy pair (6 runs: 3 tasks × baseline + guarded_recovery), score each trace, and print a compact JSON summary:
+
+```bash
+pnpm runner:batch
+pnpm runner:batch:promote   # also promote to data/trace_candidates/ (idempotent)
+```
+
+Not part of CI. Use after runner or promotion logic changes to smoke all deterministic paths locally.
+
 ### Promote local runner traces (optional)
 
 After `services/runner/` writes a trace under `runs/`, promote it to a reviewable candidate without touching curated `data/traces/`:

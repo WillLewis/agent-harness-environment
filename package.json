@@ -18,6 +18,8 @@
     "export:braintrust:live": "python packages/evals/adapters/braintrust_adapter.py --live",
     "export:weave:dry-run": "python packages/evals/adapters/weave_adapter.py --dry-run",
     "export:weave:live": "python packages/evals/adapters/weave_adapter.py --live",
+    "runner:batch": "python services/runner/run_batch.py",
+    "runner:batch:promote": "python services/runner/run_batch.py --promote-candidates",
     "compare": "python packages/evals/policy_compare.py data/evals/policy_comparison.json",
     "router": "python packages/reward/bandit_router.py data/router_decisions.json"
   },
