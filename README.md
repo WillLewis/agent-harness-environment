@@ -2,6 +2,8 @@
 
 Agent Harness Environment is a flight recorder, eval harness, and policy-comparison surface for coding agents. This starter repo is designed to open directly in Cursor and give the agent enough structure to start building without repeatedly re-explaining the product.
 
+**Documentation map:** [docs/INDEX.md](docs/INDEX.md) — demo path, verification, eval design, architecture, runner/MCP, backlog.
+
 ## What is included
 
 - Static hosted demo: cockpit with **3 task classes** (bugfix, adversarial, multi-agent) and precomputed traces.
@@ -53,12 +55,13 @@ pnpm compare
 
 ## Cursor workflow
 
-Open this folder in Cursor and start with `START_HERE_CURSOR.md`. The repository intentionally includes both `.cursor/rules/*.mdc` and `.cursor/skills/*/SKILL.md` because the product depends on repeatable agent behavior, not one-off prompting.
+Open this folder in Cursor and start with [START_HERE_CURSOR.md](START_HERE_CURSOR.md) and [docs/INDEX.md](docs/INDEX.md). The repository includes `.cursor/rules/*.mdc` and `.cursor/skills/*/SKILL.md` for repeatable agent behavior.
 
 Suggested first Cursor prompt:
 
 ```text
-Read START_HERE_CURSOR.md, docs/PRODUCT_PLAN.md, docs/UX_PLAN.md, and the Cursor rules. Then implement the next smallest slice: make the cockpit policy toggle update trace, metrics, terminal output, diff, and verdict together. Keep data static and deterministic.
+Read docs/INDEX.md, docs/FINAL_AUDIT.md (backlog §12), and .cursor/rules/architecture.mdc.
+Pick one backlog item and implement the smallest vertical slice with tests. Keep the hosted demo static and CI deterministic.
 ```
 
 ## Core commands
@@ -167,7 +170,7 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | Braintrust live upload | `pnpm export:braintrust:live` | Opt-in; static fixtures only; not in CI |
 | W&B Weave live upload | `pnpm export:weave:live` | Opt-in; static traces only; not in CI |
 
-Details: [docs/EVAL_DESIGN.md](docs/EVAL_DESIGN.md) · [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
+Details: [docs/INDEX.md](docs/INDEX.md) · [docs/EVAL_DESIGN.md](docs/EVAL_DESIGN.md) · [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
 
 ## Repo map
 

@@ -1,5 +1,7 @@
 # Release Checklist
 
+**Doc map:** [INDEX.md](./INDEX.md) · **Audit + backlog:** [FINAL_AUDIT.md](./FINAL_AUDIT.md)
+
 Use this before tagging a release, opening a portfolio PR, or handing the repo to an external reviewer.
 
 ---
@@ -27,7 +29,7 @@ pnpm export:braintrust:dry-run
 pnpm export:weave:dry-run
 ```
 
-**Expect:** all commands exit 0; `pnpm eval:ci` prints `"gates_ok":true`; pytest reports 87+ tests passing.
+**Expect:** all commands exit 0; `pnpm eval:ci` prints `"gates_ok":true`; pytest reports all tests passing (110+ at last green run).
 
 ---
 

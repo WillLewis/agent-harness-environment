@@ -1,5 +1,7 @@
 # Agent Harness Environment — Hosted UX Plan
 
+> **Planning doc:** Interaction and IA specification. Core cockpit, eval table, and failure-cluster flows are **implemented** in `apps/web/`; use [INDEX.md](./INDEX.md) for reviewer paths and [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for the live walkthrough.
+
 ## 1. UX summary
 
 This UX plan defines the hosted and native product experience for **Agent Harness Environment**. It is modular from the main product plan so the product architecture, eval strategy, and build phases can evolve independently from the visual and interaction design.

@@ -1,5 +1,7 @@
 # Cursor Prompt Pack
 
+> **Historical:** One-shot prompts from early build phases (cockpit, runner MVP, MCP). The repo implements these slices today. For current onboarding and backlog, use [INDEX.md](./INDEX.md), [START_HERE_CURSOR.md](../START_HERE_CURSOR.md), and [FINAL_AUDIT.md](./FINAL_AUDIT.md) §12.
+
 ## Build hosted cockpit
 
 ```text

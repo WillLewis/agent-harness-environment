@@ -1,5 +1,7 @@
 # Final Release Audit
 
+> **Freshness:** Written at Phase 9a handoff. Repo has since reached **Phase 13a** (runner 3 tasks, batch, promote, live export opt-in, metric drift audit). §2 capabilities and §4 limitations are **partially historical** — use [INDEX.md](./INDEX.md) and [README.md](../README.md) for current commands. **§12 backlog and risk sections remain the primary next-work source.**
+
 **Audit date:** 2026-06-05  
 **Scope:** Agent Harness Environment starter repo at release handoff (Phases 0–9a complete).  
 **Method:** Static review of `data/`, `packages/evals/`, `apps/web/`, `services/runner/`, `tools/`, `.github/workflows/ci.yml`, and handoff docs. No product code changed for this document.
@@ -285,11 +287,15 @@ These follow naturally after the current release handoff and preserve architectu
 
 ## 15. Document index
 
+**Canonical map:** [INDEX.md](./INDEX.md) (grouped by reviewer path, evals, architecture, runner/MCP, backlog).
+
 | Document | Use |
 | --- | --- |
-| [README.md](../README.md) | Entry point |
+| [INDEX.md](./INDEX.md) | **Start here** — full documentation map |
+| [README.md](../README.md) | Entry point + commands |
+| [START_HERE_CURSOR.md](../START_HERE_CURSOR.md) | Next coding agent onboarding |
 | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Hosted click path |
 | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | Pre-ship gates |
 | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | Scorers and CI contract |
-| [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Long-range vision |
+| [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Long-range vision (planning) |
 | **This file** | Audit + backlog |

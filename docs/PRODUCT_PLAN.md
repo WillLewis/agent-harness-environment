@@ -1,5 +1,7 @@
 # Agent Harness Environment — Product & Build Plan
 
+> **Planning doc:** Long-range product vision and phased roadmap. The hosted demo, eval suite, runner, and MCP surfaces described here are **partially implemented** — see [INDEX.md](./INDEX.md) and [README.md](../README.md) for what exists today.
+
 ## 1. Product summary
 
 **Agent Harness Environment** is a production-minded evaluation and observability environment for coding agents. It runs agents against realistic software tasks, captures every planning/tool/file/terminal/edit/test step as a trace, scores the run with deterministic and LLM-assisted evaluators, and shows which harness policies improve reliability, recovery, safety, and developer trust.

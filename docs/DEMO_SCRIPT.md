@@ -1,5 +1,7 @@
 # Demo Script
 
+**Doc map:** [INDEX.md](./INDEX.md) · **Verification:** [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)
+
 Use this walkthrough for a 5–10 minute hosted demo. The page is **fully static**: it replays precomputed JSON from `data/traces/` and `data/evals/`. Nothing in the browser calls a live LLM, the local runner, MCP, or external eval APIs.
 
 **Before you start:** `pnpm install`, `pip install -r requirements-dev.txt`, `pnpm dev`, then open the URL Next.js prints (often `http://localhost:3000`).
