@@ -1,5 +1,6 @@
 import { Cockpit } from '../components/Cockpit';
 import { EvalTable } from '../components/EvalTable';
+import { ImplementationEvidence } from '../components/ImplementationEvidence';
 import { routerDecision } from '../lib/demoData';
 
 const protocolCards = [
@@ -26,6 +27,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="#cockpit" className="focus-ring rounded-full bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">Replay the failure</a>
               <a href="#evals" className="focus-ring rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white">View eval report</a>
+              <a href="#architecture" className="focus-ring rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white">Implementation map</a>
             </div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
@@ -80,17 +82,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8">
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">Cursor-native build evidence</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">The workflow is encoded into the repo.</h2>
-          <div className="mt-6 grid gap-3 font-mono text-sm text-slate-300 md:grid-cols-2 lg:grid-cols-3">
-            {['.cursor/rules', '.cursor/skills', '.cursor/mcp.json', '.cursor/BUGBOT.md', 'packages/evals', 'packages/harness'].map((item) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-black/20 p-4">{item}</div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ImplementationEvidence />
     </main>
   );
 }
