@@ -8,6 +8,7 @@
     "build": "pnpm --filter @ahe/web build",
     "lint": "pnpm --filter @ahe/web lint",
     "typecheck": "pnpm --filter @ahe/web typecheck",
+    "test": "python -m pytest",
     "validate:fixtures": "python scripts/validate_fixtures.py",
     "eval": "python packages/evals/run_eval.py data/traces/guarded_recovery_date_parser.json",
     "eval:baseline": "python packages/evals/run_eval.py data/traces/baseline_date_parser.json",

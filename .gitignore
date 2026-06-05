@@ -5,7 +5,9 @@ dist
 coverage
 .venv
 __pycache__
+.pytest_cache
 *.pyc
+*.tsbuildinfo
 .env
 .env.local
 .env.*.local

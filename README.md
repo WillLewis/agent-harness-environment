@@ -49,8 +49,26 @@ Read START_HERE_CURSOR.md, docs/PRODUCT_PLAN.md, docs/UX_PLAN.md, and the Cursor
 pnpm dev                 # Run hosted demo shell
 pnpm validate:fixtures   # Validate trace fixture shape
 pnpm eval                # Score guarded recovery trace
+pnpm eval:baseline       # Score baseline trace
 pnpm compare             # Print policy comparison table
 ```
+
+## Verification
+
+Run from the repo root after `pnpm install` and `pip install -r requirements-dev.txt`:
+
+```bash
+pnpm validate:fixtures
+pnpm eval:baseline
+pnpm eval
+pnpm compare
+python -m pytest
+pnpm test                 # same as pytest
+pnpm typecheck
+pnpm build
+```
+
+`pnpm typecheck` does not require a prior build. Generated TypeScript metadata (`*.tsbuildinfo`) is gitignored.
 
 ## Repo map
 

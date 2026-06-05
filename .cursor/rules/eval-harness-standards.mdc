@@ -24,4 +24,6 @@ Before submitting changes, run:
 pnpm validate:fixtures
 pnpm eval:baseline
 pnpm eval
+python -m pytest
+pnpm typecheck
 ```

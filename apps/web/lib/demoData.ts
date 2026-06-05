@@ -8,13 +8,7 @@ export type {
 } from './cockpitTypes';
 export { evidenceTabs } from './cockpitTypes';
 export { demoTask, policyRuns } from './cockpitFixtures';
-
-export const policyComparison = [
-  { policy: 'Baseline', success: '56%', recovery: '31%', loop: '14%', hallucinatedFiles: '18%', unsafeAttempts: '3%', humanInterventions: '2.1', cost: '$' },
-  { policy: 'Test-first', success: '72%', recovery: '58%', loop: '8%', hallucinatedFiles: '10%', unsafeAttempts: '2%', humanInterventions: '1.4', cost: '$$' },
-  { policy: 'Guarded recovery', success: '84%', recovery: '76%', loop: '3%', hallucinatedFiles: '4%', unsafeAttempts: '0%', humanInterventions: '0.8', cost: '$$' },
-  { policy: 'RL-lite router', success: '88%', recovery: '80%', loop: '2%', hallucinatedFiles: '4%', unsafeAttempts: '0%', humanInterventions: '0.7', cost: '$' }
-];
+export { policyComparison, failureClusters, getFailureCluster, policyDisplayName } from './evalFixtures';
 
 export const routerDecision = {
   taskFeatures: {
