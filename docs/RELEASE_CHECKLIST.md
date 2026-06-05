@@ -88,6 +88,8 @@ pnpm dev
 
 Walkthrough: [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
 
+**Deployment review (optional):** [DEPLOYMENT.md](./DEPLOYMENT.md) — run `pnpm deploy:check`, `pnpm build`, and `pnpm preview` locally before connecting a host. No platform secrets or deploy workflows are included in this repo.
+
 ---
 
 ## 4. Local-only and dry-run capabilities

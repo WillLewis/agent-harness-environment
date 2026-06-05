@@ -11,6 +11,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | I want to… | Read first | Then run |
 | --- | --- | --- |
 | **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → `#cockpit`, `#evals`, `#architecture` |
+| **Deploy hosted demo (review)** | [DEPLOYMENT.md](./DEPLOYMENT.md) | `pnpm deploy:check` → `pnpm build` → `pnpm preview` |
 | **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | `pnpm repo:status`, CI contract in README |
 | **Understand evals vs hosted metrics** | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | `pnpm eval:ci`, `python packages/evals/audit_metric_drift.py --format table` |
 | **Pick next implementation work** | [FINAL_AUDIT.md](./FINAL_AUDIT.md) §12–14 | One P1/P2 item + matching `.cursor/skills/` |
@@ -26,6 +27,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | --- | --- | --- | --- |
 | [README.md](../README.md) | Repo entry, fast start, command cheat sheet | First open; clone setup | `pnpm install`, `pnpm dev`, `pnpm eval:ci` |
 | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Click-by-click hosted walkthrough | Before a live demo or video | `data/traces/`, `data/evals/`, `#cockpit` |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Hosted demo deploy settings + smoke | Before Vercel/Netlify setup | `pnpm deploy:check`, `pnpm build`, `pnpm preview` |
 | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | Pre-release / portfolio verification | Before tag, PR, or external link | Full CI contract; optional `pnpm eval:suite` |
 
 ### Local verification / evals

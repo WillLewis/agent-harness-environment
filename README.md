@@ -18,6 +18,7 @@ For external reviewers or portfolio walkthroughs:
 | Goal | Command / link |
 | --- | --- |
 | Run hosted demo locally | `pnpm install` → `pnpm dev` → open `#cockpit`, `#evals`, `#architecture` |
+| Deploy hosted demo (review) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel recommended; `pnpm deploy:check` then `pnpm build` |
 | Click-by-click script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
@@ -77,6 +78,8 @@ pnpm eval:baseline            # Score one trace (baseline date-parser)
 pnpm compare                  # Synthetic policy comparison table
 pnpm eval:audit               # Metric drift report (hosted vs trace scorers)
 pnpm repo:status              # Local generated-artifact hygiene (read-only)
+pnpm deploy:check             # Hosted demo deployment readiness (local)
+pnpm preview                  # Serve production build locally (after pnpm build)
 pnpm export:braintrust:dry-run
 pnpm export:braintrust:live       # optional; requires braintrust + BRAINTRUST_API_KEY
 pnpm export:weave:dry-run

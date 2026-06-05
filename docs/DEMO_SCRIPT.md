@@ -6,7 +6,7 @@ Use this walkthrough for a 5–10 minute hosted demo. The page is **fully static
 
 **Before you start:** `pnpm install`, `pip install -r requirements-dev.txt`, `pnpm dev`, then open the URL Next.js prints (often `http://localhost:3000`).
 
-For a pre-demo sanity check, run `pnpm eval:ci` and `pnpm build` (see [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)).
+For a pre-demo sanity check, run `pnpm eval:ci` and `pnpm build` (see [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)). For deployment settings, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
 ---
 
