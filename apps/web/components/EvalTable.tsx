@@ -145,7 +145,9 @@ export function EvalTable() {
 
         <div className="border-t border-white/10 px-5 py-4 text-xs text-slate-500">
           Click baseline loop or unsafe-attempt metrics to inspect failure clusters, detection rules, and dataset
-          candidates.
+          candidates. For measured scores on curated trace fixtures, run{' '}
+          <code className="text-slate-400">pnpm eval:suite</code> or{' '}
+          <code className="text-slate-400">pnpm eval:ci</code> locally — not this synthetic table.
         </div>
       </div>
 

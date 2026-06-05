@@ -94,7 +94,7 @@ Do **not** state or imply:
 
 | Risk | Severity | Notes |
 | --- | --- | --- |
-| **Dual surfaces drift** | Medium | Hosted metrics (`cockpitFixtures.ts` static eval numbers) can diverge from Python scorers if fixtures update without updating TS maps. |
+| **Dual surfaces drift** | Medium | Hosted metrics (`cockpitFixtures.ts`, `policy_comparison.json`) can diverge from Python scorers; run `python packages/evals/audit_metric_drift.py` to audit. |
 | **Runner vs eval split** | Medium | Runner emits traces under `runs/`; hosted uses `data/traces/`. No automated promote path from run → fixture. |
 | **Policy catalog mismatch** | Low | `data/policies.json` lists 5 policies; cockpit uses 3 (+ steering). Eval table shows 5; runner knows 2 plans. |
 | **Trace store** | Low | `services/trace-store` starter exists but is not on critical path for demo or CI. |

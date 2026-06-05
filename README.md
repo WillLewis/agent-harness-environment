@@ -20,6 +20,7 @@ For external reviewers or portfolio walkthroughs:
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
 | Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |
+| Audit metric source drift | `python packages/evals/audit_metric_drift.py` |
 | Score one trace locally | `pnpm eval` (guarded) · `pnpm eval:baseline` |
 | Local runner (optional) | `python services/runner/run_task.py guarded_recovery` |
 | Promote runner trace to candidate | `python scripts/promote_run_trace.py runs/<run_id>.json` |
@@ -159,6 +160,8 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | --- | --- | --- |
 | Hosted cockpit / eval table / router | `data/traces/`, `data/evals/` JSON | Demo replay; no network |
 | `pnpm eval` / `pnpm eval:ci` | Same fixtures | **Real** deterministic scorer output |
+| Hosted eval table (`#evals`) | `data/evals/policy_comparison.json` | **Synthetic** portfolio fixture — not `eval:ci` output |
+| `python …/audit_metric_drift.py` | Compares sources above | Drift/ambiguity report; does not change fixtures |
 | `services/runner/` | Toy repos → `runs/` | Local execution; not used by hosted page |
 | Adapter dry-runs | Fixtures → export JSON | Shape preview; no network |
 | Braintrust live upload | `pnpm export:braintrust:live` | Opt-in; static fixtures only; not in CI |

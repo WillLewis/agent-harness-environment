@@ -55,6 +55,17 @@ Gate contract (`packages/evals/suite_gates.py`):
 
 Per-fixture expectations are keyed by trace filename stem in `FIXTURE_EXPECTATIONS`. Thresholds are configurable via CLI flags on `run_suite.py`.
 
+### Metric sources (avoid drift confusion)
+
+| Surface | Command / path | Classification | Claims |
+| --- | --- | --- | --- |
+| Hosted eval table | `data/evals/policy_comparison.json` | `synthetic_benchmark_fixture` | Portfolio-style **synthetic** percentages (32 fictional tasks); not measured from traces |
+| Curated trace gates | `pnpm eval:ci` / `pnpm eval:suite` | `deterministic_trace_score` | **Real** scorer output on 7 fixtures in `data/traces/` |
+| Cockpit task metrics | `apps/web/lib/cockpitFixtures.ts` | static per-task maps | Demo replay numbers aligned to trace stories; not the eval table |
+| Local runner batch | `pnpm runner:batch` → `runs/` | `runner_generated_local_trace` | Generated traces; optional promote to `data/trace_candidates/` |
+
+Run `python packages/evals/audit_metric_drift.py` (optional `--format table`) to compare hosted synthetic policy rows against suite scorer rollups and flag ambiguity (policies without trace fixtures, scorers absent from hosted columns, headline metric divergence).
+
 ### GitHub Actions
 
 `.github/workflows/ci.yml` runs `pnpm eval:ci` plus fixture validation, single-trace evals, policy compare, pytest, typecheck, and build. It does not call Braintrust, W&B, or live model APIs.
