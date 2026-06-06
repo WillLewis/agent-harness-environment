@@ -35,7 +35,7 @@ export function TakeawaysSection() {
           <li key={item.chapter}>
             <SurfaceCard className="h-full">
               <p className="section-chapter">
-                <span className="text-accent-muted">{item.chapter}</span>
+                <span className="text-text-muted">{item.chapter}</span>
               </p>
               <p className="mt-2 text-sm leading-relaxed text-text-muted">{item.text}</p>
             </SurfaceCard>

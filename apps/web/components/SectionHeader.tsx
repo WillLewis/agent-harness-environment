@@ -22,8 +22,8 @@ export function SectionHeader({
       <p className="section-chapter">
         {chapter ? (
           <>
-            <span className="text-accent-muted">{chapter}</span>
-            <span className="mx-2 text-border">—</span>
+            <span className="text-text-muted">{chapter}</span>
+            <span className="mx-2 text-text-muted">—</span>
           </>
         ) : null}
         <span className="section-label">{label}</span>

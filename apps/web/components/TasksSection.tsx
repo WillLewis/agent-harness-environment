@@ -52,8 +52,8 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
     <section id="tasks" className="border-b border-border-subtle" aria-label="Task stories">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
         <p className="section-chapter">
-          <span className="text-accent-muted">04</span>
-          <span className="mx-2 text-border">—</span>
+          <span className="text-text-muted">04</span>
+          <span className="mx-2 text-text-muted">—</span>
           <span className="section-label">tasks</span>
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
@@ -98,7 +98,7 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
                       </span>
                     </div>
                     {isActive ? (
-                      <span className="rounded-md border border-success/30 bg-success/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-success">
+                      <span className="rounded-md border border-success/30 bg-success/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-success">
                         in cockpit
                       </span>
                     ) : null}
@@ -112,7 +112,7 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
                       {task.tags.map((tag) => (
                         <code
                           key={tag}
-                          className="rounded border border-border-subtle bg-surface-2/60 px-1.5 py-0.5 text-[10px] text-text-faint"
+                          className="rounded border border-border-subtle bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-text-muted"
                         >
                           {tag}
                         </code>
@@ -186,7 +186,7 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
                           {task.expectedFiles.map((file) => (
                             <code
                               key={file}
-                              className="rounded border border-border-subtle bg-surface-2/60 px-1.5 py-0.5 text-[10px] text-text-muted"
+                              className="rounded border border-border-subtle bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-text/80"
                             >
                               {file}
                             </code>

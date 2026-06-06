@@ -47,6 +47,43 @@ pass — no runner, eval, scorer, fixture, trace-semantics, or CI changes.
 
 **Files touched in this pass:** `apps/web/app/page.tsx`, `apps/web/app/globals.css`, `apps/web/app/layout.tsx` (body bg class), `apps/web/components/SiteNav.tsx`, `docs/DESIGN_MIGRATION_LOVABLE.md`. Cockpit / eval table / taxonomy / drawer were reviewed and already aligned with the token system, so were left functionally and stylistically intact.
 
+### Follow-up parity round (color + chip polish)
+
+A second side-by-side review against Lovable surfaced a few residual tone/format gaps. Still visual/format-only — no runner, eval, scorer, fixture, trace-semantics, or CI changes.
+
+| # | Gap (before) | Fix (after) |
+| --- | --- | --- |
+| 1 | Section eyebrows (`NN — LABEL`) rendered in cyan `accent-muted` and felt overused | Eyebrow number, dash, and label now use neutral `text-muted` (oklch 0.70, == Lovable `muted-foreground`). Applied to `.section-label` and the inline eyebrows in `SectionHeader`, `TasksSection`, `Cockpit`, `EvalTable`, and the `TakeawaysSection` card numbers. |
+| 2 | Cockpit metric was labelled `loop` and shown as a raw score | Now `loop rate`, expressed as a percent (`Math.round(loopScore * 100)%`). For consistency, `task success` and `recovery` are also percents now (Lovable formats `task_success`/`loop_rate` with `pct()`); count metrics (`human`/`unsafe`) stay raw. |
+| 3 | Tasks `in cockpit` badge padding drifted from shadcn (`px-2`) | Aligned to `px-2.5`; the active-card outline (`ring-1 ring-success/50 border-success/40`) already matched the Lovable reference. |
+| 4 | Vocabulary event chips used `bg-surface-2/60`, but our `surface-2` token bakes in `0.7` alpha so the dotted page showed through (chips looked washed out) | Event chips now use the solid `bg-surface-2` token; same fix applied to the Tasks tag + expected-file chips so all chips read as clean dark pills like Lovable. |
+
+**Files touched in this round:** `apps/web/app/globals.css`, `apps/web/app/page.tsx`, `apps/web/components/SectionHeader.tsx`, `apps/web/components/TasksSection.tsx`, `apps/web/components/Cockpit.tsx`, `apps/web/components/EvalTable.tsx`, `apps/web/components/TakeawaysSection.tsx`, `docs/DESIGN_MIGRATION_LOVABLE.md`. Verified with `typecheck` + `build` + hosted smoke (11/11) and browser QA at 1440×1100.
+
+### Root-cause round (Tailwind opacity modifiers were silently dropped)
+
+A computed-style diff against Lovable revealed why several surfaces looked "flat": Tailwind
+was **not generating any opacity-modified utilities** for our CSS-variable colors. Colors were
+registered as bare `var(--color-…)` strings, so `bg-success/15`, `border-success/40`,
+`ring-success/50`, `bg-surface/50`, `bg-surface-2/60`, `text-text/80`, etc. produced **no rule at
+all** and fell back to transparent / browser defaults. Concretely, the active Tasks card had a
+**gray-200 border + blue default ring** (not green) and the `in cockpit` badge / router `selected`
+box had **transparent** fills.
+
+**Fix:** `apps/web/tailwind.config.ts` now wraps every CSS-variable color in an `alphaVar()`
+resolver that returns `var(--x)` when no opacity modifier is used and
+`color-mix(in oklab, var(--x) calc(<a> * 100%), transparent)` when one is. This restores the
+intended tints app-wide (Tasks active ring/badge, router `selected` box, cockpit verdict + event
+chips, premise/surface fills, warn/danger accents) — matching the Lovable reference, which used
+the same `color-mix` approach via arbitrary `/<n>` values.
+
+| Component | Lovable parity change |
+| --- | --- |
+| Tasks active card (screenshot 1) | Green ring (`ring-success/50`) + green border (`border-success/40`) + green-tinted `in cockpit` badge (`bg-success/15 border-success/30`) now render; badge padding aligned to `px-2.5`. |
+| Router inputs panel (screenshot 2) | Reduced from 6 to the **4 most decision-relevant features** (`task type`, `repo area`, `risk level`, `failure pattern`; drops `expected_files_count` and `initial_uncertainty`). Rows restyled to `text-sm` (muted label / mono value), and the `selected` box now shows its green tint + border; verbose `why` line removed to match Lovable's clean box. |
+
+**Files touched:** `apps/web/tailwind.config.ts`, `apps/web/app/page.tsx`, `docs/DESIGN_MIGRATION_LOVABLE.md`. Re-verified `typecheck` + `build` + hosted smoke (11/11) and browser QA (Tasks / router / cockpit / taxonomy / hero) at 1440×1100 against Lovable.
+
 ---
 
 ## Migration completion summary

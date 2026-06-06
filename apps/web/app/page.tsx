@@ -45,6 +45,16 @@ const protocolCards = [
   ['unsafe_tool_attempt', 'A blocked shell, file, network, or secret-access action.']
 ] as const;
 
+// The router fixture exposes six task features; the panel shows the four most
+// decision-relevant ones (drops expected_files_count and initial_uncertainty).
+const routerInputKeys = ['task_type', 'repo_area', 'risk_level', 'known_failure_pattern'] as const;
+const routerInputLabels: Record<string, string> = {
+  task_type: 'task type',
+  repo_area: 'repo area',
+  risk_level: 'risk level',
+  known_failure_pattern: 'failure pattern'
+};
+
 const bugfixTask = getCockpitTask('bugfix_date_parser_001');
 const heroBaseline = bugfixTask.policies.baseline!;
 const heroGuarded = bugfixTask.policies.guarded_recovery!;
@@ -164,7 +174,7 @@ export default function Home() {
               {protocolEvents.map((event) => (
                 <code
                   key={event}
-                  className="rounded-md border border-border-subtle bg-surface-2/60 px-2 py-1 font-mono text-[11px] text-text"
+                  className="rounded-md border border-border-subtle bg-surface-2 px-2 py-1 font-mono text-[11px] text-text"
                 >
                   {event}
                 </code>
@@ -218,26 +228,25 @@ export default function Home() {
         />
         <div className="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
           <SurfaceCard className="flex flex-col p-4 sm:p-5">
-            <div className="font-mono text-[11px] uppercase tracking-wider text-text-faint">inputs</div>
-            <dl className="mt-3 space-y-2">
-              {Object.entries(routerDecision.taskFeatures).map(([key, value]) => (
-                <div key={key} className="flex items-baseline justify-between gap-4 text-xs">
-                  <dt className="min-w-0 break-words text-text-muted">{key.replace(/_/g, ' ')}</dt>
-                  <dd className="shrink-0 text-right font-mono text-text">{value}</dd>
-                </div>
-              ))}
+            <div className="font-mono text-[10px] uppercase tracking-widest text-text-muted">inputs</div>
+            <dl className="mt-3 space-y-2.5 text-sm">
+              {routerInputKeys
+                .filter((key) => key in routerDecision.taskFeatures)
+                .map((key) => (
+                  <div key={key} className="flex items-baseline justify-between gap-3">
+                    <dt className="text-text-muted">{routerInputLabels[key] ?? key.replace(/_/g, ' ')}</dt>
+                    <dd className="text-right font-mono text-text">{routerDecision.taskFeatures[key]}</dd>
+                  </div>
+                ))}
             </dl>
             <div className="mt-4 rounded-md border border-success/40 bg-success/10 p-3">
-              <div className="font-mono text-[10px] uppercase tracking-wider text-success">selected</div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-success">selected</div>
               <div className="mt-1 font-mono text-sm text-text">{routerDecision.selectedPolicy}</div>
-              <p className="mt-2 text-xs leading-relaxed text-text-muted [overflow-wrap:anywhere]">
-                {routerDecision.why}
-              </p>
             </div>
           </SurfaceCard>
 
           <SurfaceCard className="p-4 sm:p-5">
-            <div className="mb-4 font-mono text-[11px] uppercase tracking-wider text-text-faint">
+            <div className="mb-4 font-mono text-[10px] uppercase tracking-widest text-text-muted">
               expected reward by policy
             </div>
             <div className="space-y-3">

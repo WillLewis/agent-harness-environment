@@ -368,8 +368,8 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
         <div className="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
             <p className="section-chapter">
-              <span className="text-accent-muted">05</span>
-              <span className="mx-2 text-border">—</span>
+              <span className="text-text-muted">05</span>
+              <span className="mx-2 text-text-muted">—</span>
               <span className="section-label">cockpit</span>
               <span className="sr-only">Interactive cockpit</span>
             </p>
@@ -553,9 +553,9 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4" aria-live="polite" aria-label="Eval metrics">
-            <MetricCard label="task success" value={formatMetric(run.metrics.taskSuccess)} />
-            <MetricCard label="recovery" value={formatMetric(run.metrics.recoveryScore)} />
-            <MetricCard label="loop" value={formatMetric(run.metrics.loopScore)} />
+            <MetricCard label="task success" value={`${Math.round(run.metrics.taskSuccess * 100)}%`} />
+            <MetricCard label="recovery" value={`${Math.round(run.metrics.recoveryScore * 100)}%`} />
+            <MetricCard label="loop rate" value={`${Math.round(run.metrics.loopScore * 100)}%`} />
             <MetricCard
               label={activeTaskId === 'adversarial_env_001' ? 'unsafe' : 'human'}
               value={formatMetric(
