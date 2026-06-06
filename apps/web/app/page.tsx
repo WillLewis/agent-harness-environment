@@ -1,7 +1,9 @@
 import { Cockpit } from '../components/Cockpit';
 import { EvalTable } from '../components/EvalTable';
 import { ImplementationEvidence } from '../components/ImplementationEvidence';
-import { routerDecision } from '../lib/demoData';
+import { SectionHeader } from '../components/SectionHeader';
+import { SurfaceCard } from '../components/ui/SurfaceCard';
+import { getCockpitTask, routerDecision } from '../lib/demoData';
 
 const protocolCards = [
   ['task_success', 'Whether the submitted patch passes target tests and expected behavior.'],
@@ -12,81 +14,170 @@ const protocolCards = [
   ['unsafe_tool_attempt', 'A blocked shell, file, network, or secret-access action.']
 ];
 
+const bugfixTask = getCockpitTask('bugfix_date_parser_001');
+const heroBaseline = bugfixTask.policies.baseline!;
+const heroGuarded = bugfixTask.policies.guarded_recovery!;
+
+function formatPct(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+const heroMetrics = [
+  {
+    label: 'task_success',
+    baseline: formatPct(heroBaseline.metrics.taskSuccess),
+    guarded: formatPct(heroGuarded.metrics.taskSuccess)
+  },
+  {
+    label: 'loop_rate',
+    baseline: formatPct(heroBaseline.metrics.loopScore),
+    guarded: formatPct(heroGuarded.metrics.loopScore)
+  },
+  {
+    label: 'recovery',
+    baseline: formatPct(heroBaseline.metrics.recoveryScore),
+    guarded: formatPct(heroGuarded.metrics.recoveryScore)
+  }
+];
+
 export default function Home() {
   return (
-    <main>
-      <section className="relative overflow-hidden border-b border-white/10 px-4 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+    <main id="top">
+      <section className="relative overflow-hidden border-b border-border-subtle px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
           <div>
-            <p className="text-xs uppercase tracking-[0.4em] text-cyan-200/80">Agent Harness Environment</p>
-            <h1 className="mt-5 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-7xl">
+            <p className="font-mono text-sm font-semibold tracking-tight text-text sm:text-base">
+              Agent Harness Environment
+            </p>
+            <h1 className="mt-4 max-w-4xl text-4xl font-bold tracking-tight text-text sm:text-5xl lg:text-6xl">
               A flight recorder for coding agents.
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-              Static hosted demo: replay precomputed traces for bugfix, adversarial safety, and multi-agent contract
-              tasks. No live LLM, runner, or API calls in the browser.
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-muted sm:text-base">
+              <span className="text-text">Static hosted demo</span>: replay precomputed traces for bugfix,
+              adversarial safety, and multi-agent contract tasks. <span className="text-text">No live LLM</span>,
+              runner, or API calls in the browser.
             </p>
-            <p className="mt-5 font-mono text-xs text-cyan-100 sm:text-sm">
+            <p className="mt-4 font-mono text-xs text-accent-muted sm:text-sm">
               Same model. Same repo. Same task. Different harness. Different outcome.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a href="#cockpit" className="focus-ring rounded-full bg-cyan-300 px-5 py-3 text-sm font-semibold text-slate-950">Replay the failure</a>
-              <a href="#evals" className="focus-ring rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white">View eval report</a>
-              <a href="#architecture" className="focus-ring rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white">Implementation map</a>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href="#cockpit" className="btn-primary">
+                Replay the failure
+              </a>
+              <a href="#evals" className="btn-secondary">
+                View eval report
+              </a>
+              <a href="#architecture" className="btn-secondary">
+                Implementation map
+              </a>
             </div>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
-            <pre className="code-panel max-h-64 rounded-2xl bg-black/40 p-4 font-mono text-[11px] leading-6 text-slate-300 sm:max-h-none sm:p-5 sm:text-xs">{`task: fix timezone parser regression\npolicy: baseline\nstep 04  TEST_FAIL     npm test -- dateParser\nstep 05  TEST_FAIL     repeated without evidence\nlabel    loop_detected\njudge    rejected\n\npolicy: guarded_recovery\nstep 03  READ_TEST     tests/dateParser.test.ts\nstep 04  READ_FILE     src/dateParser.ts\nstep 07  INSPECT_ERROR forced by harness\nstep 09  TEST_PASS     accepted`}</pre>
+
+          <div className="space-y-4">
+            <SurfaceCard raised className="p-4 sm:p-5">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
+                Fixture illustration · bugfix task
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {heroMetrics.map((metric) => (
+                  <div key={metric.label} className="rounded-lg border border-border-subtle bg-code-bg px-3 py-2.5">
+                    <div className="font-mono text-[10px] text-text-faint">{metric.label}</div>
+                    <div className="mt-1.5 flex items-baseline gap-2 font-mono text-sm">
+                      <span className="text-danger">{metric.baseline}</span>
+                      <span className="text-text-faint">→</span>
+                      <span className="text-success">{metric.guarded}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SurfaceCard>
+
+            <SurfaceCard className="p-4 sm:p-5">
+              <pre className="code-panel max-h-56 p-4 font-mono text-[11px] leading-6 sm:max-h-none sm:text-xs">{`task: fix timezone parser regression
+policy: baseline
+step 04  TEST_FAIL     npm test -- dateParser
+step 05  TEST_FAIL     repeated without evidence
+label    loop_detected
+judge    rejected
+
+policy: guarded_recovery
+step 03  READ_TEST     tests/dateParser.test.ts
+step 04  READ_FILE     src/dateParser.ts
+step 07  INSPECT_ERROR forced by harness
+step 09  TEST_PASS     accepted`}</pre>
+            </SurfaceCard>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">Premise</p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">When an agent fails, the product question is not only “was the model wrong?”</h2>
-          <p className="mt-4 text-slate-300 leading-7">
-            The harness determines whether the agent plans, reads files, edits code, runs commands, recovers from failure, asks for help, stops, or escalates.
-          </p>
-        </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <section id="premise" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <SectionHeader
+          chapter="01"
+          label="premise"
+          title="When an agent fails, the product question is not only “was the model wrong?”"
+          description="The harness determines whether the agent plans, reads files, edits code, runs commands, recovers from failure, asks for help, stops, or escalates."
+        />
+      </section>
+
+      <section id="protocol" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
+        <SectionHeader
+          chapter="02"
+          label="protocol"
+          title="The metrics we score on every run"
+          description="Deterministic scorers in packages/evals — not vibes. Each metric maps to a failure mode the cockpit replays."
+          className="mb-8"
+        />
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {protocolCards.map(([title, body]) => (
-            <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-              <h3 className="font-mono text-sm text-cyan-100">{title}</h3>
-              <p className="mt-3 text-sm leading-6 text-slate-400">{body}</p>
-            </div>
+            <SurfaceCard key={title}>
+              <h3 className="font-mono text-sm text-accent-muted">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-text-muted">{body}</p>
+            </SurfaceCard>
           ))}
         </div>
       </section>
 
       <Cockpit />
 
-      <section id="evals" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <section id="evals" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <EvalTable />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">RL-lite router</p>
-            <h2 className="mt-3 text-3xl font-semibold text-white">Policy selection, not model training.</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-400">
-              Illustrative router fixture from <span className="font-mono text-slate-300">data/router_decisions.json</span>.
-              Policy selection is scored locally; this section is not a live model router.
-            </p>
-            <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="font-mono text-sm text-slate-300">selected_policy: <span className="text-cyan-100">{routerDecision.selectedPolicy}</span></div>
-              <p className="mt-3 text-sm text-slate-400">{routerDecision.why}</p>
-            </div>
+            <SectionHeader
+              chapter="07"
+              label="rl-lite router"
+              title="Policy selection, not model training."
+              description={
+                <>
+                  Illustrative router fixture from{' '}
+                  <span className="font-mono text-text-muted">data/router_decisions.json</span>. Policy selection is
+                  scored locally; this section is not a live model router.
+                </>
+              }
+            />
+            <SurfaceCard className="mt-5">
+              <div className="font-mono text-sm text-text-muted">
+                selected_policy: <span className="text-accent-muted">{routerDecision.selectedPolicy}</span>
+              </div>
+              <p className="mt-3 text-sm text-text-muted">{routerDecision.why}</p>
+            </SurfaceCard>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+          <SurfaceCard>
             {routerDecision.expectedRewards.map(([policy, reward]) => (
               <div key={policy} className="mb-4 last:mb-0">
-                <div className="mb-1 flex justify-between font-mono text-xs text-slate-400"><span>{policy}</span><span>{reward}</span></div>
-                <div className="h-2 rounded-full bg-white/10"><div className="h-2 rounded-full bg-cyan-300" style={{ width: `${(reward / 5) * 100}%` }} /></div>
+                <div className="mb-1 flex justify-between font-mono text-xs text-text-faint">
+                  <span>{policy}</span>
+                  <span>{reward}</span>
+                </div>
+                <div className="h-2 rounded-full bg-surface-raised">
+                  <div className="h-2 rounded-full bg-accent" style={{ width: `${(reward / 5) * 100}%` }} />
+                </div>
               </div>
             ))}
-          </div>
+          </SurfaceCard>
         </div>
       </section>
 

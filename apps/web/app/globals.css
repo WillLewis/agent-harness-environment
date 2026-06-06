@@ -4,8 +4,46 @@
 
 :root {
   color-scheme: dark;
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* Page & surfaces (OKLCH) */
+  --color-bg-page: oklch(0.11 0.014 252);
+  --color-bg-elevated: oklch(0.14 0.016 252);
+  --color-surface: oklch(0.16 0.018 252 / 0.55);
+  --color-surface-2: oklch(0.19 0.02 252 / 0.72);
+  --color-surface-raised: oklch(0.22 0.022 252 / 0.45);
+
+  /* Borders */
+  --color-border: oklch(0.38 0.02 252 / 0.28);
+  --color-border-subtle: oklch(0.32 0.018 252 / 0.16);
+
+  /* Text */
+  --color-text: oklch(0.96 0.008 252);
+  --color-text-muted: oklch(0.74 0.02 252);
+  --color-text-faint: oklch(0.56 0.022 252);
+
+  /* Accent — teal/cyan, used sparingly */
+  --color-accent: oklch(0.82 0.11 196);
+  --color-accent-foreground: oklch(0.18 0.02 252);
+  --color-accent-muted: oklch(0.72 0.07 196);
+  --color-accent-subtle: oklch(0.55 0.06 196 / 0.14);
+
+  /* Semantic */
+  --color-success: oklch(0.76 0.14 155);
+  --color-warning: oklch(0.8 0.13 78);
+  --color-danger: oklch(0.66 0.17 25);
+  --color-info: oklch(0.74 0.09 240);
+  --color-assist: oklch(0.76 0.11 295);
+
+  /* Code */
+  --color-code-bg: oklch(0.1 0.012 252 / 0.85);
+  --color-code-border: oklch(0.28 0.02 252 / 0.35);
+
+  /* Nav */
+  --color-nav-bg: oklch(0.11 0.014 252 / 0.82);
+  --color-grid-line: oklch(0.28 0.02 252 / 0.12);
 }
 
 * {
@@ -32,8 +70,8 @@ html {
 
 body {
   margin: 0;
-  background: #070a0f;
-  color: #e5eef7;
+  background-color: var(--color-bg-page);
+  color: var(--color-text);
   font-family: var(--font-sans);
   overflow-x: hidden;
 }
@@ -43,17 +81,73 @@ code {
   font-family: var(--font-mono);
 }
 
-.code-panel {
-  overflow-x: auto;
-  overflow-y: auto;
-  word-break: break-word;
-  white-space: pre-wrap;
+/* Subtle operational grid behind content */
+.page-grid-bg {
+  background-color: var(--color-bg-page);
+  background-image:
+    linear-gradient(var(--color-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center top;
+}
+
+@layer components {
+  .section-label {
+    @apply font-mono text-[11px] uppercase tracking-[0.22em] text-accent-muted;
+  }
+
+  .section-chapter {
+    @apply font-mono text-[11px] tracking-wide text-text-faint;
+  }
+
+  .surface-card {
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 1rem;
+    background: var(--color-surface);
+  }
+
+  .surface-card-raised {
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface-2);
+  }
+
+  .code-panel {
+    overflow-x: auto;
+    overflow-y: auto;
+    word-break: break-word;
+    white-space: pre-wrap;
+    border: 1px solid var(--color-code-border);
+    border-radius: 0.75rem;
+    background: var(--color-code-bg);
+    color: var(--color-text-muted);
+  }
+
+  .btn-primary {
+    @apply focus-ring inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition;
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  .btn-primary:hover {
+    filter: brightness(1.06);
+  }
+
+  .btn-secondary {
+    @apply focus-ring inline-flex items-center justify-center rounded-lg border px-5 py-2.5 text-sm font-semibold text-text transition;
+    border-color: var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-surface-2);
+  }
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid #67e8f9;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgb(103 232 249 / 0.2);
+  box-shadow: 0 0 0 4px oklch(0.82 0.11 196 / 0.22);
 }
 
 .sr-only {
