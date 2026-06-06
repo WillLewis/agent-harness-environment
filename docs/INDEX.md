@@ -10,9 +10,9 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 
 | I want to… | Read first | Then run |
 | --- | --- | --- |
-| **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → `#cockpit`, `#evals`, `#architecture` |
+| **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → sticky nav or `#cockpit`, `#evals`, `#architecture` |
 | **Deploy hosted demo (review)** | [DEPLOYMENT.md](./DEPLOYMENT.md) | `pnpm deploy:check` → `pnpm build` → `pnpm preview` → `pnpm smoke:hosted:local` |
-| **Lovable UI migration (plan)** | [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) | Design-only; pre-launch hosted restyle |
+| **Lovable UI migration (complete)** | [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) | Numbered IA + operational shell; fixtures unchanged |
 | **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | `pnpm repo:status`, CI contract in README |
 | **v0.1 release package** | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | Pre-tag checklist §8; [PRE_TAG_AUDIT_v0.1.md](./PRE_TAG_AUDIT_v0.1.md) |
 | **Understand evals vs hosted metrics** | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | `pnpm eval:ci`, `python packages/evals/audit_metric_drift.py --format table` |
@@ -50,7 +50,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | [.cursor/rules/architecture.mdc](../.cursor/rules/architecture.mdc) | **Current** package boundaries (hosted vs runner vs evals) | Before any feature that crosses surfaces | `apps/web`, `packages/evals`, `services/runner` |
 | [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Long-range vision, thesis, phased roadmap | **Planning** new product scope; not a literal implementation spec | `data/tasks.json`, `data/policies.json` |
 | [UX_PLAN.md](./UX_PLAN.md) | Hosted IA, interaction patterns, progressive disclosure | **Planning** UI changes; most cockpit/eval UX is already built | `apps/web/components/` |
-| [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) | Lovable reference → AHE hosted restyle plan | Before public launch UI migration | [harness-inspector.lovable.app](https://harness-inspector.lovable.app) |
+| [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) | Lovable reference → AHE hosted restyle (complete) | Hosted demo shell/IA context | [harness-inspector.lovable.app](https://harness-inspector.lovable.app) |
 | [FINAL_AUDIT.md](./FINAL_AUDIT.md) §5–8 | Architecture, eval, UX, runner risks | Release review or scope negotiation | — |
 
 ### Runner / MCP / adapters

@@ -59,10 +59,14 @@ This milestone is for **review, demo, and extension** — not production agent h
 ## Demo path (5–10 minutes)
 
 1. `pnpm install` && `pip install -r requirements-dev.txt`
-2. `pnpm dev` → open `#cockpit`, `#evals`, `#architecture`
-3. Follow [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) — baseline failure → guarded recovery → eval drawer
+2. `pnpm dev` → use sticky nav or open `#cockpit`, `#evals`, `#architecture`
+3. Follow [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) — numbered IA from hero through takeaways; cockpit baseline → guarded recovery; failure taxonomy + eval drawer
 
 **Narration anchor:** same model, same repo, same task — different harness, different outcome. Hosted page is **fixture replay only**.
+
+### Hosted demo UI (post–v0.1 baseline)
+
+After the v0.1 release baseline, the hosted app received a **Lovable-style shell** (design tokens, sticky chapter nav, numbered sections, operational dashboard surfaces). Fixture data, cockpit behavior, eval semantics, and HTML smoke signals are unchanged. See [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) for slice history and verification.
 
 ---
 

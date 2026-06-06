@@ -1,6 +1,6 @@
-# Design migration plan — Lovable reference → AHE hosted app
+# Design migration — Lovable reference → AHE hosted app
 
-**Status:** Plan only (no implementation in this phase)  
+**Status:** **Complete** (Slices 1–5, 2026-06) — hosted demo restyled; fixtures, scorers, runner, and smoke contract unchanged  
 **Reference:** [harness-inspector.lovable.app](https://harness-inspector.lovable.app)  
 **Target:** `apps/web` static hosted demo  
 **Constraint:** Preserve data model, interactions, and static/local-only claims
@@ -9,9 +9,41 @@
 
 ---
 
-## Executive summary
+## Migration completion summary
 
-Migrate the hosted AHE app from its current single-page layout to the **Lovable reference’s design language and narrative pacing** — sticky chapter nav, numbered sections, tighter visual system, and clearer progressive disclosure — while **keeping all fixture-driven behavior** (`cockpitFixtures.ts`, `evalFixtures.ts`, keyboard shortcuts, failure-cluster drawer, smoke-check anchors).
+| Slice | Scope | Status |
+| --- | --- | --- |
+| D1 | OKLCH tokens, grid shell, `SiteNav`, `SectionHeader`, hero | Done |
+| D2 | Numbered IA: premise → protocol → primitives → cockpit → taxonomy → evals → router → evidence → takeaways | Done |
+| D3 | Cockpit, eval table, failure drawer, implementation evidence visual polish | Done |
+| D4 | Responsive QA, `prefers-reduced-motion`, scroll offset for sticky nav, `DEMO_SCRIPT` sync | Done |
+| D5 | Browser QA (1440 / 900 / 390), docs/readiness sync | Done |
+
+**Verification (repo root):**
+
+```bash
+pnpm typecheck && pnpm build
+pnpm deploy:check && pnpm smoke:hosted:local   # preview on free port if :3000 busy
+pnpm eval:ci && python -m pytest
+```
+
+**Residual visual risks (accepted):**
+
+- Eval table horizontal scroll below ~720px (intentional).
+- Cockpit stacks to one column on mobile; trace list can be tall.
+- Dual `FailureClusterDrawer` instances (taxonomy + eval table) — functionally fine.
+
+**Deferred optional polish (not in scope):**
+
+- Architecture diagram block
+- `ImplementationEvidence` split into repo vs architecture sections
+- Unified drawer state between taxonomy and eval table
+
+---
+
+## Executive summary (original plan)
+
+Migrate the hosted AHE app from its prior single-page layout to the **Lovable reference’s design language and narrative pacing** — sticky chapter nav, numbered sections, tighter visual system, and clearer progressive disclosure — while **keeping all fixture-driven behavior** (`cockpitFixtures.ts`, `evalFixtures.ts`, keyboard shortcuts, failure-cluster drawer, smoke-check anchors).
 
 **Do not port Lovable copy literally** where it overclaims (24 tasks, live runner implied, fictional hero deltas as production). **Do port** structure, typography rhythm, surface treatment, and section order.
 

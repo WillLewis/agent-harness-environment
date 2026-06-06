@@ -25,7 +25,7 @@ pnpm deploy:check && pnpm smoke:hosted:local     # optional; preview must be run
 
 ## What is included
 
-- Static hosted demo: cockpit with **3 task classes** (bugfix, adversarial, multi-agent) and precomputed traces.
+- Static hosted demo (Lovable-style numbered narrative): sticky nav, premise → protocol → primitives → cockpit → failure taxonomy → eval comparison → router → implementation evidence → takeaways. **3 task classes** (bugfix, adversarial, multi-agent) with precomputed traces; no live LLM in the browser.
 - Deterministic Python scorers, static eval suite + CI gate, and synthetic policy-comparison fixture for the hosted table.
 - Local runner MVP, MCP tools, and Braintrust/Weave export adapters (dry-run by default; optional live upload).
 - Cursor rules, skills, MCP config, and product/UX/eval docs.
@@ -36,7 +36,7 @@ For external reviewers or portfolio walkthroughs:
 
 | Goal | Command / link |
 | --- | --- |
-| Run hosted demo locally | `pnpm install` → `pnpm dev` → open `#cockpit`, `#evals`, `#architecture` |
+| Run hosted demo locally | `pnpm install` → `pnpm dev` → walk [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) or jump to `#cockpit`, `#evals`, `#architecture` |
 | Deploy hosted demo (review) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel recommended; `pnpm deploy:check` then `pnpm build` |
 | Click-by-click script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
