@@ -16,6 +16,7 @@ import {
   type PolicyId,
   type TaskId
 } from '../lib/demoData';
+import { selectableActiveClass, selectableIdleClass } from '../lib/statusStyles';
 
 function verdictLabel(verdict: string) {
   if (verdict === 'accepted') return 'ACCEPTED BY JUDGE';
@@ -144,37 +145,39 @@ export function Cockpit() {
   const replayKey = `${taskId}-${policyId}`;
 
   return (
-    <section id="cockpit" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8" aria-label="Interactive cockpit">
-      <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+    <section id="cockpit" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8" aria-label="Interactive cockpit">
+      <div className="mb-5 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">Interactive cockpit</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+          <p className="section-chapter">
+            <span className="text-accent-muted">04</span>
+            <span className="mx-2 text-border">—</span>
+            <span className="section-label">Interactive cockpit</span>
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
             Same task. Different harness. Different outcome.
           </h2>
         </div>
-        <p className="max-w-2xl text-sm leading-6 text-slate-400">
-          Precomputed fixtures from <span className="font-mono text-slate-300">data/traces/</span>. Select task and
+        <p className="max-w-2xl text-xs leading-relaxed text-text-muted sm:text-sm">
+          Precomputed fixtures from <span className="font-mono text-text-muted">data/traces/</span>. Select task and
           policy to replay trace, metrics, evidence, and verdict together — no network requests.
         </p>
       </div>
 
-      <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)_minmax(0,340px)]">
-        <aside className="min-w-0 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-          <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.25em] text-cyan-100">{task.label}</div>
-            <h3 className="mt-2 text-xl font-semibold text-white">{task.title}</h3>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{task.issue}</p>
-            <div className="mt-4 break-all rounded-xl bg-black/30 p-3 font-mono text-xs text-slate-300">
-              {task.successCommand}
-            </div>
+      <div className="grid min-w-0 grid-cols-1 gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,320px)]">
+        <aside className="surface-card min-w-0 p-3 sm:p-4">
+          <div className="rounded-lg border border-accent/30 bg-accent-subtle p-3">
+            <div className="font-mono text-[10px] font-semibold uppercase tracking-wider text-accent-muted">{task.label}</div>
+            <h3 className="mt-1.5 text-base font-semibold text-text">{task.title}</h3>
+            <p className="mt-2 text-xs leading-relaxed text-text-muted">{task.issue}</p>
+            <div className="code-panel mt-3 break-all p-2.5 font-mono text-[11px]">{task.successCommand}</div>
           </div>
 
-          <div className="mt-5">
-            <div id="cockpit-task-label" className="text-xs uppercase tracking-[0.22em] text-slate-500">
+          <div className="mt-4">
+            <div id="cockpit-task-label" className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
               Task
             </div>
             <div
-              className="mt-3 space-y-2"
+              className="mt-2 space-y-1.5"
               role="group"
               aria-labelledby="cockpit-task-label"
               aria-describedby="cockpit-task-hint"
@@ -189,25 +192,23 @@ export function Cockpit() {
                     aria-label={`${option.label}: ${option.title}`}
                     onClick={() => selectTask(id)}
                     className={clsx(
-                      'focus-ring w-full rounded-2xl border p-3 text-left transition',
-                      id === taskId
-                        ? 'border-cyan-300/60 bg-cyan-300/10'
-                        : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
+                      'focus-ring w-full rounded-lg border p-2.5 text-left transition',
+                      id === taskId ? selectableActiveClass : selectableIdleClass
                     )}
                   >
-                    <div className="font-semibold text-white">{option.label}</div>
-                    <p className="mt-1 text-xs leading-5 text-slate-400">{option.title}</p>
+                    <div className="text-sm font-semibold text-text">{option.label}</div>
+                    <p className="mt-0.5 text-[11px] leading-4 text-text-faint">{option.title}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="mt-5">
-            <div id="cockpit-policy-label" className="text-xs uppercase tracking-[0.22em] text-slate-500">
+          <div className="mt-4">
+            <div id="cockpit-policy-label" className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
               Policy
             </div>
-            <div className="mt-3 space-y-2" role="group" aria-labelledby="cockpit-policy-label">
+            <div className="mt-2 space-y-1.5" role="group" aria-labelledby="cockpit-policy-label">
               {task.policyOrder.map((id, index) => {
                 const policyRun = task.policies[id];
                 if (!policyRun) return null;
@@ -219,54 +220,55 @@ export function Cockpit() {
                     aria-label={`${policyRun.name}. ${policyRun.description}`}
                     onClick={() => selectPolicy(id)}
                     className={clsx(
-                      'focus-ring w-full rounded-2xl border p-3 text-left transition',
-                      id === policyId
-                        ? 'border-cyan-300/60 bg-cyan-300/10'
-                        : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
+                      'focus-ring w-full rounded-lg border p-2.5 text-left transition',
+                      id === policyId ? selectableActiveClass : selectableIdleClass
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="font-semibold text-white">{policyRun.name}</div>
-                      <span className="font-mono text-[10px] text-slate-500">{index + 1}</span>
+                      <div className="text-sm font-semibold text-text">{policyRun.name}</div>
+                      <span className="font-mono text-[10px] text-text-faint">{index + 1}</span>
                     </div>
-                    <p className="mt-1 text-xs leading-5 text-slate-400">{policyRun.description}</p>
+                    <p className="mt-0.5 text-[11px] leading-4 text-text-faint">{policyRun.description}</p>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="mt-5">
-            <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Failure modes to watch</div>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-4">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Failure modes to watch</div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
               {task.failureModes.map((mode) => (
-                <span key={mode} className="rounded-full border border-white/10 px-2 py-1 font-mono text-[11px] text-slate-300">
+                <span
+                  key={mode}
+                  className="rounded border border-border-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted"
+                >
                   {mode}
                 </span>
               ))}
             </div>
           </div>
 
-          <p id="cockpit-task-hint" className="mt-5 text-[11px] leading-5 text-slate-500">
+          <p id="cockpit-task-hint" className="mt-4 text-[10px] leading-4 text-text-faint">
             Keyboard: <span className="font-mono">[ ]</span> tasks ·{' '}
             <span className="font-mono">1-{task.policyOrder.length}</span> policies ·{' '}
             <span className="font-mono">← →</span> steps · <span className="font-mono">f t d j r</span> evidence tabs
           </p>
         </aside>
 
-        <main className="min-w-0 rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <main className="surface-card min-w-0 p-3 sm:p-4">
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Trace replay</div>
-              <h3 className="mt-1 text-xl font-semibold text-white">{run.name}</h3>
-              <p className="mt-1 text-xs text-slate-500">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Trace replay</div>
+              <h3 className="mt-0.5 text-base font-semibold text-text">{run.name}</h3>
+              <p className="mt-0.5 font-mono text-[10px] text-text-faint">
                 {task.label} · {run.events.length} steps · {run.verdict} verdict
               </p>
             </div>
-            <div className="flex shrink-0 gap-2">
+            <div className="flex shrink-0 gap-1.5">
               <button
                 type="button"
-                className="focus-ring rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300"
+                className="focus-ring rounded-md border border-border-subtle px-2.5 py-1.5 font-mono text-[11px] text-text-muted hover:bg-surface-2"
                 onClick={() => selectStep(activeStep - 1)}
                 aria-label="Previous trace step"
               >
@@ -274,7 +276,7 @@ export function Cockpit() {
               </button>
               <button
                 type="button"
-                className="focus-ring rounded-full border border-white/10 px-3 py-2 text-xs text-slate-300"
+                className="focus-ring rounded-md border border-border-subtle px-2.5 py-1.5 font-mono text-[11px] text-text-muted hover:bg-surface-2"
                 onClick={() => selectStep(activeStep + 1)}
                 aria-label="Next trace step"
               >
@@ -288,13 +290,13 @@ export function Cockpit() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.25 }}
           >
-            <div className="max-h-[min(70vh,720px)] overflow-y-auto pr-1 lg:max-h-none lg:overflow-visible">
+            <div className="max-h-[min(70vh,720px)] overflow-y-auto pr-0.5 lg:max-h-none lg:overflow-visible">
               <TraceTimeline events={run.events} activeStep={activeStep} onSelect={selectStep} policyName={run.name} />
             </div>
           </motion.div>
         </main>
 
-        <aside className="min-w-0 space-y-4">
+        <aside className="min-w-0 space-y-3">
           <VerdictStamp
             policyKey={`${taskId}-${policyId}`}
             verdict={run.verdict}
@@ -307,7 +309,7 @@ export function Cockpit() {
             initial={reduceMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.25, delay: reduceMotion ? 0 : 0.05 }}
-            className="grid grid-cols-2 gap-3"
+            className="grid grid-cols-2 gap-2"
             aria-live="polite"
             aria-label="Eval metrics"
           >

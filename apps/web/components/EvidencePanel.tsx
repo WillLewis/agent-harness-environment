@@ -21,13 +21,13 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
   const harnessNote = stepHarnessNote(activeEvent, run.name);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Evidence</div>
-        <div className="font-mono text-[11px] text-slate-500">Step {String(activeEvent.step).padStart(2, '0')}</div>
+    <div className="surface-card p-3 sm:p-4">
+      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Evidence</div>
+        <div className="font-mono text-[10px] text-text-faint">Step {String(activeEvent.step).padStart(2, '0')}</div>
       </div>
 
-      <div className="mb-3 flex flex-wrap gap-2" role="tablist" aria-label="Evidence views">
+      <div className="mb-2.5 flex flex-wrap gap-1.5" role="tablist" aria-label="Evidence views">
         {evidenceTabs.map((item) => {
           const tabId = `evidence-tab-${item}`;
           const panelId = `evidence-panel-${item}`;
@@ -41,8 +41,10 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
               aria-controls={panelId}
               onClick={() => onTabChange(item)}
               className={clsx(
-                'focus-ring rounded-full px-3 py-1.5 text-xs capitalize',
-                tab === item ? 'bg-cyan-300 text-slate-950' : 'border border-white/10 text-slate-300'
+                'focus-ring rounded-md px-2.5 py-1 font-mono text-[11px] capitalize',
+                tab === item
+                  ? 'bg-accent text-accent-foreground'
+                  : 'border border-border-subtle text-text-muted hover:bg-surface-2'
               )}
             >
               {tabLabel(item)}
@@ -52,7 +54,7 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
       </div>
 
       {harnessNote ? (
-        <p className="mb-3 break-words rounded-2xl border border-amber-300/20 bg-amber-300/5 px-3 py-2 text-xs leading-5 text-amber-100">
+        <p className="mb-2.5 break-words rounded-md border border-warning/25 bg-warning/10 px-2.5 py-2 text-[11px] leading-5 text-warning">
           Harness note: {harnessNote}
         </p>
       ) : null}
@@ -72,30 +74,28 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
             tabIndex={isActive ? 0 : -1}
           >
             {item === 'files' ? (
-              <pre className="code-panel max-h-72 rounded-2xl bg-black/40 p-4 text-xs leading-6 text-slate-300 sm:max-h-80">
-                {buildFileTree(knownFiles, activeEvent.file)}
-              </pre>
+              <pre className="code-panel max-h-72 p-3 text-xs leading-6 sm:max-h-80">{buildFileTree(knownFiles, activeEvent.file)}</pre>
             ) : null}
 
             {item === 'terminal' ? (
-              <pre className="code-panel min-h-32 max-h-72 rounded-2xl bg-black/40 p-4 text-xs leading-6 text-slate-300 sm:min-h-40 sm:max-h-80">
+              <pre className="code-panel min-h-28 max-h-72 p-3 text-xs leading-6 sm:min-h-32 sm:max-h-80">
                 {terminalContent(activeEvent)}
               </pre>
             ) : null}
 
             {item === 'diff' ? (
-              <pre className="code-panel min-h-32 max-h-72 rounded-2xl bg-black/40 p-4 text-xs leading-6 text-slate-300 sm:min-h-40 sm:max-h-80">
+              <pre className="code-panel min-h-28 max-h-72 p-3 text-xs leading-6 sm:min-h-32 sm:max-h-80">
                 {diffContent(activeEvent)}
               </pre>
             ) : null}
 
             {item === 'judge' ? (
-              <div className="space-y-3 text-sm leading-6 text-slate-300">
-                <p className="break-words rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-xs uppercase tracking-[0.18em] text-slate-400">
+              <div className="space-y-2.5 text-sm leading-relaxed text-text-muted">
+                <p className="break-words rounded-md border border-border-subtle bg-code-bg px-2.5 py-2 font-mono text-[10px] uppercase tracking-wide text-text-faint">
                   {run.verdict === 'rejected' ? 'Rejected' : run.verdict === 'assisted' ? 'Assisted' : 'Accepted'} ·{' '}
                   {run.primaryReason}
                 </p>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5 text-xs">
                   {run.judgeNotes.map((note) => (
                     <li key={note} className="break-words">
                       • {note}
@@ -106,9 +106,7 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
             ) : null}
 
             {item === 'raw' ? (
-              <pre className="code-panel max-h-80 rounded-2xl bg-black/40 p-4 text-xs leading-6 text-slate-300">
-                {JSON.stringify(activeEvent, null, 2)}
-              </pre>
+              <pre className="code-panel max-h-80 p-3 text-xs leading-6">{JSON.stringify(activeEvent, null, 2)}</pre>
             ) : null}
           </div>
         );

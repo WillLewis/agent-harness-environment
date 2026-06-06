@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import type { TraceEvent } from '../lib/demoData';
 import { stepHarnessNote } from '../lib/cockpitEvidence';
+import { selectableActiveClass, selectableIdleClass } from '../lib/statusStyles';
 
 type TraceTimelineProps = {
   events: TraceEvent[];
@@ -11,7 +12,7 @@ type TraceTimelineProps = {
 
 export function TraceTimeline({ events, activeStep, onSelect, policyName }: TraceTimelineProps) {
   return (
-    <div className="space-y-2" role="list" aria-label="Trace timeline">
+    <div className="space-y-1.5" role="list" aria-label="Trace timeline">
       {events.map((event) => {
         const active = event.step === activeStep;
         const harnessNote = stepHarnessNote(event, policyName);
@@ -26,26 +27,26 @@ export function TraceTimeline({ events, activeStep, onSelect, policyName }: Trac
             aria-label={event.label ? `${stepLabel}, ${event.label}` : stepLabel}
             onClick={() => onSelect(event.step)}
             className={clsx(
-              'focus-ring w-full rounded-2xl border p-4 text-left transition',
-              active ? 'border-cyan-300/60 bg-cyan-300/10' : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.06]'
+              'focus-ring w-full rounded-lg border p-3 text-left transition',
+              active ? selectableActiveClass : selectableIdleClass
             )}
           >
-            <div className="flex min-w-0 items-start justify-between gap-3">
+            <div className="flex min-w-0 items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <div className="font-mono text-xs text-slate-500">
+                <div className="font-mono text-[10px] text-text-faint">
                   STEP {String(event.step).padStart(2, '0')} · {event.action}
                 </div>
-                <div className="mt-1 break-words font-semibold text-white">{event.title}</div>
+                <div className="mt-0.5 break-words text-sm font-semibold text-text">{event.title}</div>
               </div>
               {event.label ? (
-                <span className="shrink-0 rounded-full border border-amber-300/30 bg-amber-300/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wide text-amber-200">
+                <span className="shrink-0 rounded border border-warning/30 bg-warning/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-warning">
                   {event.label}
                 </span>
               ) : null}
             </div>
-            <p className="mt-2 break-words text-sm leading-6 text-slate-300">{event.summary}</p>
+            <p className="mt-1.5 break-words text-xs leading-5 text-text-muted">{event.summary}</p>
             {active && harnessNote ? (
-              <p className="mt-2 break-words rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs leading-5 text-slate-400">
+              <p className="mt-2 break-words rounded-md border border-border-subtle bg-code-bg px-2.5 py-2 text-[11px] leading-5 text-text-faint">
                 Harness note: {harnessNote}
               </p>
             ) : null}

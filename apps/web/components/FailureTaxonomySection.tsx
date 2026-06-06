@@ -10,12 +10,7 @@ import {
 import { FailureClusterDrawer } from './FailureClusterDrawer';
 import { SectionHeader } from './SectionHeader';
 import { SurfaceCard } from './ui/SurfaceCard';
-
-function severityTone(severity: string) {
-  if (severity === 'high') return 'border-danger/30 bg-danger/10 text-danger';
-  if (severity === 'medium') return 'border-warning/30 bg-warning/10 text-warning';
-  return 'border-border bg-surface text-text-muted';
-}
+import { severityBadgeClass } from '../lib/statusStyles';
 
 export function FailureTaxonomySection() {
   const [clusterId, setClusterId] = useState<FailureClusterId | null>(null);
@@ -50,7 +45,7 @@ export function FailureTaxonomySection() {
                 <span
                   className={clsx(
                     'rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide',
-                    severityTone(cluster.severity)
+                    severityBadgeClass(cluster.severity)
                   )}
                 >
                   {cluster.severity}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import clsx from 'clsx';
 import {
   BASELINE_LOOP_CLUSTER_ID,
   BASELINE_UNSAFE_CLUSTER_ID,
@@ -20,17 +21,22 @@ type MetricCellProps = {
   clickable?: boolean;
   onClick?: () => void;
   ariaLabel?: string;
+  variant?: 'default' | 'alert';
 };
 
-function MetricCell({ value, clickable, onClick, ariaLabel }: MetricCellProps) {
+function MetricCell({ value, clickable, onClick, ariaLabel, variant = 'default' }: MetricCellProps) {
   if (!clickable || !onClick) {
-    return <span className="text-slate-300">{value}</span>;
+    return (
+      <span className={clsx('font-mono tabular-nums', variant === 'alert' ? 'text-danger' : 'text-text-muted')}>
+        {value}
+      </span>
+    );
   }
 
   return (
     <button
       type="button"
-      className="focus-ring rounded-md border border-cyan-300/20 bg-cyan-300/5 px-2 py-1.5 font-mono text-cyan-100 underline decoration-cyan-300/40 underline-offset-4 hover:bg-cyan-300/10"
+      className="focus-ring rounded-md border border-danger/35 bg-danger/10 px-2 py-1 font-mono text-xs tabular-nums text-danger underline decoration-danger/40 underline-offset-2 hover:bg-danger/15"
       onClick={onClick}
       aria-label={ariaLabel}
     >
@@ -45,75 +51,80 @@ export function EvalTable() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
-        <div className="border-b border-white/10 p-5">
-          <p className="text-xs uppercase tracking-[0.3em] text-cyan-200/80">Policy comparison · 32 synthetic coding tasks</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Eval report</h3>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-            Hosted metrics are precomputed synthetic fixtures. They show how eval signals map to harness changes — not live
-            production results. Same model, same task, different harness, different outcome.
+      <div className="surface-card overflow-hidden">
+        <div className="border-b border-border-subtle p-4 sm:p-5">
+          <p className="section-chapter">
+            <span className="text-accent-muted">06</span>
+            <span className="mx-2 text-border">—</span>
+            <span className="section-label">Policy comparison · 32 synthetic coding tasks</span>
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">Eval report</h3>
+          <p className="mt-2 max-w-3xl text-xs leading-relaxed text-text-muted sm:text-sm">
+            Hosted metrics are precomputed synthetic fixtures. They show how eval signals map to harness changes — not
+            live production results. Same model, same task, different harness, different outcome.
           </p>
         </div>
 
-        <p className="border-b border-white/10 px-5 py-3 text-xs text-slate-500 md:hidden">
+        <p className="border-b border-border-subtle px-4 py-2.5 font-mono text-[10px] text-text-faint md:hidden sm:px-5">
           Swipe horizontally to view all policy columns.
         </p>
         <div className="overflow-x-auto overscroll-x-contain">
           <table className="w-full min-w-[720px] text-left text-sm sm:min-w-[860px]" aria-describedby="eval-fixture-note">
             <caption id="eval-fixture-note" className="sr-only">
-              Synthetic policy comparison fixture with clickable baseline loop and unsafe-attempt metrics opening
-              failure cluster drawers.
+              Synthetic policy comparison fixture with clickable baseline loop and unsafe-attempt metrics opening failure
+              cluster drawers.
             </caption>
-            <thead className="bg-white/[0.04] text-xs uppercase tracking-[0.18em] text-slate-400">
+            <thead className="bg-elevated font-mono text-[10px] uppercase tracking-wider text-text-faint">
               <tr>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Policy
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Success
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Recovery
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Loop
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Hallucinated files
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Unsafe attempts
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Human interventions
                 </th>
-                <th scope="col" className="px-5 py-4">
+                <th scope="col" className="px-4 py-3 sm:px-5">
                   Cost
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-border-subtle">
               {policyComparison.map((row) => {
                 const isBaseline = row.policy === 'baseline';
                 const loopValue = formatPercent(row.loop);
                 const unsafeValue = formatPercent(row.unsafeAttempts);
 
                 return (
-                  <tr key={row.policy} className="hover:bg-white/[0.03]">
-                    <th scope="row" className="px-5 py-4 font-semibold text-white">
+                  <tr key={row.policy} className="transition hover:bg-surface-2/60">
+                    <th scope="row" className="px-4 py-3 text-sm font-semibold text-text sm:px-5">
                       {policyDisplayName(row.policy)}
                     </th>
-                    <td className="px-5 py-4 text-slate-300">{formatPercent(row.success)}</td>
-                    <td className="px-5 py-4 text-slate-300">{formatPercent(row.recovery)}</td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums text-text-muted sm:px-5">
+                      {formatPercent(row.success)}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums text-text-muted sm:px-5">
+                      {formatPercent(row.recovery)}
+                    </td>
+                    <td className="px-4 py-3 sm:px-5">
                       <MetricCell
                         value={loopValue}
                         clickable={isBaseline}
-                        onClick={
-                          isBaseline
-                            ? () => setClusterId(BASELINE_LOOP_CLUSTER_ID)
-                            : undefined
-                        }
+                        variant={isBaseline ? 'alert' : 'default'}
+                        onClick={isBaseline ? () => setClusterId(BASELINE_LOOP_CLUSTER_ID) : undefined}
                         ariaLabel={
                           isBaseline
                             ? `Open repeated terminal command failure cluster for baseline loop rate ${loopValue}`
@@ -121,11 +132,14 @@ export function EvalTable() {
                         }
                       />
                     </td>
-                    <td className="px-5 py-4 text-slate-300">{formatPercent(row.hallucinatedFiles)}</td>
-                    <td className="px-5 py-4">
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums text-text-muted sm:px-5">
+                      {formatPercent(row.hallucinatedFiles)}
+                    </td>
+                    <td className="px-4 py-3 sm:px-5">
                       <MetricCell
                         value={unsafeValue}
                         clickable={isBaseline}
+                        variant={isBaseline ? 'alert' : 'default'}
                         onClick={isBaseline ? () => setClusterId(BASELINE_UNSAFE_CLUSTER_ID) : undefined}
                         ariaLabel={
                           isBaseline
@@ -134,8 +148,10 @@ export function EvalTable() {
                         }
                       />
                     </td>
-                    <td className="px-5 py-4 text-slate-300">{row.humanInterventions}</td>
-                    <td className="px-5 py-4 font-mono text-slate-300">{row.costTier}</td>
+                    <td className="px-4 py-3 font-mono text-xs tabular-nums text-text-muted sm:px-5">
+                      {row.humanInterventions}
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-text-faint sm:px-5">{row.costTier}</td>
                   </tr>
                 );
               })}
@@ -143,11 +159,11 @@ export function EvalTable() {
           </table>
         </div>
 
-        <div className="border-t border-white/10 px-5 py-4 text-xs text-slate-500">
+        <div className="border-t border-border-subtle px-4 py-3 text-[11px] leading-relaxed text-text-faint sm:px-5">
           Click baseline loop or unsafe-attempt metrics to inspect failure clusters, detection rules, and dataset
           candidates. For measured scores on curated trace fixtures, run{' '}
-          <code className="text-slate-400">pnpm eval:suite</code> or{' '}
-          <code className="text-slate-400">pnpm eval:ci</code> locally — not this synthetic table.
+          <code className="text-text-muted">pnpm eval:suite</code> or{' '}
+          <code className="text-text-muted">pnpm eval:ci</code> locally — not this synthetic table.
         </div>
       </div>
 
