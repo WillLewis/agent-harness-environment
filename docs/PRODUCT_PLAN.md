@@ -1087,10 +1087,9 @@ agent-harness-environment/
   docs/
     PRODUCT_PLAN.md
     UX_PLAN.md
-    DEMO_SCRIPT.md
+    DEPLOYMENT.md
     EVAL_DESIGN.md
   README.md
-  DEMO_SCRIPT.md
 ```
 
 ---
@@ -1499,7 +1498,7 @@ Deliverables:
 
 - polished hosted page
 - technical README
-- demo script
+- deployment walkthrough (DEPLOYMENT.md)
 - architecture diagram
 - eval design doc
 - setup instructions
@@ -1590,7 +1589,7 @@ Avoid these traps:
 
 ## 25. Final product narrative
 
-Use this narrative in README, demo script, and product walkthrough:
+Use this narrative in README, DEPLOYMENT.md manual checklist, and product walkthrough:
 
 > Agent Harness Environment is a flight recorder and evaluation environment for coding agents. It shows that the same coding task can fail or succeed depending on the harness policy around the model. The baseline agent edits early, ignores failed-test evidence, and loops. The guarded recovery policy forces evidence-gathering, constrains retries, blocks unsafe actions, and produces a narrower patch. The eval layer then quantifies the difference across task success, recovery rate, hallucinated files, loop rate, human steering burden, and cost. The most important loop is not the agent loop — it is the product loop: trace behavior, label failure, add eval coverage, change the harness, and measure whether the agent became more reliable.
 

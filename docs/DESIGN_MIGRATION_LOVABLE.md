@@ -5,7 +5,9 @@
 **Target:** `apps/web` static hosted demo  
 **Constraint:** Preserve data model, interactions, and static/local-only claims
 
-**Related:** [UX_PLAN.md](./UX_PLAN.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) · [DEMO_SCRIPT.md](./DEMO_SCRIPT.md)
+**Related:** [UX_PLAN.md](./UX_PLAN.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) (committed demo walkthrough — post-deploy manual smoke checklist)
+
+**Note:** An optional extended walkthrough may exist locally as `docs/DEMO_SCRIPT.md` (gitignored, not tracked). Fresh clones should use [DEPLOYMENT.md](./DEPLOYMENT.md) only.
 
 ---
 
@@ -16,7 +18,7 @@
 | D1 | OKLCH tokens, grid shell, `SiteNav`, `SectionHeader`, hero | Done |
 | D2 | Numbered IA: premise → protocol → primitives → cockpit → taxonomy → evals → router → evidence → takeaways | Done |
 | D3 | Cockpit, eval table, failure drawer, implementation evidence visual polish | Done |
-| D4 | Responsive QA, `prefers-reduced-motion`, scroll offset for sticky nav, `DEMO_SCRIPT` sync | Done |
+| D4 | Responsive QA, `prefers-reduced-motion`, scroll offset for sticky nav, `DEPLOYMENT.md` manual checklist sync | Done |
 | D5 | Browser QA (1440 / 900 / 390), docs/readiness sync | Done |
 
 **Verification (repo root):**
@@ -326,7 +328,7 @@ Every migrated section must retain or strengthen:
 - Move router out of inline block
 - All smoke anchors preserved
 
-**Exit:** smoke 11/11; `DEMO_SCRIPT.md` section numbers updated
+**Exit:** smoke 11/11; `DEPLOYMENT.md` manual checklist aligned to numbered IA
 
 ---
 
@@ -339,7 +341,7 @@ Every migrated section must retain or strengthen:
 - Optional Reset button (state reset only)
 - No behavior change to keyboard handlers
 
-**Exit:** manual cockpit script in DEMO_SCRIPT; smoke pass
+**Exit:** manual cockpit steps in `DEPLOYMENT.md`; smoke pass
 
 ---
 
@@ -373,7 +375,7 @@ Every migrated section must retain or strengthen:
 **Scope:** responsive pass, `prefers-reduced-motion`, docs  
 
 **Deliverables:**
-- Update `DEMO_SCRIPT.md`, `DEPLOYMENT.md` post-deploy smoke notes if headings changed
+- Update `DEPLOYMENT.md` post-deploy smoke notes if headings changed
 - Optional screenshot checklist in `RELEASE_CHECKLIST.md`
 - Run full verification: `pnpm typecheck`, `pnpm build`, `pnpm smoke:hosted:local`
 
@@ -436,7 +438,7 @@ apps/web/components/FailureClusterDrawer.tsx
 apps/web/components/ImplementationEvidence.tsx  (split)
 apps/web/components/MetricCard.tsx
 apps/web/components/VerdictStamp.tsx
-docs/DEMO_SCRIPT.md                    (phase D6)
+docs/DEPLOYMENT.md                     (phase D6 — manual smoke checklist)
 ```
 
 **Explicitly out of scope:** `data/**`, `packages/evals/**`, `services/runner/**`, CI workflows.

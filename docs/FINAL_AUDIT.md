@@ -12,7 +12,7 @@
 
 The repo is **ready for external demo and portfolio review** as a **static, deterministic harness evaluation starter**. It credibly demonstrates trace replay, policy comparison, failure clustering, local scoring, CI gates, a minimal local runner, MCP helpers, and export **shape** previews for Braintrust/W&B.
 
-It is **not** a production agent platform, live eval SaaS integration, or statistically valid benchmark at scale. Documentation and the hosted UI now state those limits explicitly ([DEMO_SCRIPT.md](./DEMO_SCRIPT.md), [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)).
+It is **not** a production agent platform, live eval SaaS integration, or statistically valid benchmark at scale. Documentation and the hosted UI now state those limits explicitly ([DEPLOYMENT.md](./DEPLOYMENT.md), [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)).
 
 **Release blocker count (P0):** **0** — assuming CI stays green on `main`.
 
@@ -32,7 +32,7 @@ It is **not** a production agent platform, live eval SaaS integration, or statis
 | **MCP** | list traces, get_trace, compare, run_eval, failure cluster, promote dataset, router fixture | `tools/mcp_server.py`, `tools/mcp_helpers.py` |
 | **Adapters** | Braintrust + Weave **dry-run** only | `packages/evals/adapters/` |
 | **Cursor workflow** | Rules, 4 skills, MCP config, BUGBOT guidance | `.cursor/` |
-| **Docs** | Product, UX, eval design, demo script, release checklist | `docs/` |
+| **Docs** | Product, UX, eval design, deployment walkthrough, release checklist | `docs/` |
 
 **Counts (static):** 3 tasks in `data/tasks.json`, 7 trace fixtures, 3 coding-task dataset rows in `coding_tasks.jsonl`, 87+ pytest tests at last green run.
 
@@ -278,7 +278,7 @@ These follow naturally after the current release handoff and preserve architectu
 ## 14. Handoff checklist for next agent
 
 1. Read [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) and run verification commands.
-2. Walk [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) once in browser.
+2. Walk [DEPLOYMENT.md](./DEPLOYMENT.md) manual browser checklist once in browser.
 3. Pick **one P1 item**; do not expand scope to hosted live agents or CI secrets for adapters without explicit ask.
 4. Preserve: `data/traces/` verdicts unless intentionally updating story + `suite_gates.py`.
 5. Add tests for any new scorer, gate stem, or runner task.
@@ -294,7 +294,7 @@ These follow naturally after the current release handoff and preserve architectu
 | [INDEX.md](./INDEX.md) | **Start here** — full documentation map |
 | [README.md](../README.md) | Entry point + commands |
 | [START_HERE_CURSOR.md](../START_HERE_CURSOR.md) | Next coding agent onboarding |
-| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Hosted click path |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Hosted click path (manual smoke checklist) |
 | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | Pre-ship gates |
 | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | Scorers and CI contract |
 | [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Long-range vision (planning) |

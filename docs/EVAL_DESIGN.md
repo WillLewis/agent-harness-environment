@@ -2,7 +2,7 @@
 
 **Doc map:** [INDEX.md](./INDEX.md)
 
-For demo walkthrough and release verification, see [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) and [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md).
+For demo walkthrough and release verification, see [DEPLOYMENT.md](./DEPLOYMENT.md) § Post-deploy smoke checklist and [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md).
 
 ## Scoring stack
 

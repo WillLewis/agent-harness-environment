@@ -1,6 +1,6 @@
 # Agent Harness Environment — Hosted UX Plan
 
-> **Planning doc:** Interaction and IA specification. Core cockpit, eval table, and failure-cluster flows are **implemented** in `apps/web/`; use [INDEX.md](./INDEX.md) for reviewer paths and [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for the live walkthrough.
+> **Planning doc:** Interaction and IA specification. Core cockpit, eval table, and failure-cluster flows are **implemented** in `apps/web/`; use [INDEX.md](./INDEX.md) for reviewer paths and [DEPLOYMENT.md](./DEPLOYMENT.md) § Post-deploy smoke checklist for the live walkthrough.
 
 ## 1. UX summary
 
