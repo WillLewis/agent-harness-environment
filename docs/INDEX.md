@@ -10,7 +10,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 
 | I want to… | Read first | Then run |
 | --- | --- | --- |
-| **Demo the product in 5–10 min** | [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | `pnpm dev` → sticky nav or `#cockpit`, `#evals`, `#architecture` |
+| **Demo the product in 5–10 min** | [DEPLOYMENT.md](./DEPLOYMENT.md) § Post-deploy smoke checklist | `pnpm dev` → sticky nav or `#cockpit`, `#evals`, `#architecture` |
 | **Deploy hosted demo (review)** | [DEPLOYMENT.md](./DEPLOYMENT.md) | `pnpm deploy:check` → `pnpm build` → `pnpm preview` → `pnpm smoke:hosted:local` |
 | **Lovable UI migration (complete)** | [DESIGN_MIGRATION_LOVABLE.md](./DESIGN_MIGRATION_LOVABLE.md) | Numbered IA + operational shell; fixtures unchanged |
 | **Verify before handoff / PR** | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | `pnpm repo:status`, CI contract in README |
@@ -28,8 +28,7 @@ Canonical map for external reviewers, portfolio walkthroughs, and the next codin
 | Document | Purpose | When to read | Commands / artifacts |
 | --- | --- | --- | --- |
 | [README.md](../README.md) | Repo entry, fast start, command cheat sheet | First open; clone setup | `pnpm install`, `pnpm dev`, `pnpm eval:ci` |
-| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Click-by-click hosted walkthrough | Before a live demo or video | `data/traces/`, `data/evals/`, `#cockpit` |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Hosted demo deploy settings + smoke | Before Vercel/Netlify setup | `pnpm deploy:check`, `pnpm build`, `pnpm preview` |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Hosted demo deploy settings + manual smoke checklist | Before Vercel/Netlify setup or a live demo | `pnpm deploy:check`, `pnpm build`, `pnpm preview` |
 | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | Pre-release / portfolio verification | Before tag, PR, or external link | Full CI contract; §8 v0.1 release readiness |
 | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | v0.1 milestone summary | External reviewer handoff | Capabilities, limits, next phases |
 

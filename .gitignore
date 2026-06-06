@@ -31,3 +31,6 @@ __pycache__/
 runs/
 data/trace_candidates/
 data/datasets/generated_candidates.jsonl
+
+# Local-only demo walkthrough (not tracked)
+docs/DEMO_SCRIPT.md

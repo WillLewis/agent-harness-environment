@@ -11,7 +11,7 @@ Static/demo milestone handoff (no git tag created in-repo):
 | Step | Link / command |
 | --- | --- |
 | What v0.1 includes (and excludes) | [docs/RELEASE_NOTES_v0.1.md](docs/RELEASE_NOTES_v0.1.md) |
-| 5–10 min hosted walkthrough | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| 5–10 min hosted walkthrough | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Post-deploy smoke checklist |
 | Risks, backlog, non-claims | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
 | Deploy settings + HTML smoke | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
 | Pre-tag checklist | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) §8 |
@@ -36,9 +36,9 @@ For external reviewers or portfolio walkthroughs:
 
 | Goal | Command / link |
 | --- | --- |
-| Run hosted demo locally | `pnpm install` → `pnpm dev` → walk [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) or jump to `#cockpit`, `#evals`, `#architecture` |
+| Run hosted demo locally | `pnpm install` → `pnpm dev` → [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) manual checklist or jump to `#cockpit`, `#evals`, `#architecture` |
 | Deploy hosted demo (review) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel recommended; `pnpm deploy:check` then `pnpm build` |
-| Click-by-click script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Manual browser checklist | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Post-deploy smoke checklist |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
 | Score full static trace suite | `pnpm eval:suite` (table) or `pnpm eval:ci` (CI gate) |

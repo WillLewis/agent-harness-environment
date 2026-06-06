@@ -86,7 +86,7 @@ pnpm dev
 # Open printed URL → #cockpit for cockpit, #evals for eval table, #architecture for evidence
 ```
 
-Walkthrough: [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
+Walkthrough: [DEPLOYMENT.md](./DEPLOYMENT.md) § Post-deploy smoke checklist.
 
 **Deployment review (optional):** [DEPLOYMENT.md](./DEPLOYMENT.md) — run `pnpm deploy:check`, `pnpm build`, and `pnpm preview` locally before connecting a host. No platform secrets or deploy workflows are included in this repo.
 
@@ -137,7 +137,7 @@ Do not expect or promise:
 | --- | --- |
 | [README.md](../README.md) | Quick start + demo handoff links |
 | [RELEASE_NOTES_v0.1.md](./RELEASE_NOTES_v0.1.md) | v0.1 milestone handoff |
-| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Click-by-click hosted walkthrough |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Manual hosted walkthrough (post-deploy smoke checklist) |
 | [EVAL_DESIGN.md](./EVAL_DESIGN.md) | Scorers, suite gates, adapters |
 | [PRODUCT_PLAN.md](./PRODUCT_PLAN.md) | Product thesis and phased plan |
 | [UX_PLAN.md](./UX_PLAN.md) | Cockpit and eval UX intent |

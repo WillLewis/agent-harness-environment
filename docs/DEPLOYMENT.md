@@ -2,7 +2,7 @@
 
 Prepare the **static hosted demo** (`apps/web`) for deployment review. This repo does **not** ship a deployment workflow, platform secrets, or live URLs — reviewers configure hosting manually.
 
-**Doc map:** [INDEX.md](./INDEX.md) · **Local demo:** [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) · **Pre-ship gates:** [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)
+**Doc map:** [INDEX.md](./INDEX.md) · **Pre-ship gates:** [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md)
 
 ---
 
@@ -15,7 +15,7 @@ Prepare the **static hosted demo** (`apps/web`) for deployment review. This repo
 | Failure clusters, router fixture, cockpit UI | Local runner (`runs/`), MCP server |
 | Client-side policy/task toggles (static JSON replay) | Braintrust / Weave live upload |
 
-**Claims to keep accurate:** static fixtures, synthetic portfolio table, no browser API calls. See [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) opening narration.
+**Claims to keep accurate:** static fixtures, synthetic portfolio table, no browser API calls. The hosted page is fully static — no live LLM, runner, MCP, or external APIs in the browser.
 
 ---
 
@@ -114,7 +114,7 @@ Development server (hot reload): `pnpm dev`.
 
 `scripts/smoke_hosted_demo.py` fetches the page HTML and checks server-rendered shell signals (title, section anchors, static-demo copy, cockpit/eval/architecture headings, task-class labels). **No Playwright**, no screenshots, no external services.
 
-**Limitation:** validates the Next.js HTML shell only — it does **not** execute client JavaScript or verify policy-toggle interactivity. Use [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for manual click-through.
+**Limitation:** validates the Next.js HTML shell only — it does **not** execute client JavaScript or verify policy-toggle interactivity. Use the manual browser checklist below for click-through.
 
 ### Local (after preview)
 
@@ -186,8 +186,6 @@ After automated smoke passes, optionally verify in a browser:
 5. **Failure taxonomy** (`#failure-taxonomy`) — **Inspect cluster** opens the same drawer as eval-table red cells.
 6. **Failure drawer** — from taxonomy or eval table: click baseline loop or unsafe metric → cluster drawer opens; Escape or backdrop closes.
 7. **Offline** — after first load, toggles still work (all data bundled).
-
-Walkthrough detail (full numbered IA): [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
 
 ---
 

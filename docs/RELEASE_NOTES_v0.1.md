@@ -60,7 +60,7 @@ This milestone is for **review, demo, and extension** — not production agent h
 
 1. `pnpm install` && `pip install -r requirements-dev.txt`
 2. `pnpm dev` → use sticky nav or open `#cockpit`, `#evals`, `#architecture`
-3. Follow [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) — numbered IA from hero through takeaways; cockpit baseline → guarded recovery; failure taxonomy + eval drawer
+3. Follow [DEPLOYMENT.md](./DEPLOYMENT.md) manual browser checklist — numbered IA from hero through takeaways; cockpit baseline → guarded recovery; failure taxonomy + eval drawer
 
 **Narration anchor:** same model, same repo, same task — different harness, different outcome. Hosted page is **fixture replay only**.
 
@@ -166,7 +166,7 @@ Prioritized from [FINAL_AUDIT.md](./FINAL_AUDIT.md) §12 (updated for post–v0.
 | Doc | Use |
 | --- | --- |
 | [README.md](../README.md) | Fast start + v0.1 reviewer path |
-| [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) | Click-by-click walkthrough |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Manual browser walkthrough |
 | [RELEASE_CHECKLIST.md](./RELEASE_CHECKLIST.md) | Pre-tag / handoff gates |
 | [FINAL_AUDIT.md](./FINAL_AUDIT.md) | Risks + backlog |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Host settings + smoke |
