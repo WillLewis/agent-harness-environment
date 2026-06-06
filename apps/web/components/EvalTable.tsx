@@ -36,7 +36,7 @@ function MetricCell({ value, clickable, onClick, ariaLabel, variant = 'default' 
   return (
     <button
       type="button"
-      className="focus-ring rounded-md border border-danger/35 bg-danger/10 px-2 py-1 font-mono text-xs tabular-nums text-danger underline decoration-danger/40 underline-offset-2 hover:bg-danger/15"
+      className="focus-ring rounded font-mono text-xs tabular-nums text-warning underline decoration-dotted decoration-warning/60 underline-offset-2 transition-colors hover:text-text"
       onClick={onClick}
       aria-label={ariaLabel}
     >
@@ -74,7 +74,7 @@ export function EvalTable() {
               Synthetic policy comparison fixture with clickable baseline loop and unsafe-attempt metrics opening failure
               cluster drawers.
             </caption>
-            <thead className="bg-elevated font-mono text-[10px] uppercase tracking-wider text-text-faint">
+            <thead className="bg-surface-2/60 font-mono text-[10px] uppercase tracking-wider text-text-faint">
               <tr>
                 <th scope="col" className="px-4 py-3 sm:px-5">
                   Policy

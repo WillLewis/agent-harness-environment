@@ -148,36 +148,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 02 — Protocol */}
+      {/* 02 — Protocol / vocabulary */}
       <section id="protocol" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
         <SectionHeader
           chapter="02"
-          label="protocol"
-          title="The vocabulary we measure"
-          description="Every run emits the same typed events and is scored against the same metrics. Both ship in-repo as deterministic code."
+          label="vocabulary"
+          title="The protocol we measure"
+          description="Every run emits the same typed events and is scored against the same metrics. Both are deterministic — they ship in the repo as code, not vibes."
           className="mb-8"
         />
-        <div className="grid gap-6 lg:grid-cols-2">
-          <SurfaceCard>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-text-faint">events</h3>
-            <div className="mt-4 flex flex-wrap gap-2">
+        <div className="space-y-8">
+          <div>
+            <h3 className="font-mono text-[11px] uppercase tracking-wider text-text-faint">events</h3>
+            <div className="mt-3 flex flex-wrap gap-2">
               {protocolEvents.map((event) => (
-                <span
+                <code
                   key={event}
-                  className="rounded-md border border-border-subtle bg-code-bg px-2 py-1 font-mono text-[11px] text-accent-muted"
+                  className="rounded-md border border-border-subtle bg-surface-2/60 px-2 py-1 font-mono text-[11px] text-text"
                 >
                   {event}
-                </span>
+                </code>
               ))}
             </div>
-          </SurfaceCard>
-          <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-            {protocolCards.map(([title, body]) => (
-              <SurfaceCard key={title} className="p-4">
-                <h3 className="font-mono text-sm text-accent-muted">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-text-muted">{body}</p>
-              </SurfaceCard>
-            ))}
+          </div>
+
+          <div>
+            <h3 className="font-mono text-[11px] uppercase tracking-wider text-text-faint">metrics</h3>
+            <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {protocolCards.map(([title, body]) => (
+                <div key={title} className="rounded-lg border border-border-subtle bg-surface-2/40 p-3.5">
+                  <h4 className="font-mono text-sm text-text">{title}</h4>
+                  <p className="mt-1.5 text-sm leading-relaxed text-text-muted">{body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -198,58 +202,68 @@ export default function Home() {
 
       {/* 08 — Router */}
       <section id="router" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <SectionHeader
-              chapter="08"
-              label="rl-lite router"
-              title="Route the task to the policy with the highest expected reward."
-              description={
-                <>
-                  The router learns from local scored traces and exports this static fixture from{' '}
-                  <span className="font-mono text-text-muted">data/router_decisions.json</span>. It selects harness
-                  policy, not a coding model.
-                </>
-              }
-            />
-            <SurfaceCard className="mt-5">
-              <div className="font-mono text-[10px] uppercase tracking-wider text-accent-muted">selected</div>
-              <div className="mt-2 font-mono text-lg text-text">
-                {routerDecision.selectedPolicy}
-              </div>
-              <p className="mt-3 text-sm text-text-muted">{routerDecision.why}</p>
-            </SurfaceCard>
-          </div>
-          <SurfaceCard>
-            <div className="mb-4 grid gap-y-2 rounded-md border border-border bg-surface px-3 py-3">
+        <SectionHeader
+          chapter="08"
+          label="rl-lite router"
+          title="Route the task to the policy with the highest expected reward"
+          description={
+            <>
+              The router reads a few cheap features off the task and picks the policy with the highest expected reward —
+              scorers are the reward, traces are the data. This is a static fixture exported from{' '}
+              <span className="font-mono text-text-muted">data/router_decisions.json</span>; it selects a harness
+              policy, not a coding model.
+            </>
+          }
+          className="mb-8"
+        />
+        <div className="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
+          <SurfaceCard className="flex flex-col p-4 sm:p-5">
+            <div className="font-mono text-[11px] uppercase tracking-wider text-text-faint">inputs</div>
+            <dl className="mt-3 space-y-2">
               {Object.entries(routerDecision.taskFeatures).map(([key, value]) => (
-                <div key={key} className="flex min-w-0 items-baseline justify-between gap-4 font-mono text-xs">
-                  <span className="min-w-0 break-all text-text-faint">{key}</span>
-                  <span className="shrink-0 text-right text-text-muted">{value}</span>
+                <div key={key} className="flex items-baseline justify-between gap-4 text-xs">
+                  <dt className="min-w-0 break-words text-text-muted">{key.replace(/_/g, ' ')}</dt>
+                  <dd className="shrink-0 text-right font-mono text-text">{value}</dd>
                 </div>
               ))}
+            </dl>
+            <div className="mt-4 rounded-md border border-success/40 bg-success/10 p-3">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-success">selected</div>
+              <div className="mt-1 font-mono text-sm text-text">{routerDecision.selectedPolicy}</div>
+              <p className="mt-2 text-xs leading-relaxed text-text-muted [overflow-wrap:anywhere]">
+                {routerDecision.why}
+              </p>
             </div>
-            {routerDecision.expectedRewards.map(([policy, reward]) => (
-              <div key={policy} className="mb-4 last:mb-0">
-                <div className="mb-1 flex justify-between font-mono text-xs text-text-faint">
-                  <span>{policy}</span>
-                  <span>
-                    {reward.toFixed(2)}
-                    {routerDecision.policyStats[policy]?.count ? (
-                      <span className="ml-2 text-text-faint">n={routerDecision.policyStats[policy].count}</span>
-                    ) : null}
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-surface-raised">
-                  <div
-                    className={`h-2 rounded-full ${
-                      policy === routerDecision.selectedPolicy ? 'bg-accent' : 'bg-text-faint'
-                    }`}
-                    style={{ width: `${Math.min(100, reward * 100)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+          </SurfaceCard>
+
+          <SurfaceCard className="p-4 sm:p-5">
+            <div className="mb-4 font-mono text-[11px] uppercase tracking-wider text-text-faint">
+              expected reward by policy
+            </div>
+            <div className="space-y-3">
+              {routerDecision.expectedRewards.map(([policy, reward]) => {
+                const selected = policy === routerDecision.selectedPolicy;
+                return (
+                  <div key={policy}>
+                    <div className="mb-1 flex items-baseline justify-between font-mono text-xs">
+                      <span className={selected ? 'text-text' : 'text-text-muted'}>{policy}</span>
+                      <span className="text-text-muted">
+                        {reward.toFixed(2)}
+                        {routerDecision.policyStats[policy]?.count ? (
+                          <span className="ml-2 text-text-faint">n={routerDecision.policyStats[policy].count}</span>
+                        ) : null}
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+                      <div
+                        className={`h-full rounded-full ${selected ? 'bg-success' : 'bg-text-faint/60'}`}
+                        style={{ width: `${Math.min(100, reward * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </SurfaceCard>
         </div>
       </section>

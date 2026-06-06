@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import clsx from 'clsx';
+import { ChevronRight } from 'lucide-react';
 import {
   failureClusters,
   getFailureCluster,
@@ -9,8 +9,6 @@ import {
 } from '../lib/evalFixtures';
 import { FailureClusterDrawer } from './FailureClusterDrawer';
 import { SectionHeader } from './SectionHeader';
-import { SurfaceCard } from './ui/SurfaceCard';
-import { severityBadgeClass } from '../lib/statusStyles';
 
 export function FailureTaxonomySection() {
   const [clusterId, setClusterId] = useState<FailureClusterId | null>(null);
@@ -39,31 +37,25 @@ export function FailureTaxonomySection() {
         />
         <div className="grid gap-3 md:grid-cols-2">
           {failureClusters.map((cluster) => (
-            <SurfaceCard key={cluster.id} className="flex flex-col">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <h3 className="text-base font-semibold text-text">{cluster.label}</h3>
-                <span
-                  className={clsx(
-                    'rounded-md border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide',
-                    severityBadgeClass(cluster.severity)
-                  )}
-                >
-                  {cluster.severity}
+            <button
+              key={cluster.id}
+              type="button"
+              onClick={() => setClusterId(cluster.id)}
+              aria-label={`Inspect failure cluster: ${cluster.label}`}
+              className="focus-ring group flex flex-col rounded-xl border border-border-subtle bg-surface/50 p-4 text-left transition-colors hover:bg-surface-2/60 sm:p-5"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-base font-medium text-text">{cluster.label}</h3>
+                <span className="shrink-0 rounded-md border border-border-subtle bg-surface-2 px-2 py-0.5 font-mono text-[10px] text-text-muted">
+                  {cluster.frequency} hits
                 </span>
               </div>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-text-muted">{cluster.pattern}</p>
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <span className="font-mono text-xs text-text-faint">{cluster.frequency} fixture hits</span>
-                <button
-                  type="button"
-                  className="focus-ring rounded-md border border-border-subtle bg-surface-2 px-3 py-1.5 font-mono text-xs text-accent-muted hover:bg-surface-raised"
-                  onClick={() => setClusterId(cluster.id)}
-                  aria-label={`Inspect failure cluster: ${cluster.label}`}
-                >
-                  Inspect cluster
-                </button>
+              <p className="mt-1.5 flex-1 text-sm leading-relaxed text-text-muted">{cluster.pattern}</p>
+              <div className="mt-3 inline-flex items-center gap-1 text-xs text-accent-muted">
+                Inspect cluster
+                <ChevronRight className="size-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </div>
-            </SurfaceCard>
+            </button>
           ))}
         </div>
       </section>

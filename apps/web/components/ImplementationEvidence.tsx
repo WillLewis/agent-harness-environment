@@ -1,7 +1,5 @@
 import {
-  cursorArtifacts,
   implementationStats,
-  keyCommands,
   statusLabels,
   systemCapabilities,
   type CapabilityStatus
@@ -105,53 +103,6 @@ export function ImplementationEvidence() {
             );
           })}
         </ul>
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-        <SurfaceCard>
-          <h3 className="text-base font-semibold text-text">Verification commands</h3>
-          <p className="mt-1.5 text-xs leading-relaxed text-text-muted sm:text-sm">
-            Same gates as CI (<code className="text-accent-muted">.github/workflows/ci.yml</code>) plus optional export
-            previews.
-          </p>
-          <ul className="mt-3 space-y-2">
-            {keyCommands.map(({ label, command }) => (
-              <li key={command} className="rounded-lg border border-border-subtle bg-code-bg p-2.5">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-text-faint">{label}</p>
-                <p className="mt-1 break-all font-mono text-xs text-text-muted">{command}</p>
-              </li>
-            ))}
-          </ul>
-        </SurfaceCard>
-        <SurfaceCard>
-          <h3 className="text-base font-semibold text-text">Hosted vs local</h3>
-          <ul className="mt-3 space-y-3 text-xs leading-relaxed text-text-muted sm:text-sm">
-            <li>
-              <strong className="font-medium text-text">Hosted (this page):</strong> imports{' '}
-              <span className="font-mono text-accent-muted">data/traces/*.json</span> and{' '}
-              <span className="font-mono text-accent-muted">data/evals/</span> at build time. Cockpit replay only.
-            </li>
-            <li>
-              <strong className="font-medium text-text">Local eval:</strong>{' '}
-              <span className="font-mono text-accent-muted">packages/evals/</span> scores fixtures;{' '}
-              <span className="font-mono text-accent-muted">pnpm eval:ci</span> fails on regression.
-            </li>
-            <li>
-              <strong className="font-medium text-text">Adapters:</strong> Braintrust and Weave export shapes are
-              previewed via dry-run — no API key required for development or CI.
-            </li>
-          </ul>
-          <div className="mt-5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Cursor workflow artifacts</p>
-            <ul className="mt-2 grid gap-1.5 font-mono text-[11px] text-text-muted sm:grid-cols-2">
-              {cursorArtifacts.map((item) => (
-                <li key={item} className="rounded-md border border-border-subtle bg-code-bg px-2.5 py-1.5">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </SurfaceCard>
       </div>
     </section>
   );
