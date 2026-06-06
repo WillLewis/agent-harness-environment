@@ -1,6 +1,6 @@
 # Design migration — Lovable reference → AHE hosted app
 
-**Status:** **Complete** (Slices 1–5, 2026-06) — hosted demo restyled; fixtures, scorers, runner, and smoke contract unchanged  
+**Status:** **Structurally complete + visual parity pass applied** (Slices 1–5 + QA pass, 2026-06) — hosted demo restyled and re-aligned to the Lovable reference after a browser QA review found residual gaps; fixtures, scorers, runner, and smoke contract unchanged  
 **Reference:** [harness-inspector.lovable.app](https://harness-inspector.lovable.app)  
 **Target:** `apps/web` static hosted demo  
 **Constraint:** Preserve data model, interactions, and static/local-only claims
@@ -8,6 +8,44 @@
 **Related:** [UX_PLAN.md](./UX_PLAN.md) · [DEPLOYMENT.md](./DEPLOYMENT.md) (committed demo walkthrough — post-deploy manual smoke checklist)
 
 **Note:** An optional extended walkthrough may exist locally as `docs/DEMO_SCRIPT.md` (gitignored, not tracked). Fresh clones should use [DEPLOYMENT.md](./DEPLOYMENT.md) only.
+
+---
+
+## Visual QA / parity pass (2026-06)
+
+A side-by-side browser QA review (local vs Lovable at 1440×1100 and 390×844) found the
+earlier slices were structurally complete but **visually diverged** from the reference in
+several places. This pass closes those gaps. It is intentionally a **visual/density-only**
+pass — no runner, eval, scorer, fixture, trace-semantics, or CI changes.
+
+### Gaps found and fixed
+
+| # | Gap (before) | Fix (after) |
+| --- | --- | --- |
+| 1 | Hero used a split layout with a right-side metric/code rail | Title-first hero: badge → large `Agent Harness Environment` → `A flight recorder for coding agents.` subtitle → static-demo support line → support tagline → CTA row → compact fixture metric tiles. Dense hero code panel removed (the trace narrative lives in the cockpit). |
+| 2 | Square grid background dominated the page | Switched body shell to a subtle dotted field (`.page-dot-bg`) + masked `.dot-bg` hero accent; legacy `.page-grid-bg` retained but unused. |
+| 3 | Nav was `AHE` + terse labels + status chip | `SiteNav` now matches Lovable: small cyan dot + `agent-harness`, full desktop labels (Why Harnesses Matter / Tasks / Cockpit / Evals / Architecture), and a GitHub affordance. |
+| 4 | Mobile first viewport showed the dense code/metric rail too early | Hero is single-column on mobile; desktop nav links collapse (brand + GitHub icon only, no clipped labels); compact metric tiles remain visible; no code-panel overload. |
+| 5 | Anchored sections could land with headings clipped under the sticky nav | `--nav-height` token (3.5rem fixed-height nav) drives `scroll-padding-top` / `scroll-margin-top` (`+0.75rem`); headings now land cleanly below the nav. |
+| — | Router task-feature grid overlapped long mono keys with values | Single-row layout with `min-w-0` / `truncate` keys and `shrink-0` values (in `page.tsx`). |
+
+### Preserved (unchanged behavior / contract)
+
+- Cockpit: play/step controls, autoplay token, steering branch at `loop_detected`, Apply steering → assisted branch, evidence tabs (`f t d j r`), policy choices, verdict stamp, metrics, keyboard shortcuts (`[ ]`, `1–n`, `← →`).
+- Eval table: clickable baseline loop / unsafe cells open the failure-cluster drawer; synthetic-fixture disclaimers kept visible.
+- Failure taxonomy + drawer wiring, focus trap, Escape, body scroll lock.
+- All smoke-required strings/anchors (see Appendix A) — smoke remains 11/11.
+
+### Browser QA checklist (manual — smoke only validates SSR strings/IDs)
+
+- [x] Local vs Lovable hero hierarchy at 1440×1100 (badge / title / subtitle / CTAs / metric tiles).
+- [x] Local vs Lovable at 390×844 — no clipped nav labels, no overlapping text, no first-viewport code overload.
+- [x] `/#tasks`, `/#cockpit`, `/#evals`, `/#architecture` headings land cleanly below the sticky nav.
+- [x] Cockpit **Play** advances steps.
+- [x] Steering branch appears at the loop; **Apply steering** switches to the assisted branch (verdict → `ACCEPTED WITH STEERING`).
+- [x] Baseline loop / unsafe eval cells open the failure-cluster drawer.
+
+**Files touched in this pass:** `apps/web/app/page.tsx`, `apps/web/app/globals.css`, `apps/web/app/layout.tsx` (body bg class), `apps/web/components/SiteNav.tsx`, `docs/DESIGN_MIGRATION_LOVABLE.md`. Cockpit / eval table / taxonomy / drawer were reviewed and already aligned with the token system, so were left functionally and stylistically intact.
 
 ---
 

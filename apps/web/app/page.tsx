@@ -73,71 +73,59 @@ const heroMetrics = [
 
 export default function Home() {
   return (
-    <main id="top" className="min-w-0">
+    <main className="min-w-0">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border-subtle px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto grid min-w-0 max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
-          <div className="min-w-0">
-            <p className="font-mono text-sm font-semibold tracking-tight text-text sm:text-base">
-              Agent Harness Environment
-            </p>
-            <h1 className="mt-4 max-w-4xl text-4xl font-bold tracking-tight text-text sm:text-5xl lg:text-6xl">
-              A flight recorder for coding agents.
-            </h1>
-            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-muted sm:text-base">
-              <span className="text-text">Static hosted demo</span>: replay precomputed traces for bugfix,
-              adversarial safety, and multi-agent contract tasks. <span className="text-text">No live LLM</span>,
-              runner, or API calls in the browser.
-            </p>
-            <p className="mt-4 font-mono text-xs text-accent-muted sm:text-sm">
-              Same model. Same repo. Same task. Different harness. Different outcome.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <a href="#cockpit" className="btn-primary">
-                Replay the failure
-              </a>
-              <a href="#evals" className="btn-secondary">
-                View eval report
-              </a>
-              <a href="#architecture" className="btn-secondary">
-                Implementation map
-              </a>
-            </div>
+      <section id="top" className="relative overflow-hidden border-b border-border-subtle">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 dot-bg opacity-70 [mask-image:radial-gradient(110%_85%_at_50%_0%,black,transparent)]"
+        />
+        <div className="relative mx-auto min-w-0 max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+          <span className="inline-flex items-center rounded-full border border-border-subtle bg-surface px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-text-faint">
+            Hosted demo · precomputed traces
+          </span>
+          <h1 className="mt-5 max-w-4xl text-4xl font-bold tracking-tight text-text sm:text-5xl lg:text-6xl">
+            Agent Harness Environment
+          </h1>
+          <p className="mt-4 max-w-3xl text-xl font-medium tracking-tight text-text-muted sm:text-2xl">
+            A flight recorder for coding agents.
+          </p>
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-muted sm:text-base">
+            <span className="text-text">Static hosted demo</span>: replay precomputed traces for bugfix,
+            adversarial safety, and multi-agent contract tasks. <span className="text-text">No live LLM</span>,
+            runner, or API calls in the browser.
+          </p>
+          <p className="mt-4 font-mono text-xs text-accent-muted sm:text-sm">
+            Same model. Same repo. Same task. Different harness. Different outcome.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#cockpit" className="btn-primary">
+              Replay the failure
+            </a>
+            <a href="#evals" className="btn-secondary">
+              View eval report
+            </a>
+            <a href="#architecture" className="btn-secondary">
+              Implementation map
+            </a>
           </div>
 
-          <div className="min-w-0 space-y-4">
-            <SurfaceCard raised className="p-4 sm:p-5">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
-                Fixture illustration · bugfix task
-              </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                {heroMetrics.map((metric) => (
-                  <div key={metric.label} className="rounded-lg border border-border-subtle bg-code-bg px-3 py-2.5">
-                    <div className="font-mono text-[10px] text-text-faint">{metric.label}</div>
-                    <div className="mt-1.5 flex items-baseline gap-2 font-mono text-sm">
-                      <span className="text-danger">{metric.baseline}</span>
-                      <span className="text-text-faint">→</span>
-                      <span className="text-success">{metric.guarded}</span>
-                    </div>
+          <div className="mt-12 max-w-3xl">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
+              Fixture illustration · bugfix task · baseline → guarded recovery
+            </p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {heroMetrics.map((metric) => (
+                <div key={metric.label} className="rounded-lg border border-border-subtle bg-surface/60 px-3 py-2.5">
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-text-faint">{metric.label}</div>
+                  <div className="mt-1.5 flex items-baseline gap-2 font-mono text-sm">
+                    <span className="text-danger line-through decoration-danger/40">{metric.baseline}</span>
+                    <span className="text-text-faint">→</span>
+                    <span className="text-base text-success">{metric.guarded}</span>
                   </div>
-                ))}
-              </div>
-            </SurfaceCard>
-
-            <SurfaceCard className="p-4 sm:p-5">
-              <pre className="code-panel max-h-56 p-4 font-mono text-[11px] leading-6 sm:max-h-none sm:text-xs">{`task: fix timezone parser regression
-policy: baseline
-step 04  TEST_FAIL     npm test -- dateParser
-step 05  TEST_FAIL     repeated without evidence
-label    loop_detected
-judge    rejected
-
-policy: guarded_recovery
-step 03  READ_TEST     tests/dateParser.test.ts
-step 04  READ_FILE     src/dateParser.ts
-step 07  INSPECT_ERROR forced by harness
-step 09  TEST_PASS     accepted`}</pre>
-            </SurfaceCard>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -233,11 +221,11 @@ step 09  TEST_PASS     accepted`}</pre>
             </SurfaceCard>
           </div>
           <SurfaceCard>
-            <div className="mb-4 grid gap-2 rounded-md border border-border bg-surface px-3 py-3 sm:grid-cols-2">
+            <div className="mb-4 grid gap-y-2 rounded-md border border-border bg-surface px-3 py-3">
               {Object.entries(routerDecision.taskFeatures).map(([key, value]) => (
-                <div key={key} className="flex justify-between gap-4 font-mono text-xs">
-                  <span className="text-text-faint">{key}</span>
-                  <span className="text-right text-text-muted">{value}</span>
+                <div key={key} className="flex min-w-0 items-baseline justify-between gap-4 font-mono text-xs">
+                  <span className="min-w-0 break-all text-text-faint">{key}</span>
+                  <span className="shrink-0 text-right text-text-muted">{value}</span>
                 </div>
               ))}
             </div>

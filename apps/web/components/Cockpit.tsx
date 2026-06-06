@@ -13,6 +13,7 @@ import {
   cockpitTaskOrder,
   DEFAULT_TASK_ID,
   getCockpitTask,
+  routerDecisions,
   type EvidenceTab,
   type PolicyId,
   type TaskId,
@@ -25,6 +26,35 @@ type CockpitProps = {
   onTaskChange: (taskId: TaskId) => void;
   autoplayToken: number;
 };
+
+type StaticPolicyId = 'test_first' | 'context_first' | 'rl_lite_router';
+type CockpitPolicyId = PolicyId | StaticPolicyId;
+
+const staticPolicyMeta: Record<StaticPolicyId, { name: string; description: string; badge: string }> = {
+  test_first: {
+    name: 'Test-first',
+    description: 'Requires test discovery or test inspection before code edits.',
+    badge: 'static'
+  },
+  context_first: {
+    name: 'Context-first',
+    description: 'Requires relevant source context before patching.',
+    badge: 'static'
+  },
+  rl_lite_router: {
+    name: 'RL-lite router',
+    description: 'Selects a harness policy based on task features and reward history.',
+    badge: 'router'
+  }
+};
+
+const basePolicyOptionOrder: CockpitPolicyId[] = [
+  'baseline',
+  'test_first',
+  'context_first',
+  'guarded_recovery',
+  'rl_lite_router'
+];
 
 function verdictLabel(verdict: string) {
   if (verdict === 'accepted') return 'ACCEPTED BY JUDGE';
@@ -46,6 +76,62 @@ function resolvePolicyRun(taskId: TaskId, policyId: PolicyId) {
   return run;
 }
 
+function isReplayPolicyId(policyId: string): policyId is PolicyId {
+  return policyId === 'baseline' || policyId === 'guarded_recovery' || policyId === 'baseline_with_steering';
+}
+
+function policyOptionOrder(taskId: TaskId): CockpitPolicyId[] {
+  const task = getCockpitTask(taskId);
+  if (task.policies.baseline_with_steering) {
+    return [
+      'baseline',
+      'test_first',
+      'context_first',
+      'guarded_recovery',
+      'baseline_with_steering',
+      'rl_lite_router'
+    ];
+  }
+  return basePolicyOptionOrder;
+}
+
+function routerDecisionForTask(taskId: TaskId) {
+  return routerDecisions.find((decision) => decision.taskId === taskId);
+}
+
+function replayPolicyForOption(taskId: TaskId, policyOptionId: CockpitPolicyId): PolicyId {
+  const task = getCockpitTask(taskId);
+  if (isReplayPolicyId(policyOptionId) && task.policies[policyOptionId]) {
+    return policyOptionId;
+  }
+  if (policyOptionId === 'rl_lite_router') {
+    const selected = routerDecisionForTask(taskId)?.selectedPolicy;
+    if (selected && isReplayPolicyId(selected) && task.policies[selected]) {
+      return selected;
+    }
+  }
+  return task.policies.guarded_recovery ? 'guarded_recovery' : 'baseline';
+}
+
+function policyDisplayName(policyId: string): string {
+  if (policyId === 'baseline') return 'Baseline';
+  if (policyId === 'guarded_recovery') return 'Guarded recovery';
+  if (policyId === 'baseline_with_steering') return 'Baseline with steering';
+  if (policyId === 'test_first') return staticPolicyMeta.test_first.name;
+  if (policyId === 'context_first') return staticPolicyMeta.context_first.name;
+  if (policyId === 'rl_lite_router') return staticPolicyMeta.rl_lite_router.name;
+  return policyId.replace(/_/g, ' ');
+}
+
+function policyOptionMeta(taskId: TaskId, policyOptionId: CockpitPolicyId) {
+  const task = getCockpitTask(taskId);
+  if (isReplayPolicyId(policyOptionId) && task.policies[policyOptionId]) {
+    const run = task.policies[policyOptionId]!;
+    return { name: run.name, description: run.description, badge: null };
+  }
+  return staticPolicyMeta[policyOptionId as StaticPolicyId];
+}
+
 function firstTabForRun(taskId: TaskId, policyId: PolicyId) {
   const task = getCockpitTask(taskId);
   const run = resolvePolicyRun(taskId, policyId);
@@ -55,7 +141,7 @@ function firstTabForRun(taskId: TaskId, policyId: PolicyId) {
 
 export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitProps) {
   const reduceMotion = useReducedMotion();
-  const [policyId, setPolicyId] = useState<PolicyId>('baseline');
+  const [policyOptionId, setPolicyOptionId] = useState<CockpitPolicyId>('baseline');
   const [activeStep, setActiveStep] = useState(1);
   const [tab, setTab] = useState<EvidenceTab>('terminal');
   const [playing, setPlaying] = useState(false);
@@ -63,14 +149,25 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
   const timerRef = useRef<number | null>(null);
 
   const task = getCockpitTask(activeTaskId);
-  const run = resolvePolicyRun(activeTaskId, policyId);
+  const options = useMemo(() => policyOptionOrder(activeTaskId), [activeTaskId]);
+  const replayPolicyId = replayPolicyForOption(activeTaskId, policyOptionId);
+  const routerDecision = routerDecisionForTask(activeTaskId);
+  const run = resolvePolicyRun(activeTaskId, replayPolicyId);
   const activeEvent = useMemo(() => findEvent(run.events, activeStep), [run.events, activeStep]);
-  const replayKey = `${activeTaskId}-${policyId}`;
+  const replayKey = `${activeTaskId}-${policyOptionId}-${replayPolicyId}`;
   const loopSteeringAvailable =
     activeTaskId === DEFAULT_TASK_ID &&
-    policyId === 'baseline' &&
+    policyOptionId === 'baseline' &&
     activeEvent?.label === 'loop_detected' &&
     !steeringDeclined;
+  const selectedPolicyHasReplay = isReplayPolicyId(policyOptionId) && replayPolicyId === policyOptionId;
+  const selectedPolicyName = policyDisplayName(policyOptionId);
+  const replayPolicyName = policyDisplayName(replayPolicyId);
+  const routerSelectedPolicy = routerDecision?.selectedPolicy;
+  const routerSelectedHasReplay =
+    routerSelectedPolicy !== undefined &&
+    isReplayPolicyId(routerSelectedPolicy) &&
+    Boolean(task.policies[routerSelectedPolicy]);
 
   const setStepAndTab = useCallback(
     (step: number, options?: { keepPlaying?: boolean }) => {
@@ -93,14 +190,19 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
   );
 
   const selectPolicy = useCallback(
-    (next: PolicyId, options?: { autoplay?: boolean }) => {
-      const nextRun = resolvePolicyRun(activeTaskId, next);
+    (next: CockpitPolicyId, nextOptions?: { autoplay?: boolean }) => {
+      const nextReplayPolicy = replayPolicyForOption(activeTaskId, next);
+      const nextRun = resolvePolicyRun(activeTaskId, nextReplayPolicy);
       const firstEvent = nextRun.events[0];
-      setPolicyId(next);
+      setPolicyOptionId(next);
       setActiveStep(1);
       setSteeringDeclined(false);
-      setTab(firstEvent ? tabForEvent(firstEvent) : defaultTabForRun(next, activeTaskId, nextRun.events));
-      setPlaying(Boolean(options?.autoplay));
+      setTab(
+        firstEvent
+          ? tabForEvent(firstEvent)
+          : defaultTabForRun(nextReplayPolicy, activeTaskId, nextRun.events)
+      );
+      setPlaying(Boolean(nextOptions?.autoplay));
     },
     [activeTaskId]
   );
@@ -109,12 +211,12 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
     setActiveStep(1);
     setSteeringDeclined(false);
     setPlaying(false);
-    setTab(firstTabForRun(activeTaskId, policyId));
-  }, [activeTaskId, policyId]);
+    setTab(firstTabForRun(activeTaskId, replayPolicyId));
+  }, [activeTaskId, replayPolicyId]);
 
   useEffect(() => {
     const defaultPolicy = getCockpitTask(activeTaskId).defaultPolicyId;
-    setPolicyId(defaultPolicy);
+    setPolicyOptionId(defaultPolicy);
     setActiveStep(1);
     setSteeringDeclined(false);
     setPlaying(false);
@@ -123,7 +225,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
   useEffect(() => {
     if (autoplayToken <= 0) return;
-    setPolicyId('baseline');
+    setPolicyOptionId('baseline');
     setActiveStep(1);
     setSteeringDeclined(false);
     setTab(firstTabForRun(activeTaskId, 'baseline'));
@@ -159,9 +261,9 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
       }
 
       const policyIndex = Number(event.key) - 1;
-      if (policyIndex >= 0 && policyIndex < task.policyOrder.length) {
+      if (policyIndex >= 0 && policyIndex < options.length) {
         event.preventDefault();
-        selectPolicy(task.policyOrder[policyIndex]);
+        selectPolicy(options[policyIndex]);
         return;
       }
 
@@ -181,7 +283,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeStep, activeTaskId, selectPolicy, selectTask, setStepAndTab, task.policyOrder]);
+  }, [activeStep, activeTaskId, options, selectPolicy, selectTask, setStepAndTab]);
 
   useEffect(() => {
     if (!playing) return;
@@ -213,7 +315,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
   function applySteering() {
     const steeringRun = resolvePolicyRun(DEFAULT_TASK_ID, 'baseline_with_steering');
     const steeringEvent = steeringRun.events.find((event) => event.action === 'ASK_USER') ?? steeringRun.events[0];
-    setPolicyId('baseline_with_steering');
+    setPolicyOptionId('baseline_with_steering');
     setSteeringDeclined(false);
     setActiveStep(steeringEvent.step);
     setTab(tabForEvent(steeringEvent));
@@ -309,35 +411,67 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
                   Policy
                 </div>
                 <div className="mt-2 space-y-1.5" role="group" aria-labelledby="cockpit-policy-label">
-                  {task.policyOrder.map((id, index) => {
-                    const policyRun = task.policies[id];
-                    if (!policyRun) return null;
+                  {options.map((id, index) => {
+                    const meta = policyOptionMeta(activeTaskId, id);
                     return (
                       <button
                         key={id}
                         type="button"
-                        aria-pressed={id === policyId}
-                        aria-label={`${policyRun.name}. ${policyRun.description}`}
+                        aria-pressed={id === policyOptionId}
+                        aria-label={`${meta.name}. ${meta.description}`}
                         onClick={() => selectPolicy(id)}
                         className={clsx(
                           'focus-ring w-full rounded-md border px-2.5 py-2 text-left text-xs transition',
-                          id === policyId ? selectableActiveClass : selectableIdleClass
+                          id === policyOptionId ? selectableActiveClass : selectableIdleClass
                         )}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium text-text">{policyRun.name}</span>
-                          <span className="font-mono text-[10px] text-text-faint">{index + 1}</span>
+                          <span className="font-medium text-text">{meta.name}</span>
+                          <span className="flex items-center gap-1">
+                            {meta.badge ? (
+                              <span className="rounded border border-border-subtle px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-text-faint">
+                                {meta.badge}
+                              </span>
+                            ) : null}
+                            <span className="font-mono text-[10px] text-text-faint">{index + 1}</span>
+                          </span>
                         </div>
-                        <p className="mt-0.5 leading-snug text-text-faint">{policyRun.description}</p>
+                        <p className="mt-0.5 leading-snug text-text-faint">{meta.description}</p>
                       </button>
                     );
                   })}
                 </div>
               </div>
 
+              {!selectedPolicyHasReplay ? (
+                <div className="rounded-md border border-info/35 bg-info/10 px-3 py-2 text-xs leading-relaxed text-info">
+                  {policyOptionId === 'rl_lite_router' ? (
+                    <>
+                      Router decision: selected{' '}
+                      <span className="font-mono">{policyDisplayName(routerSelectedPolicy ?? replayPolicyId)}</span>
+                      {routerSelectedHasReplay ? (
+                        <>. Replaying that policy trace.</>
+                      ) : (
+                        <>
+                          . No promoted <span className="font-mono">{policyDisplayName(routerSelectedPolicy ?? '')}</span>{' '}
+                          trace exists yet, so the cockpit shows the{' '}
+                          <span className="font-mono">{replayPolicyName}</span> representative trace.
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      Static policy: <span className="font-mono">{selectedPolicyName}</span> exists in the policy
+                      catalog and eval report, but has no promoted replay trace yet. Showing the{' '}
+                      <span className="font-mono">{replayPolicyName}</span> representative trace.
+                    </>
+                  )}
+                </div>
+              ) : null}
+
               <p id="cockpit-task-hint" className="text-[10px] leading-4 text-text-faint">
                 Keyboard: <span className="font-mono">[ ]</span> tasks ·{' '}
-                <span className="font-mono">1-{task.policyOrder.length}</span> policies ·{' '}
+                <span className="font-mono">1-{options.length}</span> policies ·{' '}
                 <span className="font-mono">← →</span> steps · <span className="font-mono">f t d j r</span> evidence tabs
               </p>
             </aside>
@@ -403,7 +537,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
             <aside className="min-w-0 space-y-3">
               <VerdictStamp
-                policyKey={`${activeTaskId}-${policyId}`}
+                policyKey={`${activeTaskId}-${policyOptionId}-${replayPolicyId}`}
                 verdict={run.verdict}
                 label={verdictLabel(run.verdict)}
                 reason={run.primaryReason}

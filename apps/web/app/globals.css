@@ -49,6 +49,10 @@
   /* Nav */
   --color-nav-bg: oklch(0.18 0.015 250 / 0.82);
   --color-grid-line: oklch(1 0 0 / 0.04);
+  --color-dot: oklch(1 0 0 / 0.05);
+
+  /* Sticky nav offset for anchored scrolling */
+  --nav-height: 3.5rem;
 }
 
 * {
@@ -57,12 +61,12 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 3.75rem;
+  scroll-padding-top: calc(var(--nav-height) + 0.75rem);
 }
 
 section[id],
 main[id] {
-  scroll-margin-top: 3.75rem;
+  scroll-margin-top: calc(var(--nav-height) + 0.75rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,7 +101,7 @@ code {
   font-family: var(--font-mono);
 }
 
-/* Subtle operational grid behind content */
+/* Subtle operational grid behind content (legacy, kept for reference) */
 .page-grid-bg {
   background-color: var(--color-bg-page);
   background-image:
@@ -105,6 +109,20 @@ code {
     linear-gradient(90deg, var(--color-grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   background-position: center top;
+}
+
+/* Subtle dotted field behind the page shell (Lovable parity) */
+.page-dot-bg {
+  background-color: var(--color-bg-page);
+  background-image: radial-gradient(var(--color-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: center top;
+}
+
+/* Dotted overlay used as an absolutely-positioned hero accent */
+.dot-bg {
+  background-image: radial-gradient(var(--color-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
 @layer components {

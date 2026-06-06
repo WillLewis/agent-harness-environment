@@ -1,11 +1,14 @@
+import { Github } from 'lucide-react';
+
 const navLinks = [
-  { href: '#premise', label: 'Why' },
-  { href: '#protocol', label: 'Protocol' },
+  { href: '#premise', label: 'Why Harnesses Matter' },
   { href: '#tasks', label: 'Tasks' },
   { href: '#cockpit', label: 'Cockpit' },
   { href: '#evals', label: 'Evals' },
   { href: '#architecture', label: 'Architecture' }
 ] as const;
+
+const GITHUB_URL = 'https://github.com';
 
 export function SiteNav() {
   return (
@@ -13,38 +16,45 @@ export function SiteNav() {
       className="sticky top-0 z-50 border-b border-border-subtle backdrop-blur-md"
       style={{ backgroundColor: 'var(--color-nav-bg)' }}
     >
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:flex-nowrap sm:gap-4 sm:px-6 sm:py-3 lg:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <a
           href="#top"
-          className="focus-ring shrink-0 rounded-md font-mono text-xs font-semibold tracking-tight text-text sm:text-sm"
+          className="focus-ring flex shrink-0 items-center gap-2 rounded-md font-mono text-sm font-medium text-text"
         >
-          AHE
+          <span className="size-2 rounded-sm bg-accent" aria-hidden="true" />
+          agent-harness
         </a>
 
-        <nav aria-label="Page sections" className="nav-scroll min-w-0 flex-1 overflow-x-auto">
-          <ul className="flex w-max min-w-full items-center gap-0.5 sm:gap-1">
-            {navLinks.map(({ href, label }) => (
-              <li key={href} className="shrink-0">
-                <a
-                  href={href}
-                  className="focus-ring inline-flex min-h-9 items-center rounded-md px-2.5 py-1.5 font-mono text-[11px] text-text-muted transition hover:text-text sm:px-3 sm:text-xs"
-                >
-                  {label}
-                </a>
-              </li>
-            ))}
-          </ul>
+        <nav aria-label="Page sections" className="hidden items-center gap-0.5 md:flex">
+          {navLinks.map(({ href, label }) => (
+            <a
+              key={href}
+              href={href}
+              className="focus-ring rounded-md px-3 py-1.5 text-sm text-text-muted transition hover:bg-surface-2 hover:text-text"
+            >
+              {label}
+            </a>
+          ))}
+          <a
+            href={GITHUB_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="focus-ring ml-1 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm text-text-muted transition hover:bg-surface-2 hover:text-text"
+          >
+            <Github className="size-4" aria-hidden="true" />
+            GitHub
+          </a>
         </nav>
 
-        <p
-          className="hidden shrink-0 rounded-md border border-border-subtle bg-surface px-2 py-1 font-mono text-[9px] text-text-faint sm:block lg:hidden"
-          aria-label="Hosted demo with precomputed traces"
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="focus-ring inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs text-text-muted transition hover:bg-surface-2 hover:text-text md:hidden"
+          aria-label="View source on GitHub"
         >
-          Static demo
-        </p>
-        <p className="hidden shrink-0 rounded-md border border-border-subtle bg-surface px-2.5 py-1 font-mono text-[10px] text-text-faint lg:block">
-          Hosted demo · precomputed traces
-        </p>
+          <Github className="size-4" aria-hidden="true" />
+        </a>
       </div>
     </header>
   );
