@@ -9,41 +9,46 @@
   --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
 
   /* Page & surfaces (OKLCH) */
-  --color-bg-page: oklch(0.11 0.014 252);
-  --color-bg-elevated: oklch(0.14 0.016 252);
-  --color-surface: oklch(0.16 0.018 252 / 0.55);
-  --color-surface-2: oklch(0.19 0.02 252 / 0.72);
-  --color-surface-raised: oklch(0.22 0.022 252 / 0.45);
+  --color-bg-page: oklch(0.18 0.015 250);
+  --color-bg-elevated: oklch(0.2 0.016 250);
+  --color-surface: oklch(0.22 0.018 250 / 0.6);
+  --color-surface-2: oklch(0.26 0.02 250 / 0.7);
+  --color-surface-raised: oklch(0.3 0.02 250 / 0.62);
 
   /* Borders */
-  --color-border: oklch(0.38 0.02 252 / 0.28);
-  --color-border-subtle: oklch(0.32 0.018 252 / 0.16);
+  --color-border: oklch(1 0 0 / 0.12);
+  --color-border-subtle: oklch(1 0 0 / 0.08);
 
   /* Text */
-  --color-text: oklch(0.96 0.008 252);
-  --color-text-muted: oklch(0.74 0.02 252);
-  --color-text-faint: oklch(0.56 0.022 252);
+  --color-text: oklch(0.96 0.005 250);
+  --color-text-muted: oklch(0.7 0.02 250);
+  --color-text-faint: oklch(0.58 0.02 250);
 
   /* Accent — teal/cyan, used sparingly */
-  --color-accent: oklch(0.82 0.11 196);
-  --color-accent-foreground: oklch(0.18 0.02 252);
-  --color-accent-muted: oklch(0.72 0.07 196);
-  --color-accent-subtle: oklch(0.55 0.06 196 / 0.14);
+  --color-accent: oklch(0.72 0.1 230);
+  --color-accent-foreground: oklch(0.18 0.015 250);
+  --color-accent-muted: oklch(0.72 0.1 230);
+  --color-accent-subtle: oklch(0.72 0.1 230 / 0.14);
 
   /* Semantic */
-  --color-success: oklch(0.76 0.14 155);
-  --color-warning: oklch(0.8 0.13 78);
-  --color-danger: oklch(0.66 0.17 25);
-  --color-info: oklch(0.74 0.09 240);
-  --color-assist: oklch(0.76 0.11 295);
+  --color-success: oklch(0.74 0.14 165);
+  --color-warning: oklch(0.74 0.14 60);
+  --color-danger: oklch(0.62 0.18 25);
+  --color-info: oklch(0.72 0.1 230);
+  --color-assist: oklch(0.72 0.14 280);
+
+  --ok: var(--color-success);
+  --warn: var(--color-warning);
+  --info: var(--color-info);
+  --assist: var(--color-assist);
 
   /* Code */
-  --color-code-bg: oklch(0.1 0.012 252 / 0.85);
-  --color-code-border: oklch(0.28 0.02 252 / 0.35);
+  --color-code-bg: oklch(0.16 0.014 250 / 0.82);
+  --color-code-border: oklch(1 0 0 / 0.1);
 
   /* Nav */
-  --color-nav-bg: oklch(0.11 0.014 252 / 0.82);
-  --color-grid-line: oklch(0.28 0.02 252 / 0.12);
+  --color-nav-bg: oklch(0.18 0.015 250 / 0.82);
+  --color-grid-line: oklch(1 0 0 / 0.04);
 }
 
 * {
@@ -113,13 +118,13 @@ code {
 
   .surface-card {
     border: 1px solid var(--color-border-subtle);
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     background: var(--color-surface);
   }
 
   .surface-card-raised {
     border: 1px solid var(--color-border);
-    border-radius: 1rem;
+    border-radius: 0.75rem;
     background: var(--color-surface-2);
   }
 

@@ -32,7 +32,7 @@ export function ImplementationEvidence() {
       className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8"
     >
       <SectionHeader
-        chapter="08"
+        chapter="09"
         label="Implementation evidence"
         title="What this repo implements today"
         titleId="architecture-heading"

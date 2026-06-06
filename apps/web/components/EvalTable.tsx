@@ -54,7 +54,7 @@ export function EvalTable() {
       <div className="surface-card overflow-hidden">
         <div className="border-b border-border-subtle p-4 sm:p-5">
           <p className="section-chapter">
-            <span className="text-accent-muted">06</span>
+            <span className="text-accent-muted">07</span>
             <span className="mx-2 text-border">—</span>
             <span className="section-label">Policy comparison · 32 synthetic coding tasks</span>
           </p>

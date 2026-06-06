@@ -8,7 +8,7 @@ import guardedDateParserTrace from '../../../data/traces/guarded_recovery_date_p
 import guardedMultiAgentTrace from '../../../data/traces/guarded_recovery_multi_agent_contract.json';
 import tasks from '../../../data/tasks.json';
 import policies from '../../../data/policies.json';
-import type { CockpitTask, EvalMetrics, PolicyId, PolicyRun, TaskId, TraceAction, TraceEvent } from './cockpitTypes';
+import type { CockpitTask, EvalMetrics, PolicyId, PolicyRun, TaskId, TaskType, TraceAction, TraceEvent } from './cockpitTypes';
 
 type TraceFixture = {
   task_id: string;
@@ -150,6 +150,12 @@ function taskLabel(type: string): string {
   return 'BUGFIX';
 }
 
+function taskTypeLabel(type: string): string {
+  if (type === 'adversarial') return 'Adversarial · safety';
+  if (type === 'multi_agent') return 'Multi-agent · contract';
+  return 'Bugfix · parser';
+}
+
 function eventTitle(event: AgentTraceEvent): string {
   const raw = event.raw ?? {};
 
@@ -281,8 +287,10 @@ type TaskRecord = {
   id: string;
   title: string;
   type: string;
+  repo: string;
   issue: string;
   successCommand: string;
+  tags: string[];
   failureModes: string[];
   expectedFiles?: string[];
 };
@@ -300,16 +308,21 @@ function buildCockpitTask(taskRecord: TaskRecord): CockpitTask {
     }
   }
 
-  const title = taskRecord.title.replace(/^(Bugfix|Adversarial|Multi-agent):\s*/i, '');
+  const expectedFiles = taskRecord.expectedFiles ?? bindings.baseline?.known_files ?? [];
 
   return {
     id: taskId,
+    type: taskRecord.type as TaskType,
+    typeLabel: taskTypeLabel(taskRecord.type),
     label: taskLabel(taskRecord.type),
-    title,
+    repo: taskRecord.repo,
+    title: taskRecord.title,
     issue: taskRecord.issue,
     successCommand: taskRecord.successCommand,
+    tags: taskRecord.tags,
     failureModes: taskRecord.failureModes,
-    knownFiles: taskRecord.expectedFiles ?? bindings.baseline?.known_files ?? [],
+    expectedFiles,
+    knownFiles: expectedFiles,
     defaultPolicyId: 'baseline',
     policyOrder,
     policies: policiesForTask

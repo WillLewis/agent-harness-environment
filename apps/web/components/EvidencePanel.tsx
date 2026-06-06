@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import { Braces, FileText, GitCompare, ShieldCheck, Terminal as TerminalIcon } from 'lucide-react';
 import type { EvidenceTab, PolicyRun, TraceEvent } from '../lib/demoData';
 import { buildFileTree, diffContent, stepHarnessNote, terminalContent } from '../lib/cockpitEvidence';
 import { evidenceTabs } from '../lib/demoData';
@@ -13,9 +14,13 @@ type EvidencePanelProps = {
   knownFiles: string[];
 };
 
-function tabLabel(item: EvidenceTab) {
-  return item;
-}
+const tabMeta = {
+  files: { label: 'Files', icon: FileText },
+  terminal: { label: 'Term', icon: TerminalIcon },
+  diff: { label: 'Diff', icon: GitCompare },
+  judge: { label: 'Judge', icon: ShieldCheck },
+  raw: { label: 'Raw', icon: Braces }
+} as const;
 
 export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }: EvidencePanelProps) {
   const harnessNote = stepHarnessNote(activeEvent, run.name);
@@ -27,10 +32,11 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
         <div className="font-mono text-[10px] text-text-faint">Step {String(activeEvent.step).padStart(2, '0')}</div>
       </div>
 
-      <div className="mb-2.5 flex flex-wrap gap-1.5" role="tablist" aria-label="Evidence views">
+      <div className="mb-2.5 grid grid-cols-5 rounded-lg bg-surface-2/60 p-1" role="tablist" aria-label="Evidence views">
         {evidenceTabs.map((item) => {
           const tabId = `evidence-tab-${item}`;
           const panelId = `evidence-panel-${item}`;
+          const Icon = tabMeta[item].icon;
           return (
             <button
               key={item}
@@ -41,13 +47,14 @@ export function EvidencePanel({ run, activeEvent, tab, onTabChange, knownFiles }
               aria-controls={panelId}
               onClick={() => onTabChange(item)}
               className={clsx(
-                'focus-ring rounded-md px-2.5 py-1 font-mono text-[11px] capitalize',
+                'focus-ring inline-flex min-h-8 items-center justify-center gap-1 rounded-md px-1.5 font-mono text-[10px] transition sm:text-[11px]',
                 tab === item
-                  ? 'bg-accent text-accent-foreground'
-                  : 'border border-border-subtle text-text-muted hover:bg-surface-2'
+                  ? 'bg-code-bg text-text shadow-sm'
+                  : 'text-text-muted hover:bg-surface-raised hover:text-text'
               )}
             >
-              {tabLabel(item)}
+              <Icon className="size-3.5" aria-hidden="true" />
+              <span>{tabMeta[item].label}</span>
             </button>
           );
         })}

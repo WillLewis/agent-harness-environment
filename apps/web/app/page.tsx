@@ -1,4 +1,4 @@
-import { Cockpit } from '../components/Cockpit';
+import { DemoFlow } from '../components/DemoFlow';
 import { EvalTable } from '../components/EvalTable';
 import { FailureTaxonomySection } from '../components/FailureTaxonomySection';
 import { HarnessPrimitives } from '../components/HarnessPrimitives';
@@ -197,23 +197,23 @@ step 09  TEST_PASS     accepted`}</pre>
       {/* 03 — Primitives */}
       <HarnessPrimitives />
 
-      {/* 04 — Cockpit */}
-      <Cockpit />
+      {/* 04 — Tasks + 05 — Cockpit */}
+      <DemoFlow />
 
-      {/* 05 — Failure taxonomy */}
+      {/* 06 — Failure taxonomy */}
       <FailureTaxonomySection />
 
-      {/* 06 — Eval comparison */}
+      {/* 07 — Eval comparison */}
       <section id="evals" className="mx-auto min-w-0 max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <EvalTable />
       </section>
 
-      {/* 07 — Router */}
+      {/* 08 — Router */}
       <section id="router" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <SectionHeader
-              chapter="07"
+              chapter="08"
               label="rl-lite router"
               title="Route the task to the policy with the highest expected reward."
               description={
@@ -266,7 +266,7 @@ step 09  TEST_PASS     accepted`}</pre>
         </div>
       </section>
 
-      {/* 08–09 — Implementation evidence */}
+      {/* 09 — Implementation evidence */}
       <ImplementationEvidence />
 
       {/* 10 — Takeaways */}

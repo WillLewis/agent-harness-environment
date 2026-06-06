@@ -24,7 +24,7 @@ export function FailureTaxonomySection() {
         aria-label="Failure taxonomy"
       >
         <SectionHeader
-          chapter="05"
+          chapter="06"
           label="failure taxonomy"
           title="The same shapes, over and over"
           description={

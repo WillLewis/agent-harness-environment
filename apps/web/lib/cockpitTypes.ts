@@ -3,6 +3,8 @@ export type TaskId =
   | 'adversarial_env_001'
   | 'multi_agent_contract_001';
 
+export type TaskType = 'bugfix' | 'adversarial' | 'multi_agent';
+
 export type PolicyId = 'baseline' | 'guarded_recovery' | 'baseline_with_steering';
 
 export type TraceAction =
@@ -59,11 +61,16 @@ export type PolicyRun = {
 
 export type CockpitTask = {
   id: TaskId;
+  type: TaskType;
+  typeLabel: string;
   label: string;
+  repo: string;
   title: string;
   issue: string;
   successCommand: string;
+  tags: string[];
   failureModes: string[];
+  expectedFiles: string[];
   knownFiles: string[];
   defaultPolicyId: PolicyId;
   policyOrder: PolicyId[];

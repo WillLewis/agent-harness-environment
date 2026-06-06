@@ -1,6 +1,7 @@
 const navLinks = [
   { href: '#premise', label: 'Why' },
   { href: '#protocol', label: 'Protocol' },
+  { href: '#tasks', label: 'Tasks' },
   { href: '#cockpit', label: 'Cockpit' },
   { href: '#evals', label: 'Evals' },
   { href: '#architecture', label: 'Architecture' }
