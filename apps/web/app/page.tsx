@@ -1,9 +1,40 @@
 import { Cockpit } from '../components/Cockpit';
 import { EvalTable } from '../components/EvalTable';
+import { FailureTaxonomySection } from '../components/FailureTaxonomySection';
+import { HarnessPrimitives } from '../components/HarnessPrimitives';
 import { ImplementationEvidence } from '../components/ImplementationEvidence';
 import { SectionHeader } from '../components/SectionHeader';
 import { SurfaceCard } from '../components/ui/SurfaceCard';
+import { TakeawaysSection } from '../components/TakeawaysSection';
 import { getCockpitTask, routerDecision } from '../lib/demoData';
+
+const premisePillars = [
+  {
+    title: 'Agents act invisibly',
+    body: 'A coding agent emits plans, reads, edits, and shell calls. Without a trace, failure looks like a wall of text instead of a signal.'
+  },
+  {
+    title: 'They fail in patterns',
+    body: 'Loops on identical commands, hallucinated paths, unsafe recovery, contract drift. The same shapes recur across models and tasks.'
+  },
+  {
+    title: 'Harnesses change the outcome',
+    body: 'Policy rules — recovery guards, tool gateways, judges — turn a dead-end loop into an evidence-driven retry on the same fixture.'
+  }
+] as const;
+
+const protocolEvents = [
+  'PLAN',
+  'READ_FILE',
+  'SEARCH',
+  'EDIT',
+  'TERMINAL',
+  'TEST',
+  'RETRY',
+  'BLOCKED_ACTION',
+  'POLICY_DECISION',
+  'FINAL'
+] as const;
 
 const protocolCards = [
   ['task_success', 'Whether the submitted patch passes target tests and expected behavior.'],
@@ -12,7 +43,7 @@ const protocolCards = [
   ['loop_rate', 'Repeated tool calls or commands without new information.'],
   ['human_steering_burden', 'How many times the developer had to redirect the agent.'],
   ['unsafe_tool_attempt', 'A blocked shell, file, network, or secret-access action.']
-];
+] as const;
 
 const bugfixTask = getCockpitTask('bugfix_date_parser_001');
 const heroBaseline = bugfixTask.policies.baseline!;
@@ -38,11 +69,12 @@ const heroMetrics = [
     baseline: formatPct(heroBaseline.metrics.recoveryScore),
     guarded: formatPct(heroGuarded.metrics.recoveryScore)
   }
-];
+] as const;
 
 export default function Home() {
   return (
     <main id="top">
+      {/* Hero */}
       <section className="relative overflow-hidden border-b border-border-subtle px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
           <div>
@@ -110,40 +142,74 @@ step 09  TEST_PASS     accepted`}</pre>
         </div>
       </section>
 
+      {/* 01 — Premise */}
       <section id="premise" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <SectionHeader
           chapter="01"
           label="premise"
-          title="When an agent fails, the product question is not only “was the model wrong?”"
-          description="The harness determines whether the agent plans, reads files, edits code, runs commands, recovers from failure, asks for help, stops, or escalates."
+          title="Why harnesses matter"
+          description="When an agent fails, the product question is not only “was the model wrong?” The harness determines whether the agent plans, reads files, edits code, runs commands, recovers, asks for help, stops, or escalates."
         />
-      </section>
-
-      <section id="protocol" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
-        <SectionHeader
-          chapter="02"
-          label="protocol"
-          title="The metrics we score on every run"
-          description="Deterministic scorers in packages/evals — not vibes. Each metric maps to a failure mode the cockpit replays."
-          className="mb-8"
-        />
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {protocolCards.map(([title, body]) => (
-            <SurfaceCard key={title}>
-              <h3 className="font-mono text-sm text-accent-muted">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-text-muted">{body}</p>
+        <div className="mt-8 grid gap-3 md:grid-cols-3">
+          {premisePillars.map((pillar) => (
+            <SurfaceCard key={pillar.title}>
+              <h3 className="text-sm font-semibold text-text">{pillar.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-text-muted">{pillar.body}</p>
             </SurfaceCard>
           ))}
         </div>
       </section>
 
+      {/* 02 — Protocol */}
+      <section id="protocol" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
+        <SectionHeader
+          chapter="02"
+          label="protocol"
+          title="The vocabulary we measure"
+          description="Every run emits the same typed events and is scored against the same metrics. Both ship in-repo as deterministic code."
+          className="mb-8"
+        />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SurfaceCard>
+            <h3 className="font-mono text-xs uppercase tracking-wider text-text-faint">events</h3>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {protocolEvents.map((event) => (
+                <span
+                  key={event}
+                  className="rounded-md border border-border-subtle bg-code-bg px-2 py-1 font-mono text-[11px] text-accent-muted"
+                >
+                  {event}
+                </span>
+              ))}
+            </div>
+          </SurfaceCard>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {protocolCards.map(([title, body]) => (
+              <SurfaceCard key={title} className="p-4">
+                <h3 className="font-mono text-sm text-accent-muted">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-text-muted">{body}</p>
+              </SurfaceCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 03 — Primitives */}
+      <HarnessPrimitives />
+
+      {/* 04 — Cockpit */}
       <Cockpit />
 
+      {/* 05 — Failure taxonomy */}
+      <FailureTaxonomySection />
+
+      {/* 06 — Eval comparison */}
       <section id="evals" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <EvalTable />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      {/* 07 — Router */}
+      <section id="router" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <SectionHeader
@@ -181,7 +247,11 @@ step 09  TEST_PASS     accepted`}</pre>
         </div>
       </section>
 
+      {/* 08–09 — Implementation evidence */}
       <ImplementationEvidence />
+
+      {/* 10 — Takeaways */}
+      <TakeawaysSection />
     </main>
   );
 }
