@@ -290,7 +290,7 @@ export function Cockpit() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: reduceMotion ? 0 : 0.25 }}
           >
-            <div className="max-h-[min(70vh,720px)] overflow-y-auto pr-0.5 lg:max-h-none lg:overflow-visible">
+            <div className="max-h-[min(70vh,720px)] overflow-y-auto overscroll-y-contain pr-0.5 lg:max-h-none lg:overflow-visible">
               <TraceTimeline events={run.events} activeStep={activeStep} onSelect={selectStep} policyName={run.name} />
             </div>
           </motion.div>

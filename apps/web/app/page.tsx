@@ -73,11 +73,11 @@ const heroMetrics = [
 
 export default function Home() {
   return (
-    <main id="top">
+    <main id="top" className="min-w-0">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border-subtle px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
-          <div>
+        <div className="mx-auto grid min-w-0 max-w-7xl gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-12">
+          <div className="min-w-0">
             <p className="font-mono text-sm font-semibold tracking-tight text-text sm:text-base">
               Agent Harness Environment
             </p>
@@ -105,7 +105,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <SurfaceCard raised className="p-4 sm:p-5">
               <p className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
                 Fixture illustration · bugfix task
@@ -183,7 +183,7 @@ step 09  TEST_PASS     accepted`}</pre>
               ))}
             </div>
           </SurfaceCard>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-2">
             {protocolCards.map(([title, body]) => (
               <SurfaceCard key={title} className="p-4">
                 <h3 className="font-mono text-sm text-accent-muted">{title}</h3>
@@ -204,7 +204,7 @@ step 09  TEST_PASS     accepted`}</pre>
       <FailureTaxonomySection />
 
       {/* 06 — Eval comparison */}
-      <section id="evals" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      <section id="evals" className="mx-auto min-w-0 max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <EvalTable />
       </section>
 

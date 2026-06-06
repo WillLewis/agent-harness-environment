@@ -131,10 +131,11 @@ pnpm smoke:hosted -- --url http://localhost:3000
 pnpm smoke:hosted -- --url http://localhost:3000 --timeout 30 --format json
 ```
 
-`pnpm dev` also works if preview is not running:
+`pnpm dev` also works if preview is not running. If port **3000** is occupied or serving a stale build, use a free port after `pnpm build`:
 
 ```bash
-pnpm smoke:hosted -- --url http://localhost:3000
+cd apps/web && npx next start -p 3001
+pnpm smoke:hosted -- --url http://localhost:3001
 ```
 
 ### Deployed URL
@@ -178,13 +179,15 @@ pnpm smoke:hosted -- --url https://your-deployed-url.example.com
 
 After automated smoke passes, optionally verify in a browser:
 
-1. **Cockpit** (`#cockpit`) — default bugfix + baseline shows **Rejected**; trace timeline and evidence tabs populate.
-2. **Policy toggle** — switch to **Guarded recovery** on bugfix → **Accepted**, metrics/terminal/diff update together.
-3. **Task switch** — adversarial + multi-agent tasks load distinct traces (keyboard `[` `]` optional).
-4. **Failure drawer** — click baseline loop or unsafe metric → cluster drawer opens.
-5. **Offline** — after first load, toggles still work (all data bundled).
+1. **Sticky nav** — Why / Protocol / Cockpit / Evals / Architecture jump to `#premise`, `#protocol`, `#cockpit`, `#evals`, `#architecture` without headings hidden under the nav bar.
+2. **Cockpit** (`#cockpit`) — default bugfix + baseline shows **Rejected**; trace timeline and evidence tabs populate.
+3. **Policy toggle** — switch to **Guarded recovery** on bugfix → **Accepted**, metrics/terminal/diff update together.
+4. **Task switch** — adversarial + multi-agent tasks load distinct traces (keyboard `[` `]` optional).
+5. **Failure taxonomy** (`#failure-taxonomy`) — **Inspect cluster** opens the same drawer as eval-table red cells.
+6. **Failure drawer** — from taxonomy or eval table: click baseline loop or unsafe metric → cluster drawer opens; Escape or backdrop closes.
+7. **Offline** — after first load, toggles still work (all data bundled).
 
-Walkthrough detail: [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
+Walkthrough detail (full numbered IA): [DEMO_SCRIPT.md](./DEMO_SCRIPT.md).
 
 ---
 

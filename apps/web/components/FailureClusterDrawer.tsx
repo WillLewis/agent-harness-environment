@@ -49,7 +49,7 @@ export function FailureClusterDrawer({ cluster, open, onClose }: FailureClusterD
     <div className="fixed inset-0 z-50 flex justify-end" role="presentation">
       <button
         type="button"
-        className="absolute inset-0 bg-page/80 backdrop-blur-sm"
+        className="focus-ring absolute inset-0 bg-page/80 backdrop-blur-sm"
         aria-label="Close failure cluster detail"
         onClick={onClose}
       />

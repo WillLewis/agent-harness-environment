@@ -10,23 +10,78 @@ For a pre-demo sanity check, run `pnpm eval:ci` and `pnpm build` (see [RELEASE_C
 
 ---
 
-## Opening (30 seconds)
+## Page map (numbered narrative)
+
+| # | Section | Anchor | Purpose |
+| --- | --- | --- | --- |
+| — | Hero | `#top` | Product framing + static-demo disclaimer |
+| 01 | Premise | `#premise` | Why harnesses matter |
+| 02 | Protocol | `#protocol` | Typed events + scored metrics |
+| 03 | Primitives | `#primitives` | What the harness provides |
+| 04 | Cockpit | `#cockpit` | Interactive trace replay |
+| 05 | Failure taxonomy | `#failure-taxonomy` | Cluster preview grid |
+| 06 | Eval comparison | `#evals` | Synthetic policy table |
+| 07 | RL-lite router | `#router` | Illustrative policy picker |
+| 08 | Implementation evidence | `#architecture` | Repo capabilities map |
+| 10 | Takeaways | `#takeaways` | What the demo proves |
+
+Sticky nav links: **Why · Protocol · Cockpit · Evals · Architecture** (badge: *Hosted demo · precomputed traces*).
+
+---
+
+## Opening — Hero (30 seconds)
 
 Narration:
 
 > When a coding agent fails, the question is not only whether the model was wrong. The harness controls planning, tool use, retries, safety blocks, and recovery. Agent Harness Environment records that behavior as a trace, scores it with deterministic evals, and compares harness policies on the same task.
 
-Point out the hero note: **static hosted demo** — no live agent execution in the browser.
+Point out:
+
+- **Static hosted demo** / **No live LLM** in the hero copy
+- Fixture illustration metrics (bugfix baseline → guarded) — not production telemetry
+- CTAs: **Replay the failure** (`#cockpit`), **View eval report** (`#evals`), **Implementation map** (`#architecture`)
 
 ---
 
-## Step 1 — Cockpit: default bugfix task (2 minutes)
+## Step 1 — Premise (`#premise`, 30 seconds)
 
-Scroll to **Interactive cockpit** (`#cockpit`). Default state:
+Scroll to **01 — premise · Why harnesses matter**.
 
-- **Task:** BUGFIX — timezone parser regression  
-- **Policy:** Baseline  
-- **Verdict:** Rejected  
+Narration:
+
+> Agents emit invisible streams of plans and tool calls. They fail in repeatable patterns — loops, hallucinated paths, unsafe recovery. Harness rules change whether that failure is a dead end or a recoverable detour on the same fixture.
+
+---
+
+## Step 2 — Protocol (`#protocol`, 30 seconds)
+
+Scroll to **02 — protocol · The vocabulary we measure**.
+
+Narration:
+
+> Every run emits the same typed events — PLAN, READ_FILE, TEST, BLOCKED_ACTION, and so on — and is scored against the same deterministic metrics. Both ship in-repo as code, not vibes.
+
+Briefly scan the event chips and metric definitions (`task_success`, `loop_rate`, `unsafe_tool_attempt`, etc.).
+
+---
+
+## Step 3 — Primitives (`#primitives`, 30 seconds)
+
+Scroll to **03 — primitives · What the harness provides**.
+
+Narration:
+
+> Task fixtures, trace replay, baseline vs guarded policies, deterministic scoring, failure clusters, and a local runner with CI gates. The hosted page demonstrates these with precomputed traces — no live runner in the browser.
+
+---
+
+## Step 4 — Cockpit: default bugfix task (`#cockpit`, 2 minutes)
+
+Use nav **Cockpit** or hero CTA. Default state:
+
+- **Task:** BUGFIX — timezone parser regression
+- **Policy:** Baseline
+- **Verdict:** Rejected
 
 Narration:
 
@@ -42,9 +97,9 @@ Keyboard shortcuts (optional): `[` `]` switch tasks, `1`–`3` policies on bugfi
 
 ---
 
-## Step 2 — Toggle guarded recovery (same task)
+## Step 5 — Toggle guarded recovery (same task)
 
-**Policy:** Guarded recovery  
+**Policy:** Guarded recovery
 
 Narration:
 
@@ -60,7 +115,7 @@ Narration:
 
 ---
 
-## Step 3 — Adversarial task (1–2 minutes)
+## Step 6 — Adversarial task (1–2 minutes)
 
 **Task:** ADVERSARIAL — README suggests printing `.env`  
 **Policy:** Baseline → then **Guarded recovery**
@@ -71,62 +126,88 @@ Narration:
 
 **Show:**
 
-- Baseline: `Unsafe command attempted`, `cat .env`, rejected verdict; fourth metric shows **unsafe**
+- Baseline: unsafe command attempted, rejected verdict; fourth metric shows **unsafe**
 - Guarded: blocked/avoided secret access, accepted verdict
 
 ---
 
-## Step 4 — Multi-agent contract task (1–2 minutes)
+## Step 7 — Multi-agent contract task (1–2 minutes)
 
 **Task:** MULTI-AGENT — backend API + frontend form  
 **Policy:** Baseline → then **Guarded recovery**
 
 Narration:
 
-> Parallel subagents can drift from a shared API contract. Baseline edits diverge (`priority` vs `priorityLevel`) — `contract_mismatch` and failing contract tests. Guarded recovery publishes shared contract context first; both sides align on `priority`.
+> Parallel subagents can drift from a shared API contract. Baseline edits diverge — `contract_mismatch` and failing contract tests. Guarded recovery publishes shared contract context first; both sides align.
 
 **Show:**
 
 - Baseline: contract mismatch labels on timeline, rejected verdict
-- Guarded: coordinator reads `contracts/issue-priority.json`, subagents align, tests pass
+- Guarded: coordinator reads contract artifact, subagents align, tests pass
 
 ---
 
-## Step 5 — Eval report + failure cluster drawer (1 minute)
+## Step 8 — Failure taxonomy (`#failure-taxonomy`, 45 seconds)
 
-Scroll to **Eval report** (`#evals`).
-
-Narration:
-
-> Policy comparison table uses **synthetic aggregate metrics** from `data/evals/policy_comparison.json` — illustrative portfolio numbers across 32 fictional tasks, not production telemetry.
-
-**Click:** baseline **Loop** or **Unsafe attempts** (underlined).
+Scroll to **05 — failure taxonomy**.
 
 Narration:
 
-> Failure clusters are static fixtures too: detection rule, affected tasks, recommended harness change, and a promote-to-dataset JSON preview. Escape or backdrop closes the drawer.
+> Before the aggregate eval table, we surface the failure cluster model: looping, hallucinated files, unsafe tools, contract drift. Counts are fixture illustration — not production hits.
+
+**Click:** **Inspect cluster** on any card (e.g. Looping).
+
+Narration:
+
+> Same drawer as the eval table: detection rule, affected tasks, recommended harness change, dataset candidate JSON. Escape or backdrop closes the drawer.
 
 ---
 
-## Step 6 — RL-lite router (30 seconds)
+## Step 9 — Eval comparison + drawer (`#evals`, 1 minute)
 
-Scroll to **Policy selection, not model training**.
+Scroll to **06 — Policy comparison · Eval report**.
 
 Narration:
 
-> This is an illustrative router fixture from `data/router_decisions.json`. It shows how a contextual bandit might pick `guarded_recovery` for bugfix tasks with recovery risk — not a live trained router in the hosted page.
+> The policy comparison table uses **synthetic aggregate metrics** from `data/evals/policy_comparison.json` — illustrative portfolio numbers across 32 fictional tasks, not production telemetry.
+
+**Click:** baseline **Loop** or **Unsafe attempts** (red underlined cells).
+
+Narration:
+
+> Opens the same failure-cluster detail as the taxonomy section. Escape or backdrop closes the drawer.
 
 ---
 
-## Step 7 — Implementation evidence (1 minute)
+## Step 10 — RL-lite router (`#router`, 30 seconds)
 
-Scroll to **Implementation evidence** (`#architecture`).
+Scroll to **07 — rl-lite router**.
+
+Narration:
+
+> Illustrative router fixture from `data/router_decisions.json`. It shows how a contextual bandit might pick `guarded_recovery` for bugfix tasks with recovery risk — not a live trained router in the hosted page.
+
+---
+
+## Step 11 — Implementation evidence (`#architecture`, 1 minute)
+
+Use nav **Architecture** or hero CTA.
 
 Narration:
 
 > This section maps what the repo actually implements today versus local-only dry-runs versus future external upload. Counts come from static imports: 3 tasks, 7 trace fixtures, deterministic scorers, CI smoke gate, local runner MVP, MCP tools, Braintrust/Weave **dry-run** adapters — no live Braintrust or W&B in CI.
 
 Point at verification commands: `pnpm eval:ci`, `pnpm eval:suite`, runner CLI, `pnpm export:braintrust:dry-run`, `pnpm export:weave:dry-run`.
+
+---
+
+## Step 12 — Takeaways (`#takeaways`, 30 seconds)
+
+Scroll to **10 — takeaways**.
+
+Narration:
+
+> Harness policies change outcomes on the same task; recovery is traceable; scoring is deterministic and local; optional adapters export evidence without changing the core harness. Footer reiterates: no live LLM, no runner, no API calls in the browser.
 
 ---
 
@@ -160,7 +241,12 @@ Narration:
 
 | Section | Anchor | What to show |
 | --- | --- | --- |
+| Premise | `#premise` | Three “why harness” pillars |
+| Protocol | `#protocol` | Events + metrics vocabulary |
+| Primitives | `#primitives` | Harness building blocks |
 | Cockpit | `#cockpit` | 3 tasks × baseline/guarded policies |
-| Eval report | `#evals` | Table + failure cluster drawer |
-| Router | (below evals) | Illustrative fixture |
+| Failure taxonomy | `#failure-taxonomy` | Cluster grid + inspect drawer |
+| Eval report | `#evals` | Synthetic table + drawer from red cells |
+| Router | `#router` | Illustrative fixture |
 | Implementation map | `#architecture` | Repo capabilities + commands |
+| Takeaways | `#takeaways` | Static-demo proof points |

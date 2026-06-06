@@ -52,6 +52,12 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 3.75rem;
+}
+
+section[id],
+main[id] {
+  scroll-margin-top: 3.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -65,6 +71,11 @@ html {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
   }
 }
 
@@ -141,6 +152,12 @@ code {
 
   .btn-secondary:hover {
     background: var(--color-surface-2);
+  }
+
+  .nav-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
   }
 }
 
