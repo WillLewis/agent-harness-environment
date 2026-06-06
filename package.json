@@ -23,11 +23,15 @@
     "compare": "python packages/evals/policy_compare.py data/evals/policy_comparison.json",
     "runner:batch": "python services/runner/run_batch.py",
     "runner:batch:promote": "python services/runner/run_batch.py --promote-candidates",
+    "router": "python packages/reward/bandit_router.py",
+    "router:decision": "python packages/reward/bandit_router.py",
+    "router:train": "python packages/reward/train_router.py",
+    "router:export-fixture": "python packages/reward/export_router_fixture.py",
     "export:braintrust:dry-run": "python packages/evals/adapters/braintrust_adapter.py --dry-run",
     "export:braintrust:live": "python packages/evals/adapters/braintrust_adapter.py --live",
     "export:weave:dry-run": "python packages/evals/adapters/weave_adapter.py --dry-run",
     "export:weave:live": "python packages/evals/adapters/weave_adapter.py --live",
-    "router": "python packages/reward/bandit_router.py data/router_decisions.json"
+    "router:fixture": "python packages/reward/bandit_router.py data/router_decisions.json"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

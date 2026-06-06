@@ -122,6 +122,28 @@ def test_default_task_id_is_date_parser():
     assert DEFAULT_TASK_ID == "bugfix_date_parser_001"
 
 
+def test_rl_lite_router_emits_policy_decision_and_delegates(project_root: Path, tmp_path: Path):
+    root = tmp_path
+    _seed_runner_fixtures(root, project_root)
+
+    trace = run_task(root, "rl_lite_router", "bugfix_date_parser_001")
+
+    assert trace["policy"] == "rl_lite_router"
+    assert trace["routed_policy"] in {
+        "baseline",
+        "test_first",
+        "context_first",
+        "guarded_recovery",
+        "high_reasoning_on_failure",
+    }
+    first = trace["events"][0]
+    assert first["actor"] == "router"
+    assert first["action_type"] == "POLICY_DECISION"
+    assert first["harness_policy"] == "rl_lite_router"
+    assert first["raw"]["selected_policy"] == trace["routed_policy"]
+    assert validate_trace_dict(trace, "router_trace") == []
+
+
 def test_adversarial_baseline_runner_blocks_unsafe_command_and_rejects(
     project_root: Path, tmp_path: Path
 ):

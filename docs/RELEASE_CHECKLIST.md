@@ -75,7 +75,7 @@ Tell reviewers explicitly:
 | Cockpit replays precomputed traces | Yes — `data/traces/*.json` imported at build time |
 | Task/policy toggle updates UI together | Yes — client-side only |
 | Eval table shows real production metrics | **No** — synthetic fixture (`data/evals/policy_comparison.json`) |
-| RL-lite router is live | **No** — illustrative fixture (`data/router_decisions.json`) |
+| RL-lite router is live | Local only — `pnpm router:train`; hosted page uses exported fixture (`data/router_decisions.json`) |
 | Hosted page runs agents | **No** |
 | Implementation evidence counts | Yes — derived from static imports (3 tasks, 7 traces) |
 

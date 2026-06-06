@@ -97,6 +97,9 @@ pnpm eval:baseline            # Score one trace (baseline date-parser)
 pnpm compare                  # Synthetic policy comparison table
 pnpm eval:audit               # Metric drift report (hosted vs trace scorers)
 pnpm repo:status              # Local generated-artifact hygiene (read-only)
+pnpm router:decision -- bugfix_date_parser_001
+pnpm router:train             # Train local contextual-bandit state under runs/router/
+pnpm router:export-fixture    # Export learned decisions to data/router_decisions.json
 pnpm deploy:check             # Hosted demo deployment readiness (local)
 pnpm preview                  # Serve production build locally (after pnpm build)
 pnpm smoke:hosted:local       # HTML smoke vs http://localhost:3000 (needs preview/dev)
@@ -191,6 +194,8 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 | Hosted cockpit / eval table / router | `data/traces/`, `data/evals/` JSON | Demo replay; no network |
 | `pnpm eval` / `pnpm eval:ci` | Same fixtures | **Real** deterministic scorer output |
 | Hosted eval table (`#evals`) | `data/evals/policy_comparison.json` | **Synthetic** portfolio fixture — not `eval:ci` output |
+| Local RL-lite router | `runs/router/history.jsonl`, `runs/router/state.json` | Contextual-bandit policy learning; explicit local command |
+| Hosted router fixture | `data/router_decisions.json` | Static export from learned router state; no browser training |
 | `python …/audit_metric_drift.py` | Compares sources above | Drift/ambiguity report; does not change fixtures |
 | `services/runner/` | Toy repos → `runs/` | Local execution; not used by hosted page |
 | Adapter dry-runs | Fixtures → export JSON | Shape preview; no network |
@@ -205,7 +210,7 @@ Details: [docs/INDEX.md](docs/INDEX.md) · [docs/EVAL_DESIGN.md](docs/EVAL_DESIG
 apps/web                 Hosted interactive demo shell
 packages/harness         TypeScript trace + policy primitives
 packages/evals           Python deterministic and heuristic scorers
-packages/reward          RL-lite router and reward formula
+packages/reward          Contextual-bandit router and reward formula
 services/runner          Local runner MVP (sandbox + trace emission)
 services/trace-store     SQLite trace-store starter
 tools/mcp_server.py      Cursor MCP tool surface

@@ -215,31 +215,50 @@ step 09  TEST_PASS     accepted`}</pre>
             <SectionHeader
               chapter="07"
               label="rl-lite router"
-              title="Policy selection, not model training."
+              title="Route the task to the policy with the highest expected reward."
               description={
                 <>
-                  Illustrative router fixture from{' '}
-                  <span className="font-mono text-text-muted">data/router_decisions.json</span>. Policy selection is
-                  scored locally; this section is not a live model router.
+                  The router learns from local scored traces and exports this static fixture from{' '}
+                  <span className="font-mono text-text-muted">data/router_decisions.json</span>. It selects harness
+                  policy, not a coding model.
                 </>
               }
             />
             <SurfaceCard className="mt-5">
-              <div className="font-mono text-sm text-text-muted">
-                selected_policy: <span className="text-accent-muted">{routerDecision.selectedPolicy}</span>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-accent-muted">selected</div>
+              <div className="mt-2 font-mono text-lg text-text">
+                {routerDecision.selectedPolicy}
               </div>
               <p className="mt-3 text-sm text-text-muted">{routerDecision.why}</p>
             </SurfaceCard>
           </div>
           <SurfaceCard>
+            <div className="mb-4 grid gap-2 rounded-md border border-border bg-surface px-3 py-3 sm:grid-cols-2">
+              {Object.entries(routerDecision.taskFeatures).map(([key, value]) => (
+                <div key={key} className="flex justify-between gap-4 font-mono text-xs">
+                  <span className="text-text-faint">{key}</span>
+                  <span className="text-right text-text-muted">{value}</span>
+                </div>
+              ))}
+            </div>
             {routerDecision.expectedRewards.map(([policy, reward]) => (
               <div key={policy} className="mb-4 last:mb-0">
                 <div className="mb-1 flex justify-between font-mono text-xs text-text-faint">
                   <span>{policy}</span>
-                  <span>{reward}</span>
+                  <span>
+                    {reward.toFixed(2)}
+                    {routerDecision.policyStats[policy]?.count ? (
+                      <span className="ml-2 text-text-faint">n={routerDecision.policyStats[policy].count}</span>
+                    ) : null}
+                  </span>
                 </div>
                 <div className="h-2 rounded-full bg-surface-raised">
-                  <div className="h-2 rounded-full bg-accent" style={{ width: `${(reward / 5) * 100}%` }} />
+                  <div
+                    className={`h-2 rounded-full ${
+                      policy === routerDecision.selectedPolicy ? 'bg-accent' : 'bg-text-faint'
+                    }`}
+                    style={{ width: `${Math.min(100, reward * 100)}%` }}
+                  />
                 </div>
               </div>
             ))}

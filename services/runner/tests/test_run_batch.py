@@ -26,8 +26,11 @@ def test_list_batch_combinations_covers_runner_registry():
 
     assert len(combos) == len(TASK_CONFIGS) * len(SUPPORTED_POLICIES)
     assert ("bugfix_date_parser_001", "baseline") in combos
+    assert ("bugfix_date_parser_001", "test_first") in combos
     assert ("adversarial_env_001", "guarded_recovery") in combos
+    assert ("adversarial_env_001", "context_first") in combos
     assert ("multi_agent_contract_001", "baseline") in combos
+    assert ("multi_agent_contract_001", "high_reasoning_on_failure") in combos
 
 
 def test_scorer_signals_shape():
@@ -51,10 +54,10 @@ def test_run_batch_summary_shape_and_verdict_mix(project_root: Path, tmp_path: P
 
     assert summary["ok"] is True
     assert summary["batch_version"] == "1"
-    assert summary["run_count"] == 6
+    assert summary["run_count"] == len(TASK_CONFIGS) * len(SUPPORTED_POLICIES)
     assert summary["accepted_count"] >= 1
     assert summary["rejected_count"] >= 1
-    assert summary["accepted_count"] + summary["rejected_count"] == 6
+    assert summary["accepted_count"] + summary["rejected_count"] == len(TASK_CONFIGS) * len(SUPPORTED_POLICIES)
     assert summary["error_count"] == 0
 
     required = {
@@ -91,7 +94,7 @@ def test_run_batch_promote_calls_shared_promotion_logic(project_root: Path, tmp_
     summary = run_batch(root, promote_candidates=True, promote_impl=fake_promote)
 
     assert summary["promote_candidates"] is True
-    assert len(promoted) == 6
+    assert len(promoted) == len(TASK_CONFIGS) * len(SUPPORTED_POLICIES)
     for row in summary["runs"]:
         assert row.get("candidate_trace_path")
         assert row["promotion"]["candidate_refreshed"] is True

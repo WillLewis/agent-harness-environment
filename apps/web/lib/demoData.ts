@@ -1,3 +1,5 @@
+import routerDecisionsJson from '../../../data/router_decisions.json';
+
 export type {
   CockpitTask,
   EvalMetrics,
@@ -19,20 +21,38 @@ export {
 } from './cockpitFixtures';
 export { policyComparison, failureClusters, getFailureCluster, policyDisplayName } from './evalFixtures';
 
-export const routerDecision = {
-  taskFeatures: {
-    task_type: 'bugfix',
-    risk_level: 'medium',
-    expected_files: 'one',
-    recent_failure_pattern: 'ignored_test_output'
-  },
-  selectedPolicy: 'guarded_recovery',
-  why: 'Highest expected reward for bugfix tasks with failed-test recovery risk.',
-  expectedRewards: [
-    ['baseline', 1.9],
-    ['test_first', 3.8],
-    ['context_first', 3.2],
-    ['guarded_recovery', 4.6],
-    ['high_reasoning_on_failure', 4.1]
-  ] as const
+type RouterFixture = {
+  taskFeatures: Record<string, string>;
+  selectedPolicy: string;
+  why: string;
+  expectedRewards: Record<string, number>;
+  policyStats?: Record<
+    string,
+    {
+      count: number;
+      mean_reward: number;
+      last_reward: number | null;
+      total_reward: number;
+    }
+  >;
 };
+
+const routerDecisionMap = routerDecisionsJson as Record<string, RouterFixture>;
+
+function normalizeRouterDecision(taskId: string, decision: RouterFixture) {
+  return {
+    taskId,
+    taskFeatures: decision.taskFeatures,
+    selectedPolicy: decision.selectedPolicy,
+    why: decision.why,
+    expectedRewards: Object.entries(decision.expectedRewards),
+    policyStats: decision.policyStats ?? {}
+  };
+}
+
+export const routerDecisions = Object.entries(routerDecisionMap).map(([taskId, decision]) =>
+  normalizeRouterDecision(taskId, decision)
+);
+
+export const routerDecision =
+  routerDecisions.find((decision) => decision.taskId === 'bugfix_date_parser_001') ?? routerDecisions[0];

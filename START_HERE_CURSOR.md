@@ -52,7 +52,7 @@ Replace the backlog item with something explicit if the user already chose work 
 - **CI** (`pnpm eval:ci`): deterministic trace scoring + gates; no Braintrust/W&B/network required.
 - **Trace events** are first-class; every policy path should be traceable.
 - **Deterministic scorers** anchor evals; LLM judges are optional and never the sole success signal.
-- **RL-lite** = policy routing fixture, not model training.
+- **RL-lite** = contextual-bandit policy routing, not coding-model training; hosted UI uses exported static fixtures.
 
 ---
 

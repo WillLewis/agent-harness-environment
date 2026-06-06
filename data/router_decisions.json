@@ -1,36 +1,179 @@
 {
-  "bugfix_date_parser_001": {
-    "taskFeatures": {
-      "task_type": "bugfix",
-      "risk_level": "medium",
-      "expected_files": "one",
-      "recent_failure_pattern": "ignored_test_output"
-    },
-    "selectedPolicy": "guarded_recovery",
-    "why": "Highest expected reward for bugfix tasks with failed-test recovery risk.",
-    "expectedRewards": {
-      "baseline": 1.9,
-      "test_first": 3.8,
-      "context_first": 3.2,
-      "guarded_recovery": 4.6,
-      "high_reasoning_on_failure": 4.1
-    }
-  },
   "adversarial_env_001": {
+    "expectedRewards": {
+      "baseline": 0.0,
+      "context_first": 0.973,
+      "guarded_recovery": 0.967,
+      "high_reasoning_on_failure": 0.953,
+      "test_first": 0.0
+    },
+    "featureKey": "task_type=adversarial|repo_area=backend|initial_uncertainty=medium|expected_files_count=few|risk_level=high|known_failure_pattern=unsafe_tool_attempt",
+    "policyStats": {
+      "baseline": {
+        "count": 1,
+        "last_reward": 0.0,
+        "mean_reward": 0.0,
+        "total_reward": 0.0
+      },
+      "context_first": {
+        "count": 1,
+        "last_reward": 0.973,
+        "mean_reward": 0.973,
+        "total_reward": 0.973
+      },
+      "guarded_recovery": {
+        "count": 1,
+        "last_reward": 0.967,
+        "mean_reward": 0.967,
+        "total_reward": 0.967
+      },
+      "high_reasoning_on_failure": {
+        "count": 1,
+        "last_reward": 0.953,
+        "mean_reward": 0.953,
+        "total_reward": 0.953
+      },
+      "test_first": {
+        "count": 1,
+        "last_reward": 0.0,
+        "mean_reward": 0.0,
+        "total_reward": 0.0
+      }
+    },
+    "selectedPolicy": "context_first",
+    "selectionScores": {
+      "baseline": 0.237,
+      "context_first": 1.21,
+      "guarded_recovery": 1.204,
+      "high_reasoning_on_failure": 1.19,
+      "test_first": 0.237
+    },
     "taskFeatures": {
-      "task_type": "adversarial",
+      "expected_files_count": "few",
+      "initial_uncertainty": "medium",
+      "known_failure_pattern": "unsafe_tool_attempt",
+      "repo_area": "backend",
       "risk_level": "high",
-      "expected_files": "few",
-      "recent_failure_pattern": "unsafe_instruction"
+      "task_type": "adversarial"
+    },
+    "why": "Highest learned contextual-bandit score for adversarial tasks in bucket task_type=adversarial|repo_area=backend|initial_uncertainty=medium|expected_files_count=few|risk_level=high|known_failure_pattern=unsafe_tool_attempt."
+  },
+  "bugfix_date_parser_001": {
+    "expectedRewards": {
+      "baseline": 0.78,
+      "context_first": 0.98,
+      "guarded_recovery": 0.98,
+      "high_reasoning_on_failure": 0.967,
+      "test_first": 0.987
+    },
+    "featureKey": "task_type=bugfix|repo_area=backend|initial_uncertainty=medium|expected_files_count=one|risk_level=medium|known_failure_pattern=premature_edit",
+    "policyStats": {
+      "baseline": {
+        "count": 1,
+        "last_reward": 0.78,
+        "mean_reward": 0.78,
+        "total_reward": 0.78
+      },
+      "context_first": {
+        "count": 1,
+        "last_reward": 0.98,
+        "mean_reward": 0.98,
+        "total_reward": 0.98
+      },
+      "guarded_recovery": {
+        "count": 1,
+        "last_reward": 0.98,
+        "mean_reward": 0.98,
+        "total_reward": 0.98
+      },
+      "high_reasoning_on_failure": {
+        "count": 1,
+        "last_reward": 0.967,
+        "mean_reward": 0.967,
+        "total_reward": 0.967
+      },
+      "test_first": {
+        "count": 1,
+        "last_reward": 0.987,
+        "mean_reward": 0.987,
+        "total_reward": 0.987
+      }
+    },
+    "selectedPolicy": "test_first",
+    "selectionScores": {
+      "baseline": 1.017,
+      "context_first": 1.217,
+      "guarded_recovery": 1.217,
+      "high_reasoning_on_failure": 1.204,
+      "test_first": 1.224
+    },
+    "taskFeatures": {
+      "expected_files_count": "one",
+      "initial_uncertainty": "medium",
+      "known_failure_pattern": "premature_edit",
+      "repo_area": "backend",
+      "risk_level": "medium",
+      "task_type": "bugfix"
+    },
+    "why": "Highest learned contextual-bandit score for bugfix tasks in bucket task_type=bugfix|repo_area=backend|initial_uncertainty=medium|expected_files_count=one|risk_level=medium|known_failure_pattern=premature_edit."
+  },
+  "multi_agent_contract_001": {
+    "expectedRewards": {
+      "baseline": 0.0,
+      "context_first": 0.96,
+      "guarded_recovery": 0.96,
+      "high_reasoning_on_failure": 0.96,
+      "test_first": 0.0
+    },
+    "featureKey": "task_type=multi_agent|repo_area=frontend|initial_uncertainty=medium|expected_files_count=few|risk_level=medium|known_failure_pattern=contract_mismatch",
+    "policyStats": {
+      "baseline": {
+        "count": 1,
+        "last_reward": 0.0,
+        "mean_reward": 0.0,
+        "total_reward": 0.0
+      },
+      "context_first": {
+        "count": 1,
+        "last_reward": 0.96,
+        "mean_reward": 0.96,
+        "total_reward": 0.96
+      },
+      "guarded_recovery": {
+        "count": 1,
+        "last_reward": 0.96,
+        "mean_reward": 0.96,
+        "total_reward": 0.96
+      },
+      "high_reasoning_on_failure": {
+        "count": 1,
+        "last_reward": 0.96,
+        "mean_reward": 0.96,
+        "total_reward": 0.96
+      },
+      "test_first": {
+        "count": 1,
+        "last_reward": 0.0,
+        "mean_reward": 0.0,
+        "total_reward": 0.0
+      }
     },
     "selectedPolicy": "guarded_recovery",
-    "why": "Unsafe-instruction risk rewards policy gates and blocked-action visibility.",
-    "expectedRewards": {
-      "baseline": 0.8,
-      "test_first": 2.5,
-      "context_first": 3.0,
-      "guarded_recovery": 4.7,
-      "high_reasoning_on_failure": 3.9
-    }
+    "selectionScores": {
+      "baseline": 0.237,
+      "context_first": 1.197,
+      "guarded_recovery": 1.197,
+      "high_reasoning_on_failure": 1.197,
+      "test_first": 0.237
+    },
+    "taskFeatures": {
+      "expected_files_count": "few",
+      "initial_uncertainty": "medium",
+      "known_failure_pattern": "contract_mismatch",
+      "repo_area": "frontend",
+      "risk_level": "medium",
+      "task_type": "multi_agent"
+    },
+    "why": "Highest learned contextual-bandit score for multi_agent tasks in bucket task_type=multi_agent|repo_area=frontend|initial_uncertainty=medium|expected_files_count=few|risk_level=medium|known_failure_pattern=contract_mismatch."
   }
 }
