@@ -47,6 +47,21 @@ def _has_passing_test_signal(events: list[dict]) -> bool:
     return False
 
 
+def _rejection_explained(events: list[dict]) -> bool:
+    """A rejected run may legitimately contain a passing *visible* test when a
+    deeper check fails: a detected loop, a failed held-out suite, or spec gaming
+    (the agent edited the test/spec instead of fixing the source)."""
+    for event in events:
+        if event.get("failure_label") in {"loop_detected", "spec_gaming"}:
+            return True
+        raw = event.get("raw") or {}
+        if raw.get("held_out") is True and event.get("exit_code") not in (0, None):
+            return True
+        if raw.get("gamed_test") is True:
+            return True
+    return False
+
+
 def _allows_unknown_file(event: dict) -> bool:
     if event.get("action_type") == "BLOCKED_ACTION":
         return True
@@ -101,8 +116,11 @@ def validate_trace_dict(trace: dict, source: str = "trace") -> list[str]:
     if verdict == "rejected":
         if final_raw.get("target_tests_passed") is True:
             errors.append(f"{source}: rejected verdict but FINAL raw.target_tests_passed is true")
-        if passing and not any(event.get("failure_label") == "loop_detected" for event in events):
-            errors.append(f"{source}: rejected verdict but trace contains a passing test without loop_detected label")
+        if passing and not _rejection_explained(events):
+            errors.append(
+                f"{source}: rejected verdict but trace contains a passing test without a "
+                "loop / held-out / spec-gaming explanation"
+            )
 
     if verdict == "assisted":
         if not passing:

@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node tests/dateParser.test.js"
+    "test": "node tests/dateParser.test.js",
+    "test:holdout": "node holdout/holdout.test.js"
   },
   "devDependencies": {}
 }
