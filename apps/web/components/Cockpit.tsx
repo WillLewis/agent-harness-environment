@@ -73,7 +73,8 @@ function isReplayPolicyId(policyId: string): policyId is PolicyId {
     policyId === 'test_first' ||
     policyId === 'context_first' ||
     policyId === 'guarded_recovery' ||
-    policyId === 'baseline_with_steering'
+    policyId === 'baseline_with_steering' ||
+    policyId === 'gamed_attempt'
   );
 }
 
@@ -86,6 +87,7 @@ function policyOptionOrder(taskId: TaskId): CockpitPolicyId[] {
       'context_first',
       'guarded_recovery',
       'baseline_with_steering',
+      'gamed_attempt',
       'rl_lite_router'
     ];
   }
@@ -116,6 +118,7 @@ function policyDisplayName(policyId: string): string {
   if (policyId === 'context_first') return 'Context-first';
   if (policyId === 'guarded_recovery') return 'Guarded recovery';
   if (policyId === 'baseline_with_steering') return 'Baseline with steering';
+  if (policyId === 'gamed_attempt') return 'Gamed (edits the test)';
   if (policyId === 'rl_lite_router') return staticPolicyMeta.rl_lite_router.name;
   return policyId.replace(/_/g, ' ');
 }

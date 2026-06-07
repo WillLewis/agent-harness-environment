@@ -10,7 +10,8 @@ export type PolicyId =
   | 'test_first'
   | 'context_first'
   | 'guarded_recovery'
-  | 'baseline_with_steering';
+  | 'baseline_with_steering'
+  | 'gamed_attempt';
 
 export type TraceAction =
   | 'PLAN'

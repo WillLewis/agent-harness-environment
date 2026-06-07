@@ -27,7 +27,7 @@ def test_build_audit_classifies_metric_sources(project_root: Path):
     assert report["sources"]["hosted_policy_comparison"]["classification"] == SOURCE_SYNTHETIC
     assert report["sources"]["static_trace_suite"]["classification"] == SOURCE_TRACE
     assert report["sources"]["runner_batch"]["status"] == "skipped"
-    assert report["sources"]["static_trace_suite"]["trace_count"] == 13
+    assert report["sources"]["static_trace_suite"]["trace_count"] == 14
 
 
 def test_build_audit_flags_drift_warnings(project_root: Path):
