@@ -243,6 +243,7 @@ class TaskRunner:
         self._visible_passed: bool | None = None
         self._held_out_passed: bool | None = None
         self._test_files_modified = False
+        self._patch_kind: str | None = None
 
     def _append(self, **event_kwargs: Any) -> dict[str, Any]:
         self._step += 1
@@ -480,6 +481,19 @@ class TaskRunner:
         if expected_files:
             trace["expected_files"] = expected_files
 
+        # Per-run reliability signals (date-parser real-execution path): the
+        # naive "visible" metric vs the true "held-out" metric, surfaced for the
+        # pass^k aggregator. Only present when the seeded date-parser flow ran.
+        if self._visible_passed is not None:
+            trace["reliability"] = {
+                "visible_passed": self._visible_passed,
+                "held_out_passed": bool(self._held_out_passed),
+                "test_files_modified": self._test_files_modified,
+                "patch_kind": self._patch_kind,
+                "capability": self.capability,
+                "seed": self.seed,
+            }
+
         errors = validate_trace_dict(trace, self.run_id)
         if errors:
             joined = "; ".join(errors)
@@ -629,6 +643,7 @@ class TaskRunner:
     def _finish_date_parser(self) -> None:
         """Apply the seeded patch, run the real visible + held-out suites, judge."""
         outcome = self._choose_date_parser_outcome()
+        self._patch_kind = outcome
         self._apply_date_parser_patch(outcome)
         visible = self._attempt_command(
             self.config.test_command,

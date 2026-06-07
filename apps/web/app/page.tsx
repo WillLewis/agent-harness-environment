@@ -1,5 +1,6 @@
 import { DemoFlow } from '../components/DemoFlow';
 import { EvalTable } from '../components/EvalTable';
+import { ReliabilityPanel } from '../components/ReliabilityPanel';
 import { FailureTaxonomySection } from '../components/FailureTaxonomySection';
 import { HarnessPrimitives } from '../components/HarnessPrimitives';
 import { ImplementationEvidence } from '../components/ImplementationEvidence';
@@ -208,6 +209,7 @@ export default function Home() {
       {/* 07 — Eval comparison */}
       <section id="evals" className="mx-auto min-w-0 max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <EvalTable />
+        <ReliabilityPanel />
       </section>
 
       {/* 08 — Router */}
