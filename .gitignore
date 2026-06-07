@@ -35,4 +35,5 @@ data/datasets/generated_candidates.jsonl
 # Local-only docs (not tracked)
 docs/DEMO_SCRIPT.md
 docs/METHODOLOGY_RIGOR_PLAN.md
+docs/P4_HANDOFF.md
 .vercel

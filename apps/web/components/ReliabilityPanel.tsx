@@ -1,5 +1,8 @@
+'use client';
+
 import clsx from 'clsx';
-import { policyDisplayName, reliability, reliabilityPolicy } from '../lib/evalFixtures';
+import { useState } from 'react';
+import { policyDisplayName, reliability, reliabilityPolicy, reliabilityTasks } from '../lib/evalFixtures';
 
 function pct(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -33,8 +36,10 @@ function DotStrip({ flags, label }: { flags: boolean[]; label: string }) {
 }
 
 export function ReliabilityPanel() {
-  const baseline = reliabilityPolicy('baseline');
-  const guarded = reliabilityPolicy('guarded_recovery');
+  const [taskId, setTaskId] = useState(reliabilityTasks[0]?.task_id);
+  const task = reliabilityTasks.find((row) => row.task_id === taskId) ?? reliabilityTasks[0];
+  const baseline = reliabilityPolicy(task, 'baseline');
+  const guarded = reliabilityPolicy(task, 'guarded_recovery');
 
   return (
     <div className="surface-card mt-6 overflow-hidden">
@@ -42,16 +47,32 @@ export function ReliabilityPanel() {
         <p className="section-chapter">
           <span className="text-text-muted">07</span>
           <span className="mx-2 text-text-muted">·</span>
-          <span className="section-label">Reliability · {reliability.n} real seeded runs / policy</span>
+          <span className="section-label">Reliability · {reliability.n} real seeded runs / cell</span>
         </p>
         <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">Naive metric vs. held-out truth</h3>
         <p className="mt-2 max-w-3xl text-xs leading-relaxed text-text-muted sm:text-sm">
-          Each cell is {reliability.n} real runs of the date-parser task (capability {reliability.capability}) scored by
-          actual <code className="text-text-muted">npm test</code> plus a harness-only held-out suite.{' '}
-          <span className="text-text">Visible</span> is what an eval that only runs the agent&apos;s own test would
-          report; <span className="text-text">held-out</span> is whether the patch actually generalizes.{' '}
+          Each cell is {reliability.n} real seeded runs (capability {task.capability}) scored by actual execution.{' '}
+          <span className="text-text">{task.visibleLabel}</span> is what an eval that only runs the agent&apos;s own
+          checks would report; <span className="text-text">{task.heldOutLabel}</span> is the true outcome.{' '}
           <span className="font-mono">pass^k</span> is the probability all k of k attempts pass.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {reliabilityTasks.map((row) => (
+            <button
+              key={row.task_id}
+              type="button"
+              onClick={() => setTaskId(row.task_id)}
+              className={clsx(
+                'rounded-full border px-3 py-1 text-xs font-medium transition',
+                row.task_id === task.task_id
+                  ? 'border-border-strong bg-surface-2 text-text'
+                  : 'border-border-subtle text-text-muted hover:bg-surface-2/60'
+              )}
+            >
+              {row.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="overflow-x-auto overscroll-x-contain">
@@ -62,18 +83,18 @@ export function ReliabilityPanel() {
                 Policy
               </th>
               <th scope="col" className="px-4 py-3 sm:px-5">
-                Visible pass@1
+                {task.visibleLabel} pass@1
               </th>
               <th scope="col" className="px-4 py-3 sm:px-5">
-                Held-out pass@1
+                {task.heldOutLabel} pass@1
               </th>
               <th scope="col" className="px-4 py-3 sm:px-5">
-                Held-out pass^5
+                {task.heldOutLabel} pass^5
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle">
-            {reliability.policies.map((row) => (
+            {task.policies.map((row) => (
               <tr key={row.policy} className="transition hover:bg-surface-2/60">
                 <th scope="row" className="px-4 py-3 text-sm font-semibold text-text sm:px-5">
                   {policyDisplayName(row.policy)}
@@ -111,9 +132,10 @@ export function ReliabilityPanel() {
       ) : null}
 
       <div className="border-t border-border-subtle px-4 py-3 text-[11px] leading-relaxed text-text-faint sm:px-5">
-        Measured, not modeled: regenerate with <code className="text-text-muted">python packages/evals/pass_k.py</code>.
-        Magnitudes are illustrative (decision-point weights are hand-set); the orderings — held-out ≤ visible, and
-        guarded pass^k ≫ baseline — are structural.
+        {task.metric_note} Measured, not modeled: regenerate with{' '}
+        <code className="text-text-muted">python packages/evals/pass_k.py</code>. Magnitudes are illustrative
+        (decision-point weights are hand-set); the orderings — held-out ≤ visible, and guarded pass^k ≫ baseline — are
+        structural.
       </div>
     </div>
   );

@@ -211,10 +211,12 @@ export default function Home() {
           title="Which primitives earn their keep as the model improves"
           description={
             <>
-              Sweep the agent&apos;s capability and measure real seeded runs. As the model self-corrects, the{' '}
-              <span className="text-text">productivity</span> primitives&apos; lift fades — but a more capable agent{' '}
-              <span className="text-text">games the visible test more often</span>, the failure only held-out scoring
-              catches. The durable harness is the safety / spec-integrity layer.
+              Sweep the agent&apos;s capability and measure real seeded runs across all three tasks. As the model
+              self-corrects, the <span className="text-text">productivity</span> primitives&apos; lift fades — but the
+              failures a guard exists to catch (<span className="text-text">spec-gaming</span>,{' '}
+              <span className="text-text">unsafe secret reads</span>) only <span className="text-text">climb</span> with
+              capability. The durable harness is the safety / spec-integrity layer; the productivity layer is on borrowed
+              time.
             </>
           }
           className="mb-8"

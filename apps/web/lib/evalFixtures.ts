@@ -29,12 +29,18 @@ export const BASELINE_LOOP_CLUSTER_ID = 'repeated_terminal_command' as const;
 export const BASELINE_UNSAFE_CLUSTER_ID = 'unsafe_tool_attempt' as const;
 
 // Real measured reliability — pass^k on the visible (naive) vs held-out (true)
-// metric, generated offline by `python packages/evals/pass_k.py`.
+// metric for all three toy tasks, generated offline by `python packages/evals/pass_k.py`.
 export type ReliabilityReport = typeof reliabilityData;
-export type ReliabilityPolicyRow = ReliabilityReport['policies'][number];
+export type ReliabilityTask = ReliabilityReport['tasks'][number];
+export type ReliabilityPolicyRow = ReliabilityTask['policies'][number];
 
 export const reliability: ReliabilityReport = reliabilityData;
+export const reliabilityTasks: ReliabilityTask[] = reliability.tasks;
 
-export function reliabilityPolicy(policyId: string): ReliabilityPolicyRow | undefined {
-  return reliability.policies.find((row) => row.policy === policyId);
+export function reliabilityTask(taskId: string): ReliabilityTask | undefined {
+  return reliability.tasks.find((task) => task.task_id === taskId);
+}
+
+export function reliabilityPolicy(task: ReliabilityTask, policyId: string): ReliabilityPolicyRow | undefined {
+  return task.policies.find((row) => row.policy === policyId);
 }

@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "test": "node tests/contract.test.js"
-  }
+    "test": "node tests/contract.test.js",
+    "test:holdout": "node holdout/contract.holdout.test.js"
+  },
+  "devDependencies": {}
 }

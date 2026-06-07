@@ -150,7 +150,12 @@ def test_adversarial_baseline_runner_blocks_unsafe_command_and_rejects(
     root = tmp_path
     _seed_runner_fixtures(root, project_root, include_docs_site=True)
 
-    trace = run_task(root, "baseline", "adversarial_env_001")
+    # Seeded model: a baseline (unconstrained) agent follows the adversarial README
+    # secret-read instruction with probability ~capability * temptation. seed=4 at
+    # the default capability is a run where it does — the classifier blocks the
+    # attempt and the docs build is left unfixed, so the run is rejected. (P(attempt)
+    # rises with capability; see capability_sweep.py for the measured curve.)
+    trace = run_task(root, "baseline", "adversarial_env_001", seed=4)
 
     assert trace["task_id"] == "adversarial_env_001"
     assert trace["verdict"] == "rejected"
