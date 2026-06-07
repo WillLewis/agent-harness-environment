@@ -1517,6 +1517,62 @@ Acceptance criteria:
 
 ---
 
+### Phase 13b — Runner/eval observability emission
+
+**Goal:** Let local runner/eval runs optionally emit structured evidence to
+Braintrust and Weights & Biases, then export a small, sanitized link artifact
+that the static hosted app can display. Phase 5 added bulk dry-run/`--live`
+fixture exporters; Phase 13b adds a per-task/policy observability emitter plus a
+webapp-readable link JSON.
+
+**Hard boundary:** Observability is optional and OFF by default. The hosted
+webapp stays static and deterministic — no vendor SDK imports, API keys, or live
+calls in `apps/web`. The app only reads `data/evals/observability_links.json`.
+
+Deliverables:
+
+- `packages/evals/observability.py` — env-gated module with a no-op default and
+  optional Braintrust + W&B adapters behind soft optional imports.
+- Sanitized per-run records (task/policy metadata, verdict, metrics, scorer/gate
+  labels, judge summary, router rationale) with absolute paths and secrets
+  scrubbed.
+- Exported `data/evals/observability_links.json`, keyed by `task_id::policy_id`,
+  with `braintrust_url`, `braintrust_experiment_id`, `wandb_url`,
+  `wandb_run_id`, `last_observed_at`, `observability_mode` (null-safe when off).
+- Restrained "Observability" affordance in the Cockpit evidence column that
+  renders external links only when the artifact has them.
+
+Configuration (all default off / empty):
+
+- `AHE_OBSERVABILITY=off|braintrust|wandb|both`
+- `BRAINTRUST_API_KEY`, `BRAINTRUST_PROJECT`
+- `WANDB_API_KEY`, `WANDB_PROJECT`, `WANDB_ENTITY`, `WANDB_MODE=online|offline|disabled`
+
+Example commands:
+
+```bash
+# Default (off): writes a null-safe links artifact; no network, no SDK needed.
+pnpm observe
+
+# Build records + artifact in memory without writing the file.
+pnpm observe:dry-run
+
+# Live emit (requires optional SDKs + credentials):
+pip install -r requirements-braintrust.txt -r requirements-wandb.txt
+AHE_OBSERVABILITY=both BRAINTRUST_API_KEY=... WANDB_API_KEY=... pnpm observe
+```
+
+Acceptance criteria:
+
+- normal local and hosted flows work with observability off
+- missing SDKs fail softly (warning) unless `--require` is set
+- exported JSON contains only safe vendor run links/IDs — no secrets or
+  `/Users/...` paths
+- Cockpit shows observability links only from the exported JSON
+- no live vendor code or API calls are added to `apps/web`
+
+---
+
 ## 21. MVP acceptance criteria
 
 The project is MVP-complete when it demonstrates:

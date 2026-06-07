@@ -31,6 +31,8 @@
     "export:braintrust:live": "python packages/evals/adapters/braintrust_adapter.py --live",
     "export:weave:dry-run": "python packages/evals/adapters/weave_adapter.py --dry-run",
     "export:weave:live": "python packages/evals/adapters/weave_adapter.py --live",
+    "observe": "python packages/evals/observability.py --pretty",
+    "observe:dry-run": "python packages/evals/observability.py --dry-run --pretty",
     "router:fixture": "python packages/reward/bandit_router.py data/router_decisions.json"
   },
   "devDependencies": {

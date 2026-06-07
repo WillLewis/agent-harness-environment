@@ -8,6 +8,7 @@ import { MetricCard } from './MetricCard';
 import { TraceTimeline } from './TraceTimeline';
 import { EvidencePanel } from './EvidencePanel';
 import { VerdictStamp } from './VerdictStamp';
+import { ObservabilityLinks } from './ObservabilityLinks';
 import { defaultTabForRun, findEvent, tabForEvent } from '../lib/cockpitEvidence';
 import {
   cockpitTaskOrder,
@@ -545,6 +546,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
                 onTabChange={setTab}
                 knownFiles={task.knownFiles}
               />
+              <ObservabilityLinks taskId={activeTaskId} policyId={replayPolicyId} />
             </aside>
           </div>
 
