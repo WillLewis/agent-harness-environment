@@ -14,7 +14,6 @@ import {
   cockpitTaskOrder,
   DEFAULT_TASK_ID,
   getCockpitTask,
-  routerDecisions,
   type EvidenceTab,
   type PolicyId,
   type TaskId,
@@ -28,23 +27,13 @@ type CockpitProps = {
   autoplayToken: number;
 };
 
-type StaticPolicyId = 'rl_lite_router';
-type CockpitPolicyId = PolicyId | StaticPolicyId;
-
-const staticPolicyMeta: Record<StaticPolicyId, { name: string; description: string; badge: string }> = {
-  rl_lite_router: {
-    name: 'RL-lite router',
-    description: 'Selects a harness policy based on task features and reward history.',
-    badge: 'router'
-  }
-};
+type CockpitPolicyId = PolicyId;
 
 const basePolicyOptionOrder: CockpitPolicyId[] = [
   'baseline',
   'test_first',
   'context_first',
-  'guarded_recovery',
-  'rl_lite_router'
+  'guarded_recovery'
 ];
 
 function verdictLabel(verdict: string) {
@@ -87,27 +76,16 @@ function policyOptionOrder(taskId: TaskId): CockpitPolicyId[] {
       'context_first',
       'guarded_recovery',
       'baseline_with_steering',
-      'gamed_attempt',
-      'rl_lite_router'
+      'gamed_attempt'
     ];
   }
   return basePolicyOptionOrder;
-}
-
-function routerDecisionForTask(taskId: TaskId) {
-  return routerDecisions.find((decision) => decision.taskId === taskId);
 }
 
 function replayPolicyForOption(taskId: TaskId, policyOptionId: CockpitPolicyId): PolicyId {
   const task = getCockpitTask(taskId);
   if (isReplayPolicyId(policyOptionId) && task.policies[policyOptionId]) {
     return policyOptionId;
-  }
-  if (policyOptionId === 'rl_lite_router') {
-    const selected = routerDecisionForTask(taskId)?.selectedPolicy;
-    if (selected && isReplayPolicyId(selected) && task.policies[selected]) {
-      return selected;
-    }
   }
   return task.policies.guarded_recovery ? 'guarded_recovery' : 'baseline';
 }
@@ -119,17 +97,14 @@ function policyDisplayName(policyId: string): string {
   if (policyId === 'guarded_recovery') return 'Guarded recovery';
   if (policyId === 'baseline_with_steering') return 'Baseline with steering';
   if (policyId === 'gamed_attempt') return 'Gamed (edits the test)';
-  if (policyId === 'rl_lite_router') return staticPolicyMeta.rl_lite_router.name;
   return policyId.replace(/_/g, ' ');
 }
 
 function policyOptionMeta(taskId: TaskId, policyOptionId: CockpitPolicyId) {
-  const task = getCockpitTask(taskId);
-  if (isReplayPolicyId(policyOptionId) && task.policies[policyOptionId]) {
-    const run = task.policies[policyOptionId]!;
-    return { name: run.name, description: run.description, badge: null };
-  }
-  return staticPolicyMeta[policyOptionId as StaticPolicyId];
+  const run = getCockpitTask(taskId).policies[policyOptionId];
+  return run
+    ? { name: run.name, description: run.description, badge: null }
+    : { name: policyDisplayName(policyOptionId), description: '', badge: null };
 }
 
 function firstTabForRun(taskId: TaskId, policyId: PolicyId) {
@@ -151,7 +126,6 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
   const task = getCockpitTask(activeTaskId);
   const options = useMemo(() => policyOptionOrder(activeTaskId), [activeTaskId]);
   const replayPolicyId = replayPolicyForOption(activeTaskId, policyOptionId);
-  const routerDecision = routerDecisionForTask(activeTaskId);
   const run = resolvePolicyRun(activeTaskId, replayPolicyId);
   const activeEvent = useMemo(() => findEvent(run.events, activeStep), [run.events, activeStep]);
   const replayKey = `${activeTaskId}-${policyOptionId}-${replayPolicyId}`;
@@ -160,14 +134,6 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
     policyOptionId === 'baseline' &&
     activeEvent?.label === 'loop_detected' &&
     !steeringDeclined;
-  const selectedPolicyHasReplay = isReplayPolicyId(policyOptionId) && replayPolicyId === policyOptionId;
-  const selectedPolicyName = policyDisplayName(policyOptionId);
-  const replayPolicyName = policyDisplayName(replayPolicyId);
-  const routerSelectedPolicy = routerDecision?.selectedPolicy;
-  const routerSelectedHasReplay =
-    routerSelectedPolicy !== undefined &&
-    isReplayPolicyId(routerSelectedPolicy) &&
-    Boolean(task.policies[routerSelectedPolicy]);
 
   const setStepAndTab = useCallback(
     (step: number, options?: { keepPlaying?: boolean }) => {
@@ -442,32 +408,6 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
                   })}
                 </div>
               </div>
-
-              {!selectedPolicyHasReplay ? (
-                <div className="rounded-md border border-info/35 bg-info/10 px-3 py-2 text-xs leading-relaxed text-info">
-                  {policyOptionId === 'rl_lite_router' ? (
-                    <>
-                      Router decision: selected{' '}
-                      <span className="font-mono">{policyDisplayName(routerSelectedPolicy ?? replayPolicyId)}</span>
-                      {routerSelectedHasReplay ? (
-                        <>. Replaying that policy trace.</>
-                      ) : (
-                        <>
-                          . No promoted <span className="font-mono">{policyDisplayName(routerSelectedPolicy ?? '')}</span>{' '}
-                          trace exists yet, so the cockpit shows the{' '}
-                          <span className="font-mono">{replayPolicyName}</span> representative trace.
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      Static policy: <span className="font-mono">{selectedPolicyName}</span> exists in the policy
-                      catalog and eval report, but has no promoted replay trace yet. Showing the{' '}
-                      <span className="font-mono">{replayPolicyName}</span> representative trace.
-                    </>
-                  )}
-                </div>
-              ) : null}
 
               <p id="cockpit-task-hint" className="text-[10px] leading-4 text-text-faint">
                 Keyboard: <span className="font-mono">[ ]</span> tasks ·{' '}

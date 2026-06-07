@@ -7,7 +7,7 @@ import { ImplementationEvidence } from '../components/ImplementationEvidence';
 import { SectionHeader } from '../components/SectionHeader';
 import { SurfaceCard } from '../components/ui/SurfaceCard';
 import { TakeawaysSection } from '../components/TakeawaysSection';
-import { getCockpitTask, routerDecision } from '../lib/demoData';
+import { getCockpitTask } from '../lib/demoData';
 
 const premisePillars = [
   {
@@ -45,16 +45,6 @@ const protocolCards = [
   ['human_steering_burden', 'How many times the developer had to redirect the agent.'],
   ['unsafe_tool_attempt', 'A blocked shell, file, network, or secret-access action.']
 ] as const;
-
-// The router fixture exposes six task features; the panel shows the four most
-// decision-relevant ones (drops expected_files_count and initial_uncertainty).
-const routerInputKeys = ['task_type', 'repo_area', 'risk_level', 'known_failure_pattern'] as const;
-const routerInputLabels: Record<string, string> = {
-  task_type: 'task type',
-  repo_area: 'repo area',
-  risk_level: 'risk level',
-  known_failure_pattern: 'failure pattern'
-};
 
 const bugfixTask = getCockpitTask('bugfix_date_parser_001');
 const heroBaseline = bugfixTask.policies.baseline!;
@@ -212,72 +202,7 @@ export default function Home() {
         <ReliabilityPanel />
       </section>
 
-      {/* 08 — Router */}
-      <section id="router" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <SectionHeader
-          chapter="08"
-          label="rl-lite router"
-          title="Route the task to the policy with the highest expected reward"
-          description={
-            <>
-              The router reads a few cheap features off the task and picks the policy with the highest expected reward —
-              scorers are the reward, traces are the data. This is a static fixture exported from{' '}
-              <span className="font-mono text-text-muted">data/router_decisions.json</span>; it selects a harness
-              policy, not a coding model.
-            </>
-          }
-          className="mb-8"
-        />
-        <div className="grid gap-4 md:grid-cols-[300px_minmax(0,1fr)]">
-          <SurfaceCard className="flex flex-col p-4 sm:p-5">
-            <div className="font-mono text-[10px] uppercase tracking-widest text-text-muted">inputs</div>
-            <dl className="mt-3 space-y-2.5 text-sm">
-              {routerInputKeys
-                .filter((key) => key in routerDecision.taskFeatures)
-                .map((key) => (
-                  <div key={key} className="flex items-baseline justify-between gap-3">
-                    <dt className="text-text-muted">{routerInputLabels[key] ?? key.replace(/_/g, ' ')}</dt>
-                    <dd className="text-right font-mono text-text">{routerDecision.taskFeatures[key]}</dd>
-                  </div>
-                ))}
-            </dl>
-            <div className="mt-4 rounded-md border border-success/40 bg-success/10 p-3">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-success">selected</div>
-              <div className="mt-1 font-mono text-sm text-text">{routerDecision.selectedPolicy}</div>
-            </div>
-          </SurfaceCard>
-
-          <SurfaceCard className="p-4 sm:p-5">
-            <div className="mb-4 font-mono text-[10px] uppercase tracking-widest text-text-muted">
-              expected reward by policy
-            </div>
-            <div className="space-y-3">
-              {routerDecision.expectedRewards.map(([policy, reward]) => {
-                const selected = policy === routerDecision.selectedPolicy;
-                return (
-                  <div key={policy}>
-                    <div className="mb-1 flex items-baseline justify-between font-mono text-xs">
-                      <span className={selected ? 'text-text' : 'text-text-muted'}>{policy}</span>
-                      <span className="text-text-muted">
-                        {reward.toFixed(2)}
-                        {routerDecision.policyStats[policy]?.count ? (
-                          <span className="ml-2 text-text-faint">n={routerDecision.policyStats[policy].count}</span>
-                        ) : null}
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className={`h-full rounded-full ${selected ? 'bg-success' : 'bg-text-faint/60'}`}
-                        style={{ width: `${Math.min(100, reward * 100)}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </SurfaceCard>
-        </div>
-      </section>
+      {/* 08 — Capability value (added in P3) */}
 
       {/* 09 — Implementation evidence */}
       <ImplementationEvidence />
