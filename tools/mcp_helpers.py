@@ -263,11 +263,15 @@ def normalize_trace_for_candidate(trace: dict[str, Any], project_root: Path) -> 
         raw = event.get("raw")
         if not isinstance(raw, dict):
             continue
+        for key, value in list(raw.items()):
+            if not isinstance(value, str):
+                continue
+            # Scrub absolute project-root paths so curated fixtures never leak local
+            # machine paths (e.g. inside captured terminal output or stack traces).
+            value = value.replace(root + "/", "").replace(root, ".")
+            raw[key] = value
         if "terminal_output" in raw and isinstance(raw["terminal_output"], str):
             raw["terminal_output"] = _truncate_terminal_output(raw["terminal_output"])
-        for key, value in list(raw.items()):
-            if isinstance(value, str) and value.startswith(root):
-                raw[key] = str(Path(value).relative_to(project_root))
 
     return normalized
 

@@ -44,7 +44,7 @@ export function TakeawaysSection() {
       </ol>
       <p className="mt-6 font-mono text-xs text-text-faint">
         No live LLM · no runner · no API calls in the browser. Eval table rows are 32 synthetic tasks; cockpit traces
-        are 7 fixture runs.
+        are 13 fixture runs.
       </p>
     </section>
   );

@@ -1,0 +1,85 @@
+{
+  "task_id": "multi_agent_contract_001",
+  "task_title": "Multi-agent: backend API + frontend form",
+  "repo_snapshot": "toy_repo_issue_tracker_v1",
+  "success_command": "pnpm test",
+  "known_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ],
+  "run_id": "run_local_test_first_multi_agent_contract_001",
+  "policy": "test_first",
+  "verdict": "rejected",
+  "events": [
+    {
+      "run_id": "run_local_test_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 1,
+      "timestamp": "2026-06-05T12:00:00.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Add priority field with test-first policy.",
+      "output_summary": "Plan: run contract test before coordinating backend and frontend edits.",
+      "harness_policy": "test_first"
+    },
+    {
+      "run_id": "run_local_test_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 2,
+      "timestamp": "2026-06-05T12:00:06.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run contract test before shared contract review.",
+      "output_summary": "Command failed with exit code 1.",
+      "harness_policy": "test_first",
+      "command": "pnpm test",
+      "exit_code": 1,
+      "raw": {
+        "terminal_output": "> toy-repo-issue-tracker@0.1.0 test runs/sandboxes/run_local_test_first_multi_agent_contract_001\n> node tests/contract.test.js\n\n\u2009ELIFECYCLE\u2009 Test failed. See above for more details.\n\u2009WARN\u2009  Local package.json exists, but node_modules missing, did you mean to install?\nruns/sandboxes/run_local_test_first_multi_agent_contract_001/tests/contract.test.js:11\n  throw new Error('Backend API must expose the contract priority field.');\n  ^\n\nError: Backend API must expose the contract p\n...[truncated]"
+      },
+      "failure_label": "test_first_insufficient_context"
+    },
+    {
+      "run_id": "run_local_test_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 3,
+      "timestamp": "2026-06-05T12:00:12.000Z",
+      "actor": "critic",
+      "action_type": "BLOCKED_ACTION",
+      "input_summary": "Stop uncoordinated multi-agent edit after failing contract test.",
+      "output_summary": "Rejected: test-first policy found failure but did not establish shared contract context.",
+      "harness_policy": "test_first",
+      "failure_label": "contract_mismatch",
+      "raw": {
+        "better_policy": "context_first or guarded_recovery should publish shared contract context."
+      }
+    },
+    {
+      "run_id": "run_local_test_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 4,
+      "timestamp": "2026-06-05T12:00:18.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit test-first multi-agent result.",
+      "output_summary": "Rejected: failed contract test without shared backend/frontend coordination.",
+      "harness_policy": "test_first",
+      "raw": {
+        "verdict": "rejected",
+        "target_tests_passed": false,
+        "regression_free": false
+      },
+      "failure_label": "contract_mismatch"
+    }
+  ],
+  "expected_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "task_id": "bugfix_date_parser_001",
+  "task_title": "Bugfix: timezone parser regression",
+  "repo_snapshot": "toy_repo_date_utils_v1",
+  "success_command": "npm test -- dateParser",
+  "known_files": [
+    "src/dateParser.ts",
+    "tests/dateParser.test.ts",
+    "tests/dateParser.test.js",
+    "package.json"
+  ],
+  "run_id": "run_local_context_first_date_parser_001",
+  "policy": "context_first",
+  "verdict": "accepted",
+  "events": [
+    {
+      "run_id": "run_local_context_first_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 1,
+      "timestamp": "2026-06-05T12:00:00.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Load bugfix task with context-first harness policy.",
+      "output_summary": "Plan: read parser and test context before executing target test.",
+      "harness_policy": "context_first"
+    },
+    {
+      "run_id": "run_local_context_first_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 2,
+      "timestamp": "2026-06-05T12:00:06.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read parser source before acting.",
+      "output_summary": "Parser exposes normalizeTimezoneOffset and parseDateWithNormalizedOffset. Preview: export function parseDate(input: string): Date {",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "src/dateParser.ts"
+      ]
+    },
+    {
+      "run_id": "run_local_context_first_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 3,
+      "timestamp": "2026-06-05T12:00:12.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read target regression test after source context.",
+      "output_summary": "Test covers positive and negative colonized offsets. Preview: import { parseDateWithNormalizedOffset } from '../src/dateParser';",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "tests/dateParser.test.ts"
+      ]
+    },
+    {
+      "run_id": "run_local_context_first_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 4,
+      "timestamp": "2026-06-05T12:00:18.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run target dateParser test after context gathering.",
+      "output_summary": "Target dateParser tests passed after context-first review.",
+      "harness_policy": "context_first",
+      "command": "npm test -- dateParser",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": "> toy-repo-date-utils@0.1.0 test\n> node tests/dateParser.test.js dateParser\n\nPASS tests/dateParser.test.js",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_local_context_first_date_parser_001",
+      "task_id": "bugfix_date_parser_001",
+      "step_id": 5,
+      "timestamp": "2026-06-05T12:00:24.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit local runner result.",
+      "output_summary": "Accepted: context-first policy confirmed source and test evidence.",
+      "harness_policy": "context_first",
+      "raw": {
+        "verdict": "accepted",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    }
+  ]
+}

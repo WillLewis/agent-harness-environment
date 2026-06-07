@@ -27,7 +27,7 @@ def test_build_audit_classifies_metric_sources(project_root: Path):
     assert report["sources"]["hosted_policy_comparison"]["classification"] == SOURCE_SYNTHETIC
     assert report["sources"]["static_trace_suite"]["classification"] == SOURCE_TRACE
     assert report["sources"]["runner_batch"]["status"] == "skipped"
-    assert report["sources"]["static_trace_suite"]["trace_count"] == 7
+    assert report["sources"]["static_trace_suite"]["trace_count"] == 13
 
 
 def test_build_audit_flags_drift_warnings(project_root: Path):
@@ -41,8 +41,13 @@ def test_build_audit_flags_drift_warnings(project_root: Path):
     assert "same_policy_divergent_headline_metric" in codes
 
     hosted_only = report["policy_coverage"]["hosted_only"]
-    assert "test_first" in hosted_only
+    # test_first and context_first now have promoted replay traces, so they are no
+    # longer hosted-only; rl_lite_router stays a hosted/router-only policy.
+    assert "test_first" not in hosted_only
+    assert "context_first" not in hosted_only
     assert "rl_lite_router" in hosted_only
+    assert "test_first" in report["policy_coverage"]["overlapping"]
+    assert "context_first" in report["policy_coverage"]["overlapping"]
     assert "baseline_with_steering" in report["policy_coverage"]["trace_only"]
 
 

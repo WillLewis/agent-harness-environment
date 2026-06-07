@@ -185,7 +185,7 @@ def _build_warnings(
             "severity": "warning",
             "message": (
                 "Hosted policy_comparison.json uses synthetic portfolio percentages (32 fictional "
-                "tasks). pnpm eval:suite / pnpm eval:ci use real deterministic scorers on 7 curated "
+                "tasks). pnpm eval:suite / pnpm eval:ci use real deterministic scorers on 13 curated "
                 "trace fixtures. Values are not directly comparable."
             ),
             "hosted_metric_source": SOURCE_SYNTHETIC,

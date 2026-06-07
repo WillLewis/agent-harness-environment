@@ -5,7 +5,12 @@ export type TaskId =
 
 export type TaskType = 'bugfix' | 'adversarial' | 'multi_agent';
 
-export type PolicyId = 'baseline' | 'guarded_recovery' | 'baseline_with_steering';
+export type PolicyId =
+  | 'baseline'
+  | 'test_first'
+  | 'context_first'
+  | 'guarded_recovery'
+  | 'baseline_with_steering';
 
 export type TraceAction =
   | 'PLAN'

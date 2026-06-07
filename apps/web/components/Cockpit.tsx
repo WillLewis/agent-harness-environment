@@ -27,20 +27,10 @@ type CockpitProps = {
   autoplayToken: number;
 };
 
-type StaticPolicyId = 'test_first' | 'context_first' | 'rl_lite_router';
+type StaticPolicyId = 'rl_lite_router';
 type CockpitPolicyId = PolicyId | StaticPolicyId;
 
 const staticPolicyMeta: Record<StaticPolicyId, { name: string; description: string; badge: string }> = {
-  test_first: {
-    name: 'Test-first',
-    description: 'Requires test discovery or test inspection before code edits.',
-    badge: 'static'
-  },
-  context_first: {
-    name: 'Context-first',
-    description: 'Requires relevant source context before patching.',
-    badge: 'static'
-  },
   rl_lite_router: {
     name: 'RL-lite router',
     description: 'Selects a harness policy based on task features and reward history.',
@@ -77,7 +67,13 @@ function resolvePolicyRun(taskId: TaskId, policyId: PolicyId) {
 }
 
 function isReplayPolicyId(policyId: string): policyId is PolicyId {
-  return policyId === 'baseline' || policyId === 'guarded_recovery' || policyId === 'baseline_with_steering';
+  return (
+    policyId === 'baseline' ||
+    policyId === 'test_first' ||
+    policyId === 'context_first' ||
+    policyId === 'guarded_recovery' ||
+    policyId === 'baseline_with_steering'
+  );
 }
 
 function policyOptionOrder(taskId: TaskId): CockpitPolicyId[] {
@@ -115,10 +111,10 @@ function replayPolicyForOption(taskId: TaskId, policyOptionId: CockpitPolicyId):
 
 function policyDisplayName(policyId: string): string {
   if (policyId === 'baseline') return 'Baseline';
+  if (policyId === 'test_first') return 'Test-first';
+  if (policyId === 'context_first') return 'Context-first';
   if (policyId === 'guarded_recovery') return 'Guarded recovery';
   if (policyId === 'baseline_with_steering') return 'Baseline with steering';
-  if (policyId === 'test_first') return staticPolicyMeta.test_first.name;
-  if (policyId === 'context_first') return staticPolicyMeta.context_first.name;
   if (policyId === 'rl_lite_router') return staticPolicyMeta.rl_lite_router.name;
   return policyId.replace(/_/g, ' ');
 }

@@ -1,0 +1,164 @@
+{
+  "task_id": "multi_agent_contract_001",
+  "task_title": "Multi-agent: backend API + frontend form",
+  "repo_snapshot": "toy_repo_issue_tracker_v1",
+  "success_command": "pnpm test",
+  "known_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ],
+  "run_id": "run_local_context_first_multi_agent_contract_001",
+  "policy": "context_first",
+  "verdict": "accepted",
+  "events": [
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 1,
+      "timestamp": "2026-06-05T12:00:00.000Z",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Add priority field with context-first policy.",
+      "output_summary": "Plan: read contract, backend, and frontend context before edits, then run tests.",
+      "harness_policy": "context_first"
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 2,
+      "timestamp": "2026-06-05T12:00:06.000Z",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read shared priority contract before subagent edits.",
+      "output_summary": "Contract defines priority as the shared backend/frontend field. Preview: {",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "contracts/issue-priority.json"
+      ],
+      "raw": {
+        "shared_contract": true,
+        "contract_field": "priority"
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 3,
+      "timestamp": "2026-06-05T12:00:12.000Z",
+      "actor": "subagent",
+      "action_type": "READ_FILE",
+      "input_summary": "Backend subagent reads API module after contract context.",
+      "output_summary": "Backend module needs priority field. Preview: function createIssuePayload({ title }) {",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "backend/issueApi.js"
+      ],
+      "raw": {
+        "subagent_role": "backend",
+        "shared_contract": true,
+        "contract_field": "priority"
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 4,
+      "timestamp": "2026-06-05T12:00:18.000Z",
+      "actor": "subagent",
+      "action_type": "EDIT",
+      "input_summary": "Backend subagent applies contract-aligned priority field.",
+      "output_summary": "Backend payload now includes priority.",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "backend/issueApi.js"
+      ],
+      "raw": {
+        "diff": "+ function createIssuePayload({ title, priority })",
+        "contract_field": "priority",
+        "subagent_role": "backend"
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 5,
+      "timestamp": "2026-06-05T12:00:24.000Z",
+      "actor": "subagent",
+      "action_type": "READ_FILE",
+      "input_summary": "Frontend subagent reads form module after contract context.",
+      "output_summary": "Frontend form needs the same priority field. Preview: function issueFormFields() {",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "frontend/issueForm.js"
+      ],
+      "raw": {
+        "subagent_role": "frontend",
+        "shared_contract": true,
+        "contract_field": "priority"
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 6,
+      "timestamp": "2026-06-05T12:00:30.000Z",
+      "actor": "subagent",
+      "action_type": "EDIT",
+      "input_summary": "Frontend subagent applies contract-aligned priority field.",
+      "output_summary": "Frontend form fields now include priority.",
+      "harness_policy": "context_first",
+      "files_touched": [
+        "frontend/issueForm.js"
+      ],
+      "raw": {
+        "diff": "+ return ['title', 'priority']",
+        "contract_field": "priority",
+        "subagent_role": "frontend"
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 7,
+      "timestamp": "2026-06-05T12:00:36.000Z",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run contract alignment tests after context-first edits.",
+      "output_summary": "Contract tests passed with aligned backend/frontend fields.",
+      "harness_policy": "context_first",
+      "command": "pnpm test",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": "> toy-repo-issue-tracker@0.1.0 test runs/sandboxes/run_local_context_first_multi_agent_contract_001\n> node tests/contract.test.js\n\nPASS tests/contract.test.js",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_local_context_first_multi_agent_contract_001",
+      "task_id": "multi_agent_contract_001",
+      "step_id": 8,
+      "timestamp": "2026-06-05T12:00:42.000Z",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit context-first multi-agent result.",
+      "output_summary": "Accepted: context-first policy aligned both subagents on the shared contract.",
+      "harness_policy": "context_first",
+      "raw": {
+        "verdict": "accepted",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    }
+  ],
+  "expected_files": [
+    "contracts/issue-priority.json",
+    "backend/issueApi.js",
+    "frontend/issueForm.js",
+    "package.json",
+    "tests/contract.test.js"
+  ]
+}
