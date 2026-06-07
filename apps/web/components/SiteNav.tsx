@@ -5,6 +5,7 @@ const navLinks = [
   { href: '#tasks', label: 'Tasks' },
   { href: '#cockpit', label: 'Cockpit' },
   { href: '#evals', label: 'Evals' },
+  { href: '#capability-value', label: 'Capability' },
   { href: '#architecture', label: 'Architecture' }
 ] as const;
 

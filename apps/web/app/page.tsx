@@ -1,4 +1,5 @@
 import { DemoFlow } from '../components/DemoFlow';
+import { CapabilityValueChart } from '../components/CapabilityValueChart';
 import { EvalTable } from '../components/EvalTable';
 import { ReliabilityPanel } from '../components/ReliabilityPanel';
 import { FailureTaxonomySection } from '../components/FailureTaxonomySection';
@@ -202,7 +203,29 @@ export default function Home() {
         <ReliabilityPanel />
       </section>
 
-      {/* 08 — Capability value (added in P3) */}
+      {/* 08 — Capability value */}
+      <section id="capability-value" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <SectionHeader
+          chapter="08"
+          label="capability value"
+          title="Which primitives earn their keep as the model improves"
+          description={
+            <>
+              Sweep the agent&apos;s capability and measure real seeded runs. As the model self-corrects, the{' '}
+              <span className="text-text">productivity</span> primitives&apos; lift fades — but a more capable agent{' '}
+              <span className="text-text">games the visible test more often</span>, the failure only held-out scoring
+              catches. The durable harness is the safety / spec-integrity layer.
+            </>
+          }
+          className="mb-8"
+        />
+        <CapabilityValueChart />
+        <p className="mt-4 max-w-3xl text-[11px] leading-relaxed text-text-faint">
+          Measured, not drawn: <code className="text-text-muted">python packages/evals/capability_sweep.py</code>.
+          Capability is a stand-in for model strength; magnitudes are illustrative (decision-point weights are
+          hand-set), but the directions — productivity lift fading, spec-gaming rate climbing — are structural.
+        </p>
+      </section>
 
       {/* 09 — Implementation evidence */}
       <ImplementationEvidence />
