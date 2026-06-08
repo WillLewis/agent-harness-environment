@@ -5,10 +5,6 @@ export function SiteFooter() {
         <p className="font-mono text-xs text-text-faint">
           Agent Harness Environment · static hosted demo · no live LLM or runner in the browser
         </p>
-        <p className="mt-2 text-xs leading-relaxed text-text-faint">
-          Traces and eval cells are precomputed fixtures. Local runner, scorers, and MCP tools ship in-repo for
-          development use.
-        </p>
       </div>
     </footer>
   );

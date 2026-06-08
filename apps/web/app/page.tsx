@@ -208,10 +208,10 @@ export default function Home() {
         <SectionHeader
           chapter="08"
           label="capability value"
-          title="The capability axis is real models now"
+          title="The capability axis for real models"
           description={
             <>
-              The capability axis is no longer a synthetic knob — it&apos;s the real model tier (
+              The capability axis is the real model tier (
               <span className="text-text">GPT-5.4-nano → Opus 4.8</span>). Each line is one task&apos;s held-out
               mean-fraction climbing across the tier, while the <span className="text-text">visible suite stays pinned
               at 1.0</span> for every model. The gap between the flat visible reference and each climbing line is exactly

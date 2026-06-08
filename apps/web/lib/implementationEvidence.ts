@@ -56,7 +56,7 @@ export const systemCapabilities: SystemCapability[] = [
     id: 'hosted_cockpit',
     title: 'Static hosted cockpit',
     description:
-      'Next.js demo replays precomputed traces. Policy toggle updates timeline, metrics, terminal, diff, and verdict together — no live agent or API.',
+      'Next.js demo replays precomputed traces. Model toggle updates timeline, metrics, terminal, diff, and verdict together — no live agent or API.',
     status: 'implemented',
     repoPaths: ['apps/web/components/Cockpit.tsx', 'apps/web/lib/cockpitFixtures.ts', 'data/cockpit_traces/']
   },

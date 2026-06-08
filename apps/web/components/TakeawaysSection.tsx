@@ -4,7 +4,7 @@ import { SurfaceCard } from './ui/SurfaceCard';
 const takeaways = [
   {
     chapter: '01',
-    text: 'Harness policies change coding-agent outcomes on the same task, model, and repository.'
+    text: 'The visible suite passes from the smallest model to the frontier — the held-out battery it never sees is what separates real capability on the same task and repo.'
   },
   {
     chapter: '02',
@@ -43,8 +43,8 @@ export function TakeawaysSection() {
         ))}
       </ol>
       <p className="mt-6 font-mono text-xs text-text-faint">
-        No live LLM · no runner · no API calls in the browser. Eval table rows are 32 synthetic tasks; cockpit traces
-        are 13 fixture runs.
+        No live LLM · no runner · no API calls in the browser. The eval table and capability chart are real held-out
+        fractions (3 tasks × 5 models, baseline policy); cockpit traces are 6 real-model runs.
       </p>
     </section>
   );

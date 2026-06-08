@@ -75,11 +75,13 @@ export function CapabilityValueChart() {
     <div className="surface-card p-4 sm:p-5">
       <div className="h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 16, left: -10 }}>
+          <LineChart data={chartData} margin={{ top: 8, right: 28, bottom: 16, left: -4 }}>
             <CartesianGrid stroke="var(--color-grid-line)" vertical={false} />
             <XAxis
               dataKey="modelLabel"
               type="category"
+              interval={0}
+              padding={{ left: 24, right: 28 }}
               tick={{ fill: '#727c86', fontSize: 11 }}
               tickLine={false}
               axisLine={{ stroke: 'var(--color-border-subtle)' }}
@@ -132,7 +134,7 @@ export function CapabilityValueChart() {
         ))}
       </div>
       <p className="mt-4 max-w-3xl text-[11px] leading-relaxed text-text-faint">
-        The capability axis is real models, not a synthetic knob: held-out mean-fraction per card climbs left → right
+        The capability axis is real models: held-out mean-fraction per card climbs left → right
         across the tier (GPT-5.4-nano → Opus 4.8), while the visible suite stays pinned at 1.0 for every model. Latent-defect
         discovery is the steepest climb — even the frontier tier leaves items on the table.
       </p>
