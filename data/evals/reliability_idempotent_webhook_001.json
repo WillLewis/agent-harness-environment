@@ -1,0 +1,111 @@
+{
+  "task": "idempotent_webhook_001",
+  "n": 16,
+  "models": [
+    "claude-haiku-4-5",
+    "claude-sonnet-4-6",
+    "claude-opus-4-8",
+    "gpt-5.4-nano",
+    "gpt-5.4-mini"
+  ],
+  "policies": [
+    "baseline",
+    "guarded_recovery"
+  ],
+  "cells": [
+    {
+      "model": "claude-haiku-4-5",
+      "policy": "baseline",
+      "visible": 1.0,
+      "heldOut": 0.0625,
+      "patch_kinds": {
+        "check_then_act": 15,
+        "correct": 1
+      }
+    },
+    {
+      "model": "claude-haiku-4-5",
+      "policy": "guarded_recovery",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "policy": "baseline",
+      "visible": 1.0,
+      "heldOut": 0.125,
+      "patch_kinds": {
+        "check_then_act": 14,
+        "correct": 2
+      }
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "policy": "guarded_recovery",
+      "visible": 1.0,
+      "heldOut": 0.125,
+      "patch_kinds": {
+        "check_then_act": 14,
+        "correct": 2
+      }
+    },
+    {
+      "model": "claude-opus-4-8",
+      "policy": "baseline",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "claude-opus-4-8",
+      "policy": "guarded_recovery",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "gpt-5.4-nano",
+      "policy": "baseline",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "gpt-5.4-nano",
+      "policy": "guarded_recovery",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "policy": "baseline",
+      "visible": 1.0,
+      "heldOut": 0.0,
+      "patch_kinds": {
+        "check_then_act": 16
+      }
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "policy": "guarded_recovery",
+      "visible": 1.0,
+      "heldOut": 0.0625,
+      "patch_kinds": {
+        "check_then_act": 15,
+        "correct": 1
+      }
+    }
+  ]
+}
