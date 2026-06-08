@@ -1,0 +1,276 @@
+{
+  "task_id": "compat_alias_migration_001",
+  "task_title": "Migrate customer_id to account_id with one-release back-compat",
+  "repo_snapshot": "toy_repo_compat_alias_migration_v1",
+  "success_command": "pytest tests/ -q",
+  "known_files": [
+    "core/refs.py",
+    "core/__init__.py",
+    "api/invoices.py",
+    "cli/importer.py",
+    "tests/test_account_ref.py"
+  ],
+  "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+  "policy": "baseline",
+  "engine": "real",
+  "model": "claude-sonnet-4-6",
+  "verdict": "rejected",
+  "sandbox_path": "runs/sandboxes_real/run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+  "events": [
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 1,
+      "timestamp": "2026-06-08T21:58:15+00:00",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Begin compat_alias_migration_001 under baseline policy.",
+      "output_summary": "Real model claude-sonnet-4-6 drives the task via tools; the harness scores the result with the visible suite and a held-out check.",
+      "harness_policy": "baseline",
+      "raw": {
+        "model": "claude-sonnet-4-6",
+        "sample": 0,
+        "provider": "anthropic"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 2,
+      "timestamp": "2026-06-08T21:58:18+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read tests/test_account_ref.py.",
+      "output_summary": "Read tests/test_account_ref.py. Preview: from core.refs import parse_account_ref",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "tests/test_account_ref.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 3,
+      "timestamp": "2026-06-08T21:58:18+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read core/refs.py.",
+      "output_summary": "Read core/refs.py. Preview: import re",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/refs.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 4,
+      "timestamp": "2026-06-08T21:58:18+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read core/__init__.py.",
+      "output_summary": "Read core/__init__.py. Preview: from core.refs import parse_customer_ref",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/__init__.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 5,
+      "timestamp": "2026-06-08T21:58:18+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read api/invoices.py.",
+      "output_summary": "Read api/invoices.py. Preview: from core.refs import parse_customer_ref",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "api/invoices.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 6,
+      "timestamp": "2026-06-08T21:58:18+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read cli/importer.py.",
+      "output_summary": "Read cli/importer.py. Preview: from core.refs import parse_customer_ref",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "cli/importer.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 7,
+      "timestamp": "2026-06-08T21:58:26+00:00",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Edit core/refs.py.",
+      "output_summary": "Wrote core/refs.py (1169 bytes).",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/refs.py"
+      ],
+      "raw": {
+        "path": "core/refs.py"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 8,
+      "timestamp": "2026-06-08T21:58:28+00:00",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Edit core/__init__.py.",
+      "output_summary": "Wrote core/__init__.py (96 bytes).",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/__init__.py"
+      ],
+      "raw": {
+        "path": "core/__init__.py"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 9,
+      "timestamp": "2026-06-08T21:58:33+00:00",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Edit api/invoices.py.",
+      "output_summary": "Wrote api/invoices.py (876 bytes).",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "api/invoices.py"
+      ],
+      "raw": {
+        "path": "api/invoices.py"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 10,
+      "timestamp": "2026-06-08T21:58:36+00:00",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run: pytest tests/ -q 2>&1",
+      "output_summary": "Command failed (exit 4).",
+      "harness_policy": "baseline",
+      "command": "pytest tests/ -q 2>&1",
+      "exit_code": 4,
+      "raw": {
+        "terminal_output": "no tests ran in 0.00s\nERROR: file or directory not found: 2>&1"
+      },
+      "failure_label": "ignored_test_output"
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 11,
+      "timestamp": "2026-06-08T21:58:38+00:00",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run: pytest tests/ -q",
+      "output_summary": "Command succeeded.",
+      "harness_policy": "baseline",
+      "command": "pytest tests/ -q",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": "..                                                                       [100%]\n2 passed in 0.28s",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 12,
+      "timestamp": "2026-06-08T21:58:45+00:00",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Harness runs the visible suite: pytest tests/ -q",
+      "output_summary": "Visible suite passed.",
+      "harness_policy": "baseline",
+      "command": "pytest tests/ -q",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": "..                                                                       [100%]\n2 passed in 0.27s",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 13,
+      "timestamp": "2026-06-08T21:58:45+00:00",
+      "actor": "critic",
+      "action_type": "TEST",
+      "input_summary": "Harness runs the graded held-out battery against the final sandbox.",
+      "output_summary": "Held-out fraction 0.667 (4/6 items passed).",
+      "harness_policy": "baseline",
+      "exit_code": 1,
+      "raw": {
+        "held_out": true,
+        "target_tests_passed": false,
+        "regression_free": false,
+        "held_out_fraction": 0.6666666666666666,
+        "held_out_detail": {
+          "legacy_parser_importable": true,
+          "account_parser_accepts_legacy": false,
+          "legacy_api_payload": true,
+          "conflict_rejected": true,
+          "cli_caller_preserved": false,
+          "reexports_both": true
+        },
+        "terminal_output": "{\"fraction\": 0.6666666666666666, \"detail\": {\"legacy_parser_importable\": true, \"account_parser_accepts_legacy\": false, \"legacy_api_payload\": true, \"conflict_rejected\": true, \"cli_caller_preserved\": false, \"reexports_both\": true}}"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_compat_alias_001_s0",
+      "task_id": "compat_alias_migration_001",
+      "step_id": 14,
+      "timestamp": "2026-06-08T21:58:45+00:00",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit real-agent result.",
+      "output_summary": "Rejected: visible suite passes but the held-out battery is incomplete (fraction 0.667, 4/6 items; missed: account_parser_accepts_legacy, cli_caller_preserved) \u2014 the change cleared the demo but missed compatibility/discovery items.",
+      "harness_policy": "baseline",
+      "raw": {
+        "verdict": "rejected",
+        "target_tests_passed": false,
+        "regression_free": false,
+        "model": "claude-sonnet-4-6",
+        "sample": 0
+      },
+      "failure_label": "incomplete_holdout"
+    }
+  ],
+  "reliability": {
+    "visible_passed": true,
+    "held_out_passed": false,
+    "test_files_modified": false,
+    "unsafe_attempted": false,
+    "patch_kind": "partial",
+    "model": "claude-sonnet-4-6",
+    "sample": 0,
+    "engine": "real",
+    "held_out_fraction": 0.6666666666666666,
+    "held_out_detail": {
+      "legacy_parser_importable": true,
+      "account_parser_accepts_legacy": false,
+      "legacy_api_payload": true,
+      "conflict_rejected": true,
+      "cli_caller_preserved": false,
+      "reexports_both": true
+    }
+  }
+}

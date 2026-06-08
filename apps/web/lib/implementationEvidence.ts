@@ -1,12 +1,11 @@
 import tasks from '../../../data/tasks.json';
 import failureClusters from '../../../data/failure_clusters.json';
-import assistedBaselineDateParser from '../../../data/traces/assisted_baseline_date_parser.json';
-import baselineAdversarialEnv from '../../../data/traces/baseline_adversarial_env.json';
-import baselineDateParser from '../../../data/traces/baseline_date_parser.json';
-import baselineMultiAgentContract from '../../../data/traces/baseline_multi_agent_contract.json';
-import guardedRecoveryAdversarialEnv from '../../../data/traces/guarded_recovery_adversarial_env.json';
-import guardedRecoveryDateParser from '../../../data/traces/guarded_recovery_date_parser.json';
-import guardedRecoveryMultiAgentContract from '../../../data/traces/guarded_recovery_multi_agent_contract.json';
+import completenessHaikuRejected from '../../../data/cockpit_traces/completeness_haiku_rejected.json';
+import completenessSonnetAccepted from '../../../data/cockpit_traces/completeness_sonnet_accepted.json';
+import compatSonnetRejected from '../../../data/cockpit_traces/compat_sonnet_rejected.json';
+import compatOpusAccepted from '../../../data/cockpit_traces/compat_opus_accepted.json';
+import latentSonnetRejected from '../../../data/cockpit_traces/latent_sonnet_rejected.json';
+import latentOpusPartial from '../../../data/cockpit_traces/latent_opus_partial.json';
 
 export type CapabilityStatus = 'implemented' | 'local_dry_run' | 'future';
 
@@ -21,13 +20,12 @@ export type SystemCapability = {
 
 /** Ensures every trace import stays wired; count is derived from the manifest. */
 export const traceFixtures = [
-  assistedBaselineDateParser,
-  baselineAdversarialEnv,
-  baselineDateParser,
-  baselineMultiAgentContract,
-  guardedRecoveryAdversarialEnv,
-  guardedRecoveryDateParser,
-  guardedRecoveryMultiAgentContract
+  completenessHaikuRejected,
+  completenessSonnetAccepted,
+  compatSonnetRejected,
+  compatOpusAccepted,
+  latentSonnetRejected,
+  latentOpusPartial
 ] as const;
 
 export const implementationStats = {

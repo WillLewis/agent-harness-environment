@@ -1,8 +1,5 @@
-'use client';
-
 import clsx from 'clsx';
-import { useState } from 'react';
-import { policyDisplayName, reliability, reliabilityPolicy, reliabilityTasks } from '../lib/evalFixtures';
+import { cardReliability, runsPerCell, type ModelTierPoint } from '../lib/separationReliability';
 
 function pct(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -14,128 +11,87 @@ function toneFor(value: number) {
   return 'text-danger';
 }
 
-function DotStrip({ flags, label }: { flags: boolean[]; label: string }) {
-  const passed = flags.filter(Boolean).length;
+function barColor(value: number) {
+  if (value >= 0.85) return 'bg-success';
+  if (value >= 0.5) return 'bg-warning';
+  return 'bg-danger';
+}
+
+/** Paired bars for one model: flat visible reference over the real held-out fraction. */
+function ModelBars({ point }: { point: ModelTierPoint }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="w-16 shrink-0 font-mono text-[10px] uppercase tracking-wider text-text-faint">{label}</span>
-      <div className="flex flex-wrap gap-1">
-        {flags.map((flag, index) => (
-          <span
-            key={index}
-            className={clsx('h-2 w-2 rounded-full', flag ? 'bg-success' : 'bg-danger/80')}
-            aria-hidden="true"
-          />
-        ))}
+    <div className="space-y-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="text-xs font-medium text-text">{point.modelLabel}</span>
+        <span className={clsx('font-mono text-[11px] tabular-nums', toneFor(point.heldOut))}>
+          {pct(point.heldOut)}
+        </span>
       </div>
-      <span className="ml-auto shrink-0 font-mono text-[10px] text-text-faint">
-        {passed}/{flags.length}
-      </span>
+      <div className="space-y-1">
+        {/* Visible — flat ~100% for every model */}
+        <div className="flex items-center gap-2">
+          <span className="w-12 shrink-0 font-mono text-[9px] uppercase tracking-wider text-text-faint">visible</span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
+            <div className="h-full rounded-full bg-text-faint/50" style={{ width: `${point.visible * 100}%` }} />
+          </div>
+          <span className="w-9 shrink-0 text-right font-mono text-[9px] tabular-nums text-text-faint">
+            {pct(point.visible)}
+          </span>
+        </div>
+        {/* Held-out — the true gradient across the model tier */}
+        <div className="flex items-center gap-2">
+          <span className="w-12 shrink-0 font-mono text-[9px] uppercase tracking-wider text-text-faint">held-out</span>
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-2">
+            <div
+              className={clsx('h-full rounded-full', barColor(point.heldOut))}
+              style={{ width: `${point.heldOut * 100}%` }}
+            />
+          </div>
+          <span className={clsx('w-9 shrink-0 text-right font-mono text-[9px] tabular-nums', toneFor(point.heldOut))}>
+            {pct(point.heldOut)}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
 
 export function ReliabilityPanel() {
-  const [taskId, setTaskId] = useState(reliabilityTasks[0]?.task_id);
-  const task = reliabilityTasks.find((row) => row.task_id === taskId) ?? reliabilityTasks[0];
-  const baseline = reliabilityPolicy(task, 'baseline');
-  const guarded = reliabilityPolicy(task, 'guarded_recovery');
-
   return (
     <div className="surface-card mt-6 overflow-hidden">
       <div className="border-b border-border-subtle p-4 sm:p-5">
         <p className="section-chapter">
           <span className="text-text-muted">07</span>
           <span className="mx-2 text-text-muted">·</span>
-          <span className="section-label">Reliability · {reliability.n} real seeded runs / cell</span>
+          <span className="section-label">Reliability · {runsPerCell} held-out runs / model / card</span>
         </p>
-        <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">Naive metric vs. held-out truth</h3>
+        <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">Visible says 100%. Held-out reveals the gradient.</h3>
         <p className="mt-2 max-w-3xl text-xs leading-relaxed text-text-muted sm:text-sm">
-          Each cell is {reliability.n} real seeded runs (capability {task.capability}) scored by actual execution.{' '}
-          <span className="text-text">{task.visibleLabel}</span> is what an eval that only runs the agent&apos;s own
-          checks would report; <span className="text-text">{task.heldOutLabel}</span> is the true outcome.{' '}
-          <span className="font-mono">pass^k</span> is the probability all k of k attempts pass.
+          Each card is one task, run across the model tier (GPT-5.4-nano → Opus 4.8). The{' '}
+          <span className="text-text">visible suite passes for every model</span> — that bar is flat at ~100% top to
+          bottom. The harness&apos;s <span className="text-text">held-out battery</span> is what separates real
+          capability: the lower bar is the mean fraction of held-out items each model actually satisfies.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {reliabilityTasks.map((row) => (
-            <button
-              key={row.task_id}
-              type="button"
-              onClick={() => setTaskId(row.task_id)}
-              className={clsx(
-                'rounded-full border px-3 py-1 text-xs font-medium transition',
-                row.task_id === task.task_id
-                  ? 'border-border-strong bg-surface-2 text-text'
-                  : 'border-border-subtle text-text-muted hover:bg-surface-2/60'
-              )}
-            >
-              {row.label}
-            </button>
-          ))}
-        </div>
       </div>
 
-      <div className="overflow-x-auto overscroll-x-contain">
-        <table className="w-full min-w-[560px] text-left text-sm">
-          <thead className="bg-surface-2/60 font-mono text-[10px] uppercase tracking-wider text-text-faint">
-            <tr>
-              <th scope="col" className="px-4 py-3 sm:px-5">
-                Policy
-              </th>
-              <th scope="col" className="px-4 py-3 sm:px-5">
-                {task.visibleLabel} pass@1
-              </th>
-              <th scope="col" className="px-4 py-3 sm:px-5">
-                {task.heldOutLabel} pass@1
-              </th>
-              <th scope="col" className="px-4 py-3 sm:px-5">
-                {task.heldOutLabel} pass^5
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border-subtle">
-            {task.policies.map((row) => (
-              <tr key={row.policy} className="transition hover:bg-surface-2/60">
-                <th scope="row" className="px-4 py-3 text-sm font-semibold text-text sm:px-5">
-                  {policyDisplayName(row.policy)}
-                </th>
-                <td className="px-4 py-3 font-mono text-xs tabular-nums text-text-muted sm:px-5">
-                  {pct(row.visible.pass1)}
-                </td>
-                <td className={clsx('px-4 py-3 font-mono text-xs tabular-nums sm:px-5', toneFor(row.heldOut.pass1))}>
-                  {pct(row.heldOut.pass1)}
-                </td>
-                <td
-                  className={clsx('px-4 py-3 font-mono text-xs tabular-nums sm:px-5', toneFor(row.heldOut.passK['5']))}
-                >
-                  {row.heldOut.passK['5'].toFixed(3)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {baseline && guarded ? (
-        <div className="space-y-4 border-t border-border-subtle p-4 sm:p-5">
-          <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
-            per-seed outcomes · green = pass · red = fail
-          </p>
-          {[baseline, guarded].map((row) => (
-            <div key={row.policy} className="space-y-1.5">
-              <p className="text-xs font-semibold text-text">{policyDisplayName(row.policy)}</p>
-              <DotStrip flags={row.seedResults.visible} label="visible" />
-              <DotStrip flags={row.seedResults.heldOut} label="held-out" />
+      <div className="grid gap-px bg-border-subtle sm:grid-cols-3">
+        {cardReliability.map((card) => (
+          <div key={card.taskId} className="bg-page/40 p-4 sm:p-5">
+            <h4 className="text-sm font-semibold text-text">{card.cardLabel}</h4>
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-text-faint">{card.axis}</p>
+            <div className="mt-4 space-y-3.5">
+              {card.models.map((point) => (
+                <ModelBars key={point.model} point={point} />
+              ))}
             </div>
-          ))}
-        </div>
-      ) : null}
+          </div>
+        ))}
+      </div>
 
       <div className="border-t border-border-subtle px-4 py-3 text-[11px] leading-relaxed text-text-faint sm:px-5">
-        {task.metric_note} Measured, not modeled: regenerate with{' '}
-        <code className="text-text-muted">python packages/evals/pass_k.py</code>. Magnitudes are illustrative
-        (decision-point weights are hand-set); the orderings — held-out ≤ visible, and guarded pass^k ≫ baseline — are
-        structural.
+        Baseline policy. The guarded_recovery policy barely moves these held-out fractions (the gap is capability, not
+        recovery), so it isn&apos;t charted here. Measured, not modeled: each cell is {runsPerCell} real-model runs scored by
+        actual execution against the held-out suite.
       </div>
     </div>
   );

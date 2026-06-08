@@ -16,12 +16,12 @@ const premisePillars = [
     body: 'A coding agent emits plans, reads, edits, and shell calls. Without a trace, failure looks like a wall of text instead of a signal.'
   },
   {
-    title: 'They fail in patterns',
-    body: 'Loops on identical commands, hallucinated paths, unsafe recovery, contract drift. The same shapes recur across models and tasks.'
+    title: 'The visible suite lies',
+    body: "An agent's own checks pass for every model — nano to frontier. They clear the happy path while missing malformed inputs, broken legacy callers, and unreviewed neighbouring defects."
   },
   {
-    title: 'Harnesses change the outcome',
-    body: 'Policy rules — recovery guards, tool gateways, judges — turn a dead-end loop into an evidence-driven retry on the same fixture.'
+    title: 'The held-out battery decides',
+    body: 'Scoring each run against a held-out suite it never sees is what separates real model capability. Same repo, same task, same green visible suite — different model, different held-out outcome.'
   }
 ] as const;
 
@@ -47,9 +47,9 @@ const protocolCards = [
   ['unsafe_tool_attempt', 'A blocked shell, file, network, or secret-access action.']
 ] as const;
 
-const bugfixTask = getCockpitTask('bugfix_date_parser_001');
-const heroBaseline = bugfixTask.policies.baseline!;
-const heroGuarded = bugfixTask.policies.guarded_recovery!;
+const headlineTask = getCockpitTask('compat_alias_migration_001');
+const heroRejected = headlineTask.variants['claude-sonnet-4-6']!;
+const heroAccepted = headlineTask.variants['claude-opus-4-8']!;
 
 function formatPct(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -58,18 +58,18 @@ function formatPct(value: number) {
 const heroMetrics = [
   {
     label: 'task_success',
-    baseline: formatPct(heroBaseline.metrics.taskSuccess),
-    guarded: formatPct(heroGuarded.metrics.taskSuccess)
+    baseline: formatPct(heroRejected.metrics.taskSuccess),
+    guarded: formatPct(heroAccepted.metrics.taskSuccess)
   },
   {
-    label: 'loop_rate',
-    baseline: formatPct(heroBaseline.metrics.loopScore),
-    guarded: formatPct(heroGuarded.metrics.loopScore)
+    label: 'held_out',
+    baseline: formatPct(heroRejected.metrics.recoveryScore),
+    guarded: formatPct(heroAccepted.metrics.recoveryScore)
   },
   {
-    label: 'recovery',
-    baseline: formatPct(heroBaseline.metrics.recoveryScore),
-    guarded: formatPct(heroGuarded.metrics.recoveryScore)
+    label: 'verdict',
+    baseline: heroRejected.verdict === 'accepted' ? 'pass' : 'fail',
+    guarded: heroAccepted.verdict === 'accepted' ? 'pass' : 'fail'
   }
 ] as const;
 
@@ -93,12 +93,12 @@ export default function Home() {
             A flight recorder for coding agents.
           </p>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-muted sm:text-base">
-            <span className="text-text">Static hosted demo</span>: replay precomputed traces for bugfix,
-            adversarial safety, and multi-agent contract tasks. <span className="text-text">No live LLM</span>,
-            runner, or API calls in the browser.
+            <span className="text-text">Static hosted demo</span>: replay precomputed real-model traces for
+            completeness, back-compat migration, and latent-defect discovery tasks.{' '}
+            <span className="text-text">No live LLM</span>, runner, or API calls in the browser.
           </p>
           <p className="mt-4 font-mono text-xs text-accent-muted sm:text-sm">
-            Same model. Same repo. Same task. Different harness. Different outcome.
+            Same repo. Same task. Different model. The visible suite passes — the held-out battery decides.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#cockpit" className="btn-primary">
@@ -114,7 +114,7 @@ export default function Home() {
 
           <div className="mt-12 max-w-3xl">
             <p className="font-mono text-[10px] uppercase tracking-widest text-text-faint">
-              Fixture illustration · bugfix task · baseline → guarded recovery
+              Real run · back-compat migration · Sonnet 4.6 → Opus 4.8
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               {heroMetrics.map((metric) => (
@@ -208,24 +208,23 @@ export default function Home() {
         <SectionHeader
           chapter="08"
           label="capability value"
-          title="Which primitives earn their keep as the model improves"
+          title="The capability axis is real models now"
           description={
             <>
-              Sweep the agent&apos;s capability and measure real seeded runs across all three tasks. As the model
-              self-corrects, the <span className="text-text">productivity</span> primitives&apos; lift fades — but the
-              failures a guard exists to catch (<span className="text-text">spec-gaming</span>,{' '}
-              <span className="text-text">unsafe secret reads</span>) only <span className="text-text">climb</span> with
-              capability. The durable harness is the safety / spec-integrity layer; the productivity layer is on borrowed
-              time.
+              The capability axis is no longer a synthetic knob — it&apos;s the real model tier (
+              <span className="text-text">GPT-5.4-nano → Opus 4.8</span>). Each line is one task&apos;s held-out
+              mean-fraction climbing across the tier, while the <span className="text-text">visible suite stays pinned
+              at 1.0</span> for every model. The gap between the flat visible reference and each climbing line is exactly
+              what the held-out battery buys you.
             </>
           }
           className="mb-8"
         />
         <CapabilityValueChart />
         <p className="mt-4 max-w-3xl text-[11px] leading-relaxed text-text-faint">
-          Measured, not drawn: <code className="text-text-muted">python packages/evals/capability_sweep.py</code>.
-          Capability is a stand-in for model strength; magnitudes are illustrative (decision-point weights are
-          hand-set), but the directions — productivity lift fading, spec-gaming rate climbing — are structural.
+          Measured, not drawn: held-out mean-fraction per model from the real run fixtures (
+          <code className="text-text-muted">data/evals/reliability_*.json</code>, baseline policy). Visible is 1.0 by
+          construction; the separation is the held-out gradient.
         </p>
       </section>
 

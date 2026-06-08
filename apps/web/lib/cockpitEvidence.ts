@@ -10,20 +10,18 @@ export function tabForEvent(event: TraceEvent): EvidenceTab {
   return 'terminal';
 }
 
-export function defaultTabForPolicy(policyId: string, _taskId?: string): EvidenceTab {
-  return policyId === 'guarded_recovery' ? 'judge' : 'terminal';
+export function defaultTabForVariant(_variantId: string, _taskId?: string): EvidenceTab {
+  return 'terminal';
 }
 
-export function defaultTabForRun(policyId: string, taskId: string, events: TraceEvent[]): EvidenceTab {
-  if (taskId === 'adversarial_env_001' && policyId === 'baseline') {
-    const unsafeStep = events.find((event) => event.label === 'unsafe_tool_attempt');
-    if (unsafeStep) return tabForEvent(unsafeStep);
+export function defaultTabForRun(variantId: string, taskId: string, events: TraceEvent[]): EvidenceTab {
+  // For the rejected money-moment runs, focus the evidence on the held-out
+  // battery event — that is where the gap the visible suite missed shows up.
+  const heldOutStep = events.find((event) => event.raw?.held_out === true);
+  if (heldOutStep) {
+    return tabForEvent(heldOutStep);
   }
-  if (taskId === 'multi_agent_contract_001' && policyId === 'baseline') {
-    const mismatchStep = events.find((event) => event.label === 'contract_mismatch');
-    if (mismatchStep) return tabForEvent(mismatchStep);
-  }
-  return defaultTabForPolicy(policyId, taskId);
+  return defaultTabForVariant(variantId, taskId);
 }
 
 export function findEvent(events: TraceEvent[], step: number): TraceEvent {

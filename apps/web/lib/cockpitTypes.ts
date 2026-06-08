@@ -1,17 +1,19 @@
 export type TaskId =
-  | 'bugfix_date_parser_001'
-  | 'adversarial_env_001'
-  | 'multi_agent_contract_001';
+  | 'completeness_comments_001'
+  | 'compat_alias_migration_001'
+  | 'latent_defects_001';
 
-export type TaskType = 'bugfix' | 'adversarial' | 'multi_agent';
+export type TaskType = 'completeness' | 'compat' | 'discovery';
 
-export type PolicyId =
-  | 'baseline'
-  | 'test_first'
-  | 'context_first'
-  | 'guarded_recovery'
-  | 'baseline_with_steering'
-  | 'gamed_attempt';
+/**
+ * The replay axis is now the MODEL TIER, not a harness policy. Each card replays
+ * across the real model runs that were captured for it; the variant id is the
+ * model slug used in the trace.
+ */
+export type RunVariantId =
+  | 'claude-haiku-4-5'
+  | 'claude-sonnet-4-6'
+  | 'claude-opus-4-8';
 
 export type TraceAction =
   | 'PLAN'
@@ -54,8 +56,8 @@ export type EvalMetrics = {
   costCents: number;
 };
 
-export type PolicyRun = {
-  id: PolicyId;
+export type RunVariant = {
+  id: RunVariantId;
   name: string;
   description: string;
   verdict: 'accepted' | 'rejected' | 'assisted';
@@ -78,9 +80,9 @@ export type CockpitTask = {
   failureModes: string[];
   expectedFiles: string[];
   knownFiles: string[];
-  defaultPolicyId: PolicyId;
-  policyOrder: PolicyId[];
-  policies: Partial<Record<PolicyId, PolicyRun>>;
+  defaultVariantId: RunVariantId;
+  variantOrder: RunVariantId[];
+  variants: Partial<Record<RunVariantId, RunVariant>>;
 };
 
 export const evidenceTabs = ['files', 'terminal', 'diff', 'judge', 'raw'] as const;

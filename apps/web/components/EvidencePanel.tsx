@@ -2,12 +2,12 @@
 
 import clsx from 'clsx';
 import { Braces, FileText, GitCompare, ShieldCheck, Terminal as TerminalIcon } from 'lucide-react';
-import type { EvidenceTab, PolicyRun, TraceEvent } from '../lib/demoData';
+import type { EvidenceTab, RunVariant, TraceEvent } from '../lib/demoData';
 import { buildFileTree, diffContent, stepHarnessNote, terminalContent } from '../lib/cockpitEvidence';
 import { evidenceTabs } from '../lib/demoData';
 
 type EvidencePanelProps = {
-  run: PolicyRun;
+  run: RunVariant;
   activeEvent: TraceEvent;
   tab: EvidenceTab;
   onTabChange: (tab: EvidenceTab) => void;

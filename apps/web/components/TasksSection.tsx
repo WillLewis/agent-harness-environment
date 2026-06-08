@@ -8,8 +8,8 @@ import {
   Bug,
   ChevronDown,
   FileCode2,
+  FileSearch,
   Network,
-  ShieldAlert,
   Tag,
   Zap
 } from 'lucide-react';
@@ -17,9 +17,9 @@ import { cockpitTaskOrder, getCockpitTask, type TaskId } from '../lib/demoData';
 import { taskStories, type TaskStory } from '../lib/taskStories';
 
 const typeIcons = {
-  bugfix: Bug,
-  adversarial: ShieldAlert,
-  multi_agent: Network
+  completeness: Bug,
+  compat: Network,
+  discovery: FileSearch
 } as const;
 
 type TasksSectionProps = {
@@ -59,10 +59,11 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
           Three tasks. Three failure shapes.
         </h2>
-        <p className="sr-only">BUGFIX ADVERSARIAL MULTI-AGENT</p>
+        <p className="sr-only">COMPLETENESS COMPAT-MIGRATION LATENT-DEFECTS</p>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">
           Before you watch the cockpit replay, meet the work. Each task below is a real shape we see in production
-          agent traces — a bug under deadline, a prompt-injected README, a multi-agent contract drift. Open{' '}
+          agent traces — a two-part completeness fix, a back-compat API migration, a latent-defect review. The visible
+          suite passes for every model; the held-out battery is what separates them. Open{' '}
           <span className="font-mono text-text-muted">The Backstory</span> for the situation a PM would recognize, or
           hit <span className="font-mono text-text-muted">Trigger It</span> to load the task into the cockpit.
         </p>

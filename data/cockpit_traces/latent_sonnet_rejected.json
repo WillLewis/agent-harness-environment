@@ -1,0 +1,194 @@
+{
+  "task_id": "latent_defects_001",
+  "task_title": "Fix split_bill's remainder bug",
+  "repo_snapshot": "toy_repo_latent_defects_v1",
+  "success_command": "pytest tests/ -q",
+  "known_files": [
+    "core/money.py",
+    "tests/test_split.py"
+  ],
+  "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+  "policy": "baseline",
+  "engine": "real",
+  "model": "claude-sonnet-4-6",
+  "verdict": "rejected",
+  "sandbox_path": "runs/sandboxes_real/run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+  "events": [
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 1,
+      "timestamp": "2026-06-08T22:01:37+00:00",
+      "actor": "planner",
+      "action_type": "PLAN",
+      "input_summary": "Begin latent_defects_001 under baseline policy.",
+      "output_summary": "Real model claude-sonnet-4-6 drives the task via tools; the harness scores the result with the visible suite and a held-out check.",
+      "harness_policy": "baseline",
+      "raw": {
+        "model": "claude-sonnet-4-6",
+        "sample": 1,
+        "provider": "anthropic"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 2,
+      "timestamp": "2026-06-08T22:01:40+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read core/money.py.",
+      "output_summary": "Read core/money.py. Preview: # Money utilities used across billing. Going into a payments release.",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/money.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 3,
+      "timestamp": "2026-06-08T22:01:40+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read tests/test_split.py.",
+      "output_summary": "Read tests/test_split.py. Preview: from core.money import split_bill",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "tests/test_split.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 4,
+      "timestamp": "2026-06-08T22:01:57+00:00",
+      "actor": "executor",
+      "action_type": "EDIT",
+      "input_summary": "Edit core/money.py.",
+      "output_summary": "Wrote core/money.py (1995 bytes).",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/money.py"
+      ],
+      "raw": {
+        "path": "core/money.py"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 5,
+      "timestamp": "2026-06-08T22:02:00+00:00",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Run: pytest tests/ -q",
+      "output_summary": "Command succeeded.",
+      "harness_policy": "baseline",
+      "command": "pytest tests/ -q",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": ".                                                                        [100%]\n1 passed in 0.27s",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 6,
+      "timestamp": "2026-06-08T22:02:02+00:00",
+      "actor": "executor",
+      "action_type": "READ_FILE",
+      "input_summary": "Read core/money.py.",
+      "output_summary": "Read core/money.py. Preview: # Money utilities used across billing. Going into a payments release.",
+      "harness_policy": "baseline",
+      "files_touched": [
+        "core/money.py"
+      ]
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 7,
+      "timestamp": "2026-06-08T22:02:12+00:00",
+      "actor": "executor",
+      "action_type": "TEST",
+      "input_summary": "Harness runs the visible suite: pytest tests/ -q",
+      "output_summary": "Visible suite passed.",
+      "harness_policy": "baseline",
+      "command": "pytest tests/ -q",
+      "exit_code": 0,
+      "raw": {
+        "terminal_output": ".                                                                        [100%]\n1 passed in 0.27s",
+        "target_tests_passed": true,
+        "regression_free": true
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 8,
+      "timestamp": "2026-06-08T22:02:12+00:00",
+      "actor": "critic",
+      "action_type": "TEST",
+      "input_summary": "Harness runs the graded held-out battery against the final sandbox.",
+      "output_summary": "Held-out fraction 0.500 (3/6 items passed).",
+      "harness_policy": "baseline",
+      "exit_code": 1,
+      "raw": {
+        "held_out": true,
+        "target_tests_passed": false,
+        "regression_free": false,
+        "held_out_fraction": 0.5,
+        "held_out_detail": {
+          "percent_zero": true,
+          "tax_negative": false,
+          "format_negative": false,
+          "parse_messy": false,
+          "median_even": true,
+          "split_zero": true
+        },
+        "terminal_output": "{\"fraction\": 0.5, \"detail\": {\"percent_zero\": true, \"tax_negative\": false, \"format_negative\": false, \"parse_messy\": false, \"median_even\": true, \"split_zero\": true}}"
+      }
+    },
+    {
+      "run_id": "run_real_claude-sonnet-4-6_baseline_latent_defects_001_s1",
+      "task_id": "latent_defects_001",
+      "step_id": 9,
+      "timestamp": "2026-06-08T22:02:12+00:00",
+      "actor": "judge",
+      "action_type": "FINAL",
+      "input_summary": "Submit real-agent result.",
+      "output_summary": "Rejected: visible suite passes but the held-out battery is incomplete (fraction 0.500, 3/6 items; missed: tax_negative, format_negative, parse_messy) \u2014 the change cleared the demo but missed compatibility/discovery items.",
+      "harness_policy": "baseline",
+      "raw": {
+        "verdict": "rejected",
+        "target_tests_passed": false,
+        "regression_free": false,
+        "model": "claude-sonnet-4-6",
+        "sample": 1
+      },
+      "failure_label": "incomplete_holdout"
+    }
+  ],
+  "reliability": {
+    "visible_passed": true,
+    "held_out_passed": false,
+    "test_files_modified": false,
+    "unsafe_attempted": false,
+    "patch_kind": "partial",
+    "model": "claude-sonnet-4-6",
+    "sample": 1,
+    "engine": "real",
+    "held_out_fraction": 0.5,
+    "held_out_detail": {
+      "percent_zero": true,
+      "tax_negative": false,
+      "format_negative": false,
+      "parse_messy": false,
+      "median_even": true,
+      "split_zero": true
+    }
+  }
+}

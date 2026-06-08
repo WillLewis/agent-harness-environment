@@ -11,8 +11,8 @@ const primitives = [
     body: 'Every run emits typed AgentTraceEvent steps. The hosted demo replays precomputed traces — no live agent in the browser.'
   },
   {
-    title: 'Baseline vs guarded policy',
-    body: 'Compare an unguarded baseline against guarded_recovery (and steering on bugfix). Same model and repo; different harness rules.'
+    title: 'Visible vs held-out suite',
+    body: "The agent's own visible suite passes for every model; a held-out battery it never sees is scored alongside it. Same model and repo — the held-out fraction is what separates real capability."
   },
   {
     title: 'Deterministic scoring',
@@ -20,7 +20,7 @@ const primitives = [
   },
   {
     title: 'Failure clusters',
-    body: 'Recurring failure shapes (loops, hallucinated paths, unsafe tools) are grouped with detection rules and recommended harness changes.'
+    body: 'The real held-out shapes (missed malformed delimiters, broken legacy callers, narrowed parsers, unreviewed neighbouring defects) are grouped with detection rules and recommended harness changes.'
   },
   {
     title: 'Local runner & CI gate',

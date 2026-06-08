@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Pause, Play, RotateCcw, SkipBack, SkipForward, GitBranch } from 'lucide-react';
+import { Pause, Play, RotateCcw, SkipBack, SkipForward } from 'lucide-react';
 import { MetricCard } from './MetricCard';
 import { TraceTimeline } from './TraceTimeline';
 import { EvidencePanel } from './EvidencePanel';
@@ -12,12 +12,10 @@ import { ObservabilityLinks } from './ObservabilityLinks';
 import { defaultTabForRun, findEvent, tabForEvent } from '../lib/cockpitEvidence';
 import {
   cockpitTaskOrder,
-  DEFAULT_TASK_ID,
   getCockpitTask,
   type EvidenceTab,
-  type PolicyId,
-  type TaskId,
-  type TraceEvent
+  type RunVariantId,
+  type TaskId
 } from '../lib/demoData';
 import { selectableActiveClass, selectableIdleClass } from '../lib/statusStyles';
 
@@ -26,15 +24,6 @@ type CockpitProps = {
   onTaskChange: (taskId: TaskId) => void;
   autoplayToken: number;
 };
-
-type CockpitPolicyId = PolicyId;
-
-const basePolicyOptionOrder: CockpitPolicyId[] = [
-  'baseline',
-  'test_first',
-  'context_first',
-  'guarded_recovery'
-];
 
 function verdictLabel(verdict: string) {
   if (verdict === 'accepted') return 'ACCEPTED BY JUDGE';
@@ -46,94 +35,55 @@ function formatMetric(value: number) {
   return Number.isInteger(value) ? value : value.toFixed(2);
 }
 
-function resolvePolicyRun(taskId: TaskId, policyId: PolicyId) {
+function variantDisplayName(variantId: string): string {
+  if (variantId === 'claude-haiku-4-5') return 'Haiku 4.5';
+  if (variantId === 'claude-sonnet-4-6') return 'Sonnet 4.6';
+  if (variantId === 'claude-opus-4-8') return 'Opus 4.8';
+  return variantId;
+}
+
+function resolveVariantRun(taskId: TaskId, variantId: RunVariantId) {
   const task = getCockpitTask(taskId);
-  const run = task.policies[policyId];
+  const run = task.variants[variantId];
   if (!run) {
-    const fallback = task.policyOrder[0];
-    return task.policies[fallback]!;
+    const fallback = task.variantOrder[0];
+    return task.variants[fallback]!;
   }
   return run;
 }
 
-function isReplayPolicyId(policyId: string): policyId is PolicyId {
-  return (
-    policyId === 'baseline' ||
-    policyId === 'test_first' ||
-    policyId === 'context_first' ||
-    policyId === 'guarded_recovery' ||
-    policyId === 'baseline_with_steering' ||
-    policyId === 'gamed_attempt'
-  );
-}
-
-function policyOptionOrder(taskId: TaskId): CockpitPolicyId[] {
+function resolveVariantId(taskId: TaskId, variantId: RunVariantId): RunVariantId {
   const task = getCockpitTask(taskId);
-  if (task.policies.baseline_with_steering) {
-    return [
-      'baseline',
-      'test_first',
-      'context_first',
-      'guarded_recovery',
-      'baseline_with_steering',
-      'gamed_attempt'
-    ];
-  }
-  return basePolicyOptionOrder;
+  return task.variants[variantId] ? variantId : task.variantOrder[0];
 }
 
-function replayPolicyForOption(taskId: TaskId, policyOptionId: CockpitPolicyId): PolicyId {
-  const task = getCockpitTask(taskId);
-  if (isReplayPolicyId(policyOptionId) && task.policies[policyOptionId]) {
-    return policyOptionId;
-  }
-  return task.policies.guarded_recovery ? 'guarded_recovery' : 'baseline';
-}
-
-function policyDisplayName(policyId: string): string {
-  if (policyId === 'baseline') return 'Baseline';
-  if (policyId === 'test_first') return 'Test-first';
-  if (policyId === 'context_first') return 'Context-first';
-  if (policyId === 'guarded_recovery') return 'Guarded recovery';
-  if (policyId === 'baseline_with_steering') return 'Baseline with steering';
-  if (policyId === 'gamed_attempt') return 'Gamed (edits the test)';
-  return policyId.replace(/_/g, ' ');
-}
-
-function policyOptionMeta(taskId: TaskId, policyOptionId: CockpitPolicyId) {
-  const run = getCockpitTask(taskId).policies[policyOptionId];
+function variantOptionMeta(taskId: TaskId, variantId: RunVariantId) {
+  const run = getCockpitTask(taskId).variants[variantId];
   return run
     ? { name: run.name, description: run.description, badge: null }
-    : { name: policyDisplayName(policyOptionId), description: '', badge: null };
+    : { name: variantDisplayName(variantId), description: '', badge: null };
 }
 
-function firstTabForRun(taskId: TaskId, policyId: PolicyId) {
-  const task = getCockpitTask(taskId);
-  const run = resolvePolicyRun(taskId, policyId);
+function firstTabForRun(taskId: TaskId, variantId: RunVariantId) {
+  const run = resolveVariantRun(taskId, variantId);
   const firstEvent = run.events[0];
-  return firstEvent ? tabForEvent(firstEvent) : defaultTabForRun(policyId, taskId, run.events);
+  return firstEvent ? tabForEvent(firstEvent) : defaultTabForRun(variantId, taskId, run.events);
 }
 
 export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitProps) {
   const reduceMotion = useReducedMotion();
-  const [policyOptionId, setPolicyOptionId] = useState<CockpitPolicyId>('baseline');
+  const task = getCockpitTask(activeTaskId);
+  const [variantId, setVariantId] = useState<RunVariantId>(task.defaultVariantId);
   const [activeStep, setActiveStep] = useState(1);
   const [tab, setTab] = useState<EvidenceTab>('terminal');
   const [playing, setPlaying] = useState(false);
-  const [steeringDeclined, setSteeringDeclined] = useState(false);
   const timerRef = useRef<number | null>(null);
 
-  const task = getCockpitTask(activeTaskId);
-  const options = useMemo(() => policyOptionOrder(activeTaskId), [activeTaskId]);
-  const replayPolicyId = replayPolicyForOption(activeTaskId, policyOptionId);
-  const run = resolvePolicyRun(activeTaskId, replayPolicyId);
+  const options = useMemo(() => task.variantOrder, [task.variantOrder]);
+  const replayVariantId = resolveVariantId(activeTaskId, variantId);
+  const run = resolveVariantRun(activeTaskId, replayVariantId);
   const activeEvent = useMemo(() => findEvent(run.events, activeStep), [run.events, activeStep]);
-  const replayKey = `${activeTaskId}-${policyOptionId}-${replayPolicyId}`;
-  const loopSteeringAvailable =
-    activeTaskId === DEFAULT_TASK_ID &&
-    policyOptionId === 'baseline' &&
-    activeEvent?.label === 'loop_detected' &&
-    !steeringDeclined;
+  const replayKey = `${activeTaskId}-${replayVariantId}`;
 
   const setStepAndTab = useCallback(
     (step: number, options?: { keepPlaying?: boolean }) => {
@@ -155,18 +105,17 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
     [onTaskChange]
   );
 
-  const selectPolicy = useCallback(
-    (next: CockpitPolicyId, nextOptions?: { autoplay?: boolean }) => {
-      const nextReplayPolicy = replayPolicyForOption(activeTaskId, next);
-      const nextRun = resolvePolicyRun(activeTaskId, nextReplayPolicy);
+  const selectVariant = useCallback(
+    (next: RunVariantId, nextOptions?: { autoplay?: boolean }) => {
+      const nextReplayVariant = resolveVariantId(activeTaskId, next);
+      const nextRun = resolveVariantRun(activeTaskId, nextReplayVariant);
       const firstEvent = nextRun.events[0];
-      setPolicyOptionId(next);
+      setVariantId(next);
       setActiveStep(1);
-      setSteeringDeclined(false);
       setTab(
         firstEvent
           ? tabForEvent(firstEvent)
-          : defaultTabForRun(nextReplayPolicy, activeTaskId, nextRun.events)
+          : defaultTabForRun(nextReplayVariant, activeTaskId, nextRun.events)
       );
       setPlaying(Boolean(nextOptions?.autoplay));
     },
@@ -175,26 +124,24 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
   const resetReplay = useCallback(() => {
     setActiveStep(1);
-    setSteeringDeclined(false);
     setPlaying(false);
-    setTab(firstTabForRun(activeTaskId, replayPolicyId));
-  }, [activeTaskId, replayPolicyId]);
+    setTab(firstTabForRun(activeTaskId, replayVariantId));
+  }, [activeTaskId, replayVariantId]);
 
   useEffect(() => {
-    const defaultPolicy = getCockpitTask(activeTaskId).defaultPolicyId;
-    setPolicyOptionId(defaultPolicy);
+    const defaultVariant = getCockpitTask(activeTaskId).defaultVariantId;
+    setVariantId(defaultVariant);
     setActiveStep(1);
-    setSteeringDeclined(false);
     setPlaying(false);
-    setTab(firstTabForRun(activeTaskId, defaultPolicy));
+    setTab(firstTabForRun(activeTaskId, defaultVariant));
   }, [activeTaskId]);
 
   useEffect(() => {
     if (autoplayToken <= 0) return;
-    setPolicyOptionId('baseline');
+    const defaultVariant = getCockpitTask(activeTaskId).defaultVariantId;
+    setVariantId(defaultVariant);
     setActiveStep(1);
-    setSteeringDeclined(false);
-    setTab(firstTabForRun(activeTaskId, 'baseline'));
+    setTab(firstTabForRun(activeTaskId, defaultVariant));
     setPlaying(true);
   }, [activeTaskId, autoplayToken]);
 
@@ -226,10 +173,10 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
         return;
       }
 
-      const policyIndex = Number(event.key) - 1;
-      if (policyIndex >= 0 && policyIndex < options.length) {
+      const variantIndex = Number(event.key) - 1;
+      if (variantIndex >= 0 && variantIndex < options.length) {
         event.preventDefault();
-        selectPolicy(options[policyIndex]);
+        selectVariant(options[variantIndex]);
         return;
       }
 
@@ -249,11 +196,11 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeStep, activeTaskId, options, selectPolicy, selectTask, setStepAndTab]);
+  }, [activeStep, activeTaskId, options, selectVariant, selectTask, setStepAndTab]);
 
   useEffect(() => {
     if (!playing) return;
-    if (loopSteeringAvailable || activeStep >= run.events.length) {
+    if (activeStep >= run.events.length) {
       setPlaying(false);
       return;
     }
@@ -265,7 +212,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
         window.clearTimeout(timerRef.current);
       }
     };
-  }, [activeStep, loopSteeringAvailable, playing, run.events.length, setStepAndTab]);
+  }, [activeStep, playing, run.events.length, setStepAndTab]);
 
   function togglePlay() {
     if (playing) {
@@ -276,56 +223,6 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
       setStepAndTab(1, { keepPlaying: true });
     }
     setPlaying(true);
-  }
-
-  function applySteering() {
-    const steeringRun = resolvePolicyRun(DEFAULT_TASK_ID, 'baseline_with_steering');
-    const steeringEvent = steeringRun.events.find((event) => event.action === 'ASK_USER') ?? steeringRun.events[0];
-    setPolicyOptionId('baseline_with_steering');
-    setSteeringDeclined(false);
-    setActiveStep(steeringEvent.step);
-    setTab(tabForEvent(steeringEvent));
-    setPlaying(true);
-  }
-
-  function declineSteering() {
-    const nextStep = Math.min(run.events.length, activeStep + 1);
-    const nextEvent = findEvent(run.events, nextStep);
-    setSteeringDeclined(true);
-    setActiveStep(nextStep);
-    setTab(tabForEvent(nextEvent));
-    setPlaying(true);
-  }
-
-  function renderSteeringBranch(event: TraceEvent) {
-    if (event.id !== activeEvent.id || !loopSteeringAvailable) return null;
-    return (
-      <div className="ml-7 mt-2 rounded-md border border-assist/40 bg-assist/10 p-3">
-        <div className="flex items-center gap-2 text-xs font-medium text-assist">
-          <GitBranch className="size-4" aria-hidden="true" />
-          Human steering available
-        </div>
-        <p className="mt-1 text-xs leading-relaxed text-text-muted">
-          The agent is stuck. Offer a hint, or let it continue and watch it fail.
-        </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <button
-            type="button"
-            className="focus-ring inline-flex min-h-8 items-center rounded-md bg-text px-3 text-xs font-medium text-page hover:bg-text/90"
-            onClick={applySteering}
-          >
-            Apply steering
-          </button>
-          <button
-            type="button"
-            className="focus-ring inline-flex min-h-8 items-center rounded-md bg-surface-2 px-3 text-xs font-medium text-text hover:bg-surface-raised"
-            onClick={declineSteering}
-          >
-            Let agent continue
-          </button>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -340,13 +237,13 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
               <span className="sr-only">Interactive cockpit</span>
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-              Replay a real failure, then fix the harness
+              Replay a real run, then watch the held-out battery decide
             </h2>
           </div>
           <p className="max-w-2xl text-xs leading-relaxed text-text-muted sm:text-sm">
-            Press play to watch the baseline agent loop and get rejected. Toggle{' '}
-            <span className="font-mono text-text-muted">Guarded Recovery</span> and watch the same task land green. At
-            the loop moment in baseline, an option to apply human steering appears.
+            Press play to watch a model clear the visible suite and still get rejected. Toggle the{' '}
+            <span className="font-mono text-text-muted">stronger model</span> and watch the same task pass the held-out
+            battery. The visible suite agrees with both — only the held-out check separates them.
           </p>
         </div>
 
@@ -373,32 +270,27 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
               </div>
 
               <div className="rounded-lg border border-border-subtle bg-surface-2/40 p-3">
-                <div id="cockpit-policy-label" className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
-                  Policy
+                <div id="cockpit-model-label" className="font-mono text-[10px] uppercase tracking-wider text-text-faint">
+                  Model
                 </div>
-                <div className="mt-2 space-y-1.5" role="group" aria-labelledby="cockpit-policy-label">
+                <div className="mt-2 space-y-1.5" role="group" aria-labelledby="cockpit-model-label">
                   {options.map((id, index) => {
-                    const meta = policyOptionMeta(activeTaskId, id);
+                    const meta = variantOptionMeta(activeTaskId, id);
                     return (
                       <button
                         key={id}
                         type="button"
-                        aria-pressed={id === policyOptionId}
+                        aria-pressed={id === replayVariantId}
                         aria-label={`${meta.name}. ${meta.description}`}
-                        onClick={() => selectPolicy(id)}
+                        onClick={() => selectVariant(id)}
                         className={clsx(
                           'focus-ring w-full rounded-md border px-2.5 py-2 text-left text-xs transition',
-                          id === policyOptionId ? selectableActiveClass : selectableIdleClass
+                          id === replayVariantId ? selectableActiveClass : selectableIdleClass
                         )}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-medium text-text">{meta.name}</span>
                           <span className="flex items-center gap-1">
-                            {meta.badge ? (
-                              <span className="rounded border border-border-subtle px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-text-faint">
-                                {meta.badge}
-                              </span>
-                            ) : null}
                             <span className="font-mono text-[10px] text-text-faint">{index + 1}</span>
                           </span>
                         </div>
@@ -411,7 +303,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
               <p id="cockpit-task-hint" className="text-[10px] leading-4 text-text-faint">
                 Keyboard: <span className="font-mono">[ ]</span> tasks ·{' '}
-                <span className="font-mono">1-{options.length}</span> policies ·{' '}
+                <span className="font-mono">1-{options.length}</span> models ·{' '}
                 <span className="font-mono">← →</span> steps · <span className="font-mono">f t d j r</span> evidence tabs
               </p>
             </aside>
@@ -469,7 +361,6 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
                     activeStep={activeStep}
                     onSelect={setStepAndTab}
                     policyName={run.name}
-                    renderAfterEvent={renderSteeringBranch}
                   />
                 </div>
               </motion.div>
@@ -477,7 +368,7 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
 
             <aside className="min-w-0 space-y-3">
               <VerdictStamp
-                policyKey={`${activeTaskId}-${policyOptionId}-${replayPolicyId}`}
+                policyKey={replayKey}
                 verdict={run.verdict}
                 label={verdictLabel(run.verdict)}
                 reason={run.primaryReason}
@@ -489,20 +380,15 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
                 onTabChange={setTab}
                 knownFiles={task.knownFiles}
               />
-              <ObservabilityLinks taskId={activeTaskId} policyId={replayPolicyId} />
+              <ObservabilityLinks taskId={activeTaskId} policyId={replayVariantId} />
             </aside>
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4" aria-live="polite" aria-label="Eval metrics">
             <MetricCard label="task success" value={`${Math.round(run.metrics.taskSuccess * 100)}%`} />
-            <MetricCard label="recovery" value={`${Math.round(run.metrics.recoveryScore * 100)}%`} />
-            <MetricCard label="loop rate" value={`${Math.round(run.metrics.loopScore * 100)}%`} />
-            <MetricCard
-              label={activeTaskId === 'adversarial_env_001' ? 'unsafe' : 'human'}
-              value={formatMetric(
-                activeTaskId === 'adversarial_env_001' ? run.metrics.unsafeAttempts : run.metrics.humanInterventions
-              )}
-            />
+            <MetricCard label="held-out" value={`${Math.round(run.metrics.recoveryScore * 100)}%`} />
+            <MetricCard label="tool calls" value={formatMetric(run.metrics.toolCalls)} />
+            <MetricCard label="verdict" value={run.verdict === 'accepted' ? 'pass' : 'fail'} />
           </div>
         </div>
       </div>
