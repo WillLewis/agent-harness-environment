@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -40,6 +41,20 @@ from task_runner import TaskRunner  # noqa: E402
 POLICIES = ["baseline", "test_first", "context_first", "guarded_recovery"]
 CAPABILITIES = [0.1, 0.3, 0.5, 0.7, 0.9]
 DEFAULT_N = 20
+DEFAULT_REAL_MODEL = "claude-sonnet-4-6"
+
+
+def _make_runner(engine, project_root, policy, task_id, *, seed, capability, model):
+    """Seeded = deterministic sweep runner; real = live Anthropic model (offline only).
+
+    The real engine has no synthetic capability knob, so a real run is a single
+    validation MARKER, not a swept curve (the plan keeps the seeded sweep as the
+    smooth axis and overlays real-model points)."""
+    if engine == "real":
+        from real_agent_runner import RealAgentRunner  # lazy: seeded CI never needs the SDK
+
+        return RealAgentRunner(project_root, policy, task_id, seed=seed, model=model)
+    return TaskRunner(project_root, policy, task_id, seed=seed, capability=capability)
 
 # Each task defines the baseline "exposure" the durable guard exists to catch, and
 # how the chart should frame it. `exposureKind` drives the chart colour: "integrity"
@@ -88,10 +103,21 @@ TASKS = [
 ]
 
 
-def measure_cell(project_root: Path, task: dict, policy: str, capability: float, n: int) -> dict:
+def measure_cell(
+    project_root: Path,
+    task: dict,
+    policy: str,
+    capability,
+    n: int,
+    *,
+    engine: str = "seeded",
+    model: str = DEFAULT_REAL_MODEL,
+) -> dict:
     held_out = visible = exposure = 0
     for seed in range(n):
-        trace = TaskRunner(project_root, policy, task["task_id"], seed=seed, capability=capability).run()
+        trace = _make_runner(
+            engine, project_root, policy, task["task_id"], seed=seed, capability=capability, model=model
+        ).run()
         rel = trace.get("reliability") or {}
         if trace.get("verdict") == "accepted":
             held_out += 1
@@ -102,10 +128,21 @@ def measure_cell(project_root: Path, task: dict, policy: str, capability: float,
     return {"heldOut": held_out / n, "visible": visible / n, "exposure": exposure / n}
 
 
-def sweep_task(project_root: Path, task: dict, *, n: int) -> dict:
+def sweep_task(
+    project_root: Path,
+    task: dict,
+    *,
+    n: int,
+    capabilities=CAPABILITIES,
+    engine: str = "seeded",
+    model: str = DEFAULT_REAL_MODEL,
+) -> dict:
     curves = []
-    for capability in CAPABILITIES:
-        cells = {p: measure_cell(project_root, task, p, capability, n) for p in POLICIES}
+    for capability in capabilities:
+        cells = {
+            p: measure_cell(project_root, task, p, capability, n, engine=engine, model=model)
+            for p in POLICIES
+        }
         base = cells["baseline"]["heldOut"]
         curves.append(
             {
@@ -138,29 +175,77 @@ def sweep_task(project_root: Path, task: dict, *, n: int) -> dict:
     }
 
 
-def sweep(project_root: Path, *, n: int = DEFAULT_N) -> dict:
-    return {
-        "n": n,
-        "capabilities": CAPABILITIES,
-        "generated_with": f"python packages/evals/capability_sweep.py --n {n}",
-        "metric_note": (
+def sweep(
+    project_root: Path,
+    *,
+    n: int = DEFAULT_N,
+    engine: str = "seeded",
+    model: str = DEFAULT_REAL_MODEL,
+) -> dict:
+    # Real has no synthetic capability axis — it contributes a single validation
+    # marker (one point), overlaid on the seeded curve later.
+    capabilities = ["real"] if engine == "real" else CAPABILITIES
+    if engine == "real":
+        generated_with = f"python packages/evals/capability_sweep.py --engine real --model {model} --n {n}"
+        metric_note = (
+            f"REAL Anthropic model ({model}) — a single validation marker per task (no synthetic "
+            "capability axis), NONDETERMINISTIC offline export (never CI). 'lift' = held-out pass@1 "
+            "vs baseline; 'exposure' = the baseline failure rate the durable guard catches. Overlay "
+            "this point on the seeded capability curve; magnitudes are whatever the real model produces."
+        )
+    else:
+        generated_with = f"python packages/evals/capability_sweep.py --n {n}"
+        metric_note = (
             "Real seeded runs across all three toy tasks. 'lift' = held-out pass@1 vs baseline "
             "(productivity primitives, fade with capability). 'exposure' = the baseline failure rate the "
             "durable guard catches (spec-gaming / unsafe-attempt rise; contract-drift falls). "
             "Magnitudes illustrative; directions structural."
-        ),
-        "tasks": [sweep_task(project_root, task, n=n) for task in TASKS],
+        )
+    result: dict = {
+        "n": n,
+        "capabilities": capabilities,
+        "engine": engine,
+        "generated_with": generated_with,
+        "metric_note": metric_note,
+        "tasks": [
+            sweep_task(project_root, task, n=n, capabilities=capabilities, engine=engine, model=model)
+            for task in TASKS
+        ],
     }
+    if engine == "real":
+        result["model"] = model
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--n", type=int, default=DEFAULT_N, help="seeds per (task, policy, capability)")
-    parser.add_argument("--output", default="data/evals/capability_curves.json")
+    parser.add_argument(
+        "--engine",
+        choices=["seeded", "real"],
+        default="seeded",
+        help="seeded = deterministic sweep; real = single live-model marker (offline export).",
+    )
+    parser.add_argument("--model", default=DEFAULT_REAL_MODEL, help="model id for --engine real")
+    parser.add_argument("--output", default=None, help="output path; defaults per engine")
     args = parser.parse_args()
 
-    result = sweep(ROOT, n=args.n)
-    out_path = ROOT / args.output
+    if args.engine == "real":
+        from real_agent_runner import load_env_file
+
+        load_env_file(ROOT)
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            parser.error("--engine real needs ANTHROPIC_API_KEY (set it in env or repo-root .env).")
+
+    default_output = (
+        "data/evals/capability_curves_real.json"
+        if args.engine == "real"
+        else "data/evals/capability_curves.json"
+    )
+    output = args.output or default_output
+
+    result = sweep(ROOT, n=args.n, engine=args.engine, model=args.model)
+    out_path = ROOT / output
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
 
@@ -172,7 +257,7 @@ def main() -> int:
                 f"{row['capability']:>4} {row['testFirstLift']:>8.3f} {row['contextFirstLift']:>8.3f} "
                 f"{row['baselineExposure']:>9.3f} {row['baselineHeldOut']:>8.3f} {row['guardedHeldOut']:>8.3f}"
             )
-    print(f"\nwrote {args.output}")
+    print(f"\nwrote {output}")
     return 0
 
 
