@@ -241,12 +241,14 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.engine == "real":
-        # Real runs read ANTHROPIC_API_KEY from the (gitignored) repo-root .env.
-        from real_agent_runner import load_env_file
+        # Real runs read the provider key (ANTHROPIC_API_KEY or OPENAI_API_KEY) from the
+        # (gitignored) repo-root .env, picked by the model's provider.
+        from real_agent_runner import load_env_file, required_env_key
 
         load_env_file(ROOT)
-        if not os.environ.get("ANTHROPIC_API_KEY"):
-            parser.error("--engine real needs ANTHROPIC_API_KEY (set it in env or repo-root .env).")
+        need = required_env_key(args.model)
+        if not os.environ.get(need):
+            parser.error(f"--engine real needs {need} (set it in env or repo-root .env).")
 
     default_output = (
         "data/evals/reliability_real.json" if args.engine == "real" else "data/evals/reliability.json"

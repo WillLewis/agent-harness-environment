@@ -176,6 +176,44 @@ def supports_sampling_params(model: str) -> bool:
     return not any(model.startswith(prefix) for prefix in NO_SAMPLING_PARAM_MODELS)
 
 
+# --- Provider routing (cross-vendor capability axis) -----------------------------
+# The harness (policy = system prompt + tool gating), sandbox execution, trace
+# emission and scoring are provider-agnostic. Only the inner "call the model, read
+# its tool calls" loop differs between Anthropic and OpenAI, so we route by model id
+# and keep two thin agent loops that share _dispatch_tool / _finalize / _build_trace.
+OPENAI_MODEL_PREFIXES = ("gpt-", "o1", "o1-", "o3", "o3-", "o4", "o4-", "chatgpt")
+# The OpenAI path uses the Responses API (/v1/responses): gpt-5.x rejects
+# `reasoning_effort` alongside function tools in /v1/chat/completions and points you
+# here. We run at the LOWEST reasoning effort the model exposes ("none") — the toy
+# tasks are trivial, so no reasoning is needed and it keeps latency/cost down.
+# max_output_tokens also has to cover reasoning tokens when effort > none.
+DEFAULT_OPENAI_MAX_TOKENS = 8000
+DEFAULT_OPENAI_REASONING_EFFORT = "none"  # gpt-5.4-mini supports: none|low|medium|high|xhigh
+
+
+def provider_for_model(model: str) -> str:
+    return "openai" if model.lower().startswith(OPENAI_MODEL_PREFIXES) else "anthropic"
+
+
+def required_env_key(model: str) -> str:
+    return "OPENAI_API_KEY" if provider_for_model(model) == "openai" else "ANTHROPIC_API_KEY"
+
+
+def _openai_tools() -> list[dict[str, Any]]:
+    """Translate the canonical (Anthropic-shaped) tool specs into OpenAI Responses-API
+    function tools — a flat {type, name, description, parameters} shape (not the nested
+    chat.completions {type:"function", function:{...}} form)."""
+    return [
+        {
+            "type": "function",
+            "name": tool["name"],
+            "description": tool["description"],
+            "parameters": tool["input_schema"],
+        }
+        for tool in TOOLS
+    ]
+
+
 def _policy_system_text(policy: str) -> str:
     """The policy-specific behavioural contract — this IS the harness."""
     if policy == "baseline":
@@ -437,7 +475,9 @@ class RealAgentRunner:
 
     # ----- prompt assembly (static => cacheable across the N samples) -----
 
-    def _system_blocks(self) -> list[dict[str, Any]]:
+    def _system_text(self) -> str:
+        """The full static instruction text — policy + task + repo + source snapshot.
+        Identical across the N samples for a given (task, policy), so it caches well."""
         lines = [
             _policy_system_text(self.policy),
             "",
@@ -460,14 +500,20 @@ class RealAgentRunner:
         lines.append(
             "\nUse read_file / edit_file / run_command to complete the task, then call submit()."
         )
-        text = "\n".join(lines)
+        return "\n".join(lines)
+
+    def _system_blocks(self) -> list[dict[str, Any]]:
         # Cache the whole static prefix (tools + system) across the N samples for the
         # same (task, policy, model): the bytes are identical, so samples 2..N read it.
-        return [{"type": "text", "text": text, "cache_control": {"type": "ephemeral"}}]
+        return [{"type": "text", "text": self._system_text(), "cache_control": {"type": "ephemeral"}}]
 
     def _client_or_default(self) -> Any:
         if self._client is not None:
             return self._client
+        if provider_for_model(self.model) == "openai":
+            import openai  # local import so the Anthropic path never requires the OpenAI SDK
+
+            return openai.OpenAI()
         import anthropic  # local import so the seeded path never requires the SDK
 
         return anthropic.Anthropic()
@@ -497,9 +543,33 @@ class RealAgentRunner:
                 f"Real model {self.model} drives the task via tools; the harness scores the "
                 "result with the visible suite and a held-out check."
             ),
-            raw={"model": self.model, "sample": self.sample},
+            raw={
+                "model": self.model,
+                "sample": self.sample,
+                "provider": provider_for_model(self.model),
+            },
         )
 
+        if provider_for_model(self.model) == "openai":
+            self._run_agent_loop_openai()
+        else:
+            self._run_agent_loop_anthropic()
+
+        self._finalize()
+        return self._build_trace()
+
+    def _agent_loop_error(self, exc: Exception) -> None:
+        # A single failed sample must not crash the sweep: record it and let _finalize
+        # judge whatever state the sandbox is in (usually visible fails -> rejected).
+        self._append(
+            actor="critic",
+            action="RETRY",
+            input_summary="Agent loop raised an exception.",
+            output_summary=f"Halting this sample after an error: {exc}",
+            raw={"error": str(exc)},
+        )
+
+    def _run_agent_loop_anthropic(self) -> None:
         client = self._client_or_default()
         system_blocks = self._system_blocks()
         messages: list[dict[str, Any]] = [
@@ -535,23 +605,80 @@ class RealAgentRunner:
                     break
                 messages.append({"role": "user", "content": tool_results})
         except Exception as exc:  # noqa: BLE001 — a single failed sample must not crash the sweep
-            self._append(
-                actor="critic",
-                action="RETRY",
-                input_summary="Agent loop raised an exception.",
-                output_summary=f"Halting this sample after an error: {exc}",
-                raw={"error": str(exc)},
-            )
+            self._agent_loop_error(exc)
 
-        self._finalize()
-        return self._build_trace()
+    def _run_agent_loop_openai(self) -> None:
+        """OpenAI Responses-API tool loop. Same harness, same tools, same _dispatch_tool
+        — only the wire protocol differs: a `developer` instruction item, `function_call`
+        output items (JSON-string arguments + call_id), and `function_call_output` items
+        fed back via `previous_response_id` so reasoning state is preserved server-side.
+        Runs at the lowest reasoning effort (the toy tasks need none)."""
+        client = self._client_or_default()
+        tools = _openai_tools()
+        # First turn carries the full static prefix; later turns send only the new tool
+        # outputs and chain via previous_response_id.
+        input_items: list[dict[str, Any]] = [
+            {"role": "developer", "content": self._system_text()},
+            {"role": "user", "content": "Begin working on the task now."},
+        ]
+        previous_response_id: str | None = None
+
+        submitted = False
+        try:
+            for _turn in range(self.max_turns):
+                response = client.responses.create(
+                    model=self.model,
+                    input=input_items,
+                    tools=tools,
+                    tool_choice="auto",
+                    reasoning={"effort": DEFAULT_OPENAI_REASONING_EFFORT},
+                    max_output_tokens=DEFAULT_OPENAI_MAX_TOKENS,
+                    previous_response_id=previous_response_id,
+                )
+                previous_response_id = response.id
+                calls = [
+                    item for item in response.output if getattr(item, "type", None) == "function_call"
+                ]
+                if not calls:
+                    # No tool call — treat as completion.
+                    break
+                input_items = []
+                for call in calls:
+                    try:
+                        args = json.loads(call.arguments or "{}")
+                    except (json.JSONDecodeError, TypeError):
+                        args = {}
+                    result_text, _is_error, did_submit = self._dispatch_tool(
+                        call.name, args if isinstance(args, dict) else {}
+                    )
+                    input_items.append(
+                        {
+                            "type": "function_call_output",
+                            "call_id": call.call_id,
+                            "output": result_text,
+                        }
+                    )
+                    submitted = submitted or did_submit
+                if submitted:
+                    break
+        except Exception as exc:  # noqa: BLE001 — a single failed sample must not crash the sweep
+            self._agent_loop_error(exc)
 
     # ----- finalize: real visible + held-out, then verdict + FINAL -----
 
     def _emit_visible_test(self) -> bool:
-        result = run_command(self.config.test_command, self.sandbox_root)
-        output = terminal_output(result)
-        passed = result.exit_code == 0
+        # Run the authoritative visible suite. This is harness-side scoring (outside the
+        # agent loop's try/except), so it must tolerate a slow/timed-out command (pnpm
+        # startup under load) and score it as a failed visible run rather than crash the
+        # whole sweep. 60s headroom for pnpm; a real failure still exits non-zero fast.
+        try:
+            result = run_command(self.config.test_command, self.sandbox_root, timeout=60)
+            exit_code = result.exit_code
+            output = terminal_output(result)
+        except Exception as exc:  # noqa: BLE001 — a timed-out/erroring visible run is a fail, not a crash
+            exit_code = 1
+            output = f"visible test execution error: {exc}"
+        passed = exit_code == 0
         raw: dict[str, Any] = {"terminal_output": output}
         if passed:
             raw["target_tests_passed"] = True
@@ -565,7 +692,7 @@ class RealAgentRunner:
             input_summary=f"Harness runs the visible suite: {self.config.test_command}",
             output_summary=("Visible suite passed." if passed else "Visible suite failed."),
             command=self.config.test_command,
-            exit_code=result.exit_code,
+            exit_code=exit_code,
             **extra,
         )
         return passed
@@ -577,7 +704,7 @@ class RealAgentRunner:
                 cwd=self.sandbox_root,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=60,
             )
             exit_code = completed.returncode
             chunks = [completed.stdout.strip(), completed.stderr.strip()]
