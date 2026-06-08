@@ -58,15 +58,15 @@ export const systemCapabilities: SystemCapability[] = [
     description:
       'Next.js demo replays precomputed traces. Policy toggle updates timeline, metrics, terminal, diff, and verdict together — no live agent or API.',
     status: 'implemented',
-    repoPaths: ['apps/web/components/Cockpit.tsx', 'apps/web/lib/cockpitFixtures.ts', 'data/traces/']
+    repoPaths: ['apps/web/components/Cockpit.tsx', 'apps/web/lib/cockpitFixtures.ts', 'data/cockpit_traces/']
   },
   {
     id: 'trace_fixtures',
     title: 'Trace fixtures',
     description:
-      'Versioned AgentTraceEvent JSON under data/traces/ drives hosted replay, eval scoring, and adapter export previews.',
+      'Versioned AgentTraceEvent JSON drives the work: data/cockpit_traces/ feeds the hosted replay, data/traces/ feeds eval scoring and adapter export previews.',
     status: 'implemented',
-    repoPaths: ['data/traces/', 'packages/harness/', 'packages/evals/fixture_validation.py']
+    repoPaths: ['data/cockpit_traces/', 'data/traces/', 'packages/harness/', 'packages/evals/fixture_validation.py']
   },
   {
     id: 'deterministic_scorers',

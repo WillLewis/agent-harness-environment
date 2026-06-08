@@ -18,4 +18,3 @@ export {
   getCockpitTask,
   variantRuns
 } from './cockpitFixtures';
-export { policyComparison, failureClusters, getFailureCluster, policyDisplayName } from './evalFixtures';

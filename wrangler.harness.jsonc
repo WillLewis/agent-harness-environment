@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "agent-harness-environment",
+  "main": "workers/harness-static.js",
+  "compatibility_date": "2026-05-30",
+  "workers_dev": false,
+  "keep_vars": true,
+  "routes": [{ "pattern": "wxl3.com/harness*", "zone_name": "wxl3.com" }],
+  "assets": {
+    "directory": "./apps/web/out",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "html_handling": "auto-trailing-slash"
+  }
+}
