@@ -1,0 +1,221 @@
+{
+  "_sweep_status": "CORRUPTED: all claude-* cells are noop garbage (Anthropic credits exhausted); OpenAI cells used the OVER-SOFT contract-docstring money.py (since reverted to subtle hints). Fully re-sweep after credit top-up.",
+  "task": "latent_defects_001",
+  "n": 16,
+  "models": [
+    "gpt-5.4-nano",
+    "gpt-5.4-mini",
+    "claude-haiku-4-5",
+    "claude-sonnet-4-6",
+    "claude-opus-4-8"
+  ],
+  "policies": [
+    "baseline",
+    "guarded_recovery"
+  ],
+  "grading": "fraction",
+  "cells": [
+    {
+      "model": "gpt-5.4-nano",
+      "policy": "baseline",
+      "meanFraction": 0.8646,
+      "stdevFraction": 0.0651,
+      "visibleRate": 1.0,
+      "completeRate": 0.1875,
+      "itemPassRates": {
+        "percent_zero": 1.0,
+        "tax_negative": 1.0,
+        "format_negative": 0.188,
+        "parse_messy": 1.0,
+        "median_even": 1.0,
+        "split_zero": 1.0
+      },
+      "patch_kinds": {
+        "partial": 13,
+        "complete": 3
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "gpt-5.4-nano",
+      "policy": "guarded_recovery",
+      "meanFraction": 0.8438,
+      "stdevFraction": 0.0403,
+      "visibleRate": 1.0,
+      "completeRate": 0.0625,
+      "itemPassRates": {
+        "percent_zero": 1.0,
+        "tax_negative": 1.0,
+        "format_negative": 0.062,
+        "parse_messy": 1.0,
+        "median_even": 1.0,
+        "split_zero": 1.0
+      },
+      "patch_kinds": {
+        "partial": 15,
+        "complete": 1
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "policy": "baseline",
+      "meanFraction": 1.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 1.0,
+      "completeRate": 1.0,
+      "itemPassRates": {
+        "percent_zero": 1.0,
+        "tax_negative": 1.0,
+        "format_negative": 1.0,
+        "parse_messy": 1.0,
+        "median_even": 1.0,
+        "split_zero": 1.0
+      },
+      "patch_kinds": {
+        "complete": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "gpt-5.4-mini",
+      "policy": "guarded_recovery",
+      "meanFraction": 1.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 1.0,
+      "completeRate": 1.0,
+      "itemPassRates": {
+        "percent_zero": 1.0,
+        "tax_negative": 1.0,
+        "format_negative": 1.0,
+        "parse_messy": 1.0,
+        "median_even": 1.0,
+        "split_zero": 1.0
+      },
+      "patch_kinds": {
+        "complete": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-haiku-4-5",
+      "policy": "baseline",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-haiku-4-5",
+      "policy": "guarded_recovery",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "policy": "baseline",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "policy": "guarded_recovery",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-opus-4-8",
+      "policy": "baseline",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-opus-4-8",
+      "policy": "guarded_recovery",
+      "meanFraction": 0.0,
+      "stdevFraction": 0.0,
+      "visibleRate": 0.0,
+      "completeRate": 0.0,
+      "itemPassRates": {
+        "percent_zero": 0.0,
+        "tax_negative": 0.0,
+        "format_negative": 0.0,
+        "parse_messy": 0.0,
+        "median_even": 0.0,
+        "split_zero": 0.0
+      },
+      "patch_kinds": {
+        "noop": 16
+      },
+      "n_effective": 16
+    }
+  ]
+}

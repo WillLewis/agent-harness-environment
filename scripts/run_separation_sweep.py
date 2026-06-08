@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Real-model sweep for the headline separation suite (cards A, B, C).
+"""Real-model sweep for the FINAL separation suite (fractional held-out grading).
 
-Runs N samples per (task, model, policy) cell, writes one fixture file per task
-to data/evals/reliability_{task_id}.json in the same format as the hard/injection
-real fixtures.
+Cards A/B/C each grade the held-out as a battery of independent sub-items scored as a
+FRACTION (grade(workdir) -> float). This driver runs N samples per (task, model, policy)
+cell and reports the MEAN held-out fraction + variance + per-item pass rates — the mean
+fraction across models is the capability gradient the suite is designed to surface.
+
+Writes one fixture per task to data/evals/reliability_{task_id}.json.
 
 Usage:
-    python scripts/run_separation_sweep.py             # all tasks, N=16
-    python scripts/run_separation_sweep.py --n 8 --task idempotent_webhook_001
+    python scripts/run_separation_sweep.py                  # all 3 cards, N=16
+    python scripts/run_separation_sweep.py --n 16 --task latent_defects_001
     python scripts/run_separation_sweep.py --models claude-opus-4-8 claude-sonnet-4-6
 """
 from __future__ import annotations
@@ -15,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 import threading
 from collections import defaultdict
@@ -26,131 +30,121 @@ for d in (ROOT / "services" / "runner", ROOT / "packages" / "evals", ROOT / "pac
     if str(d) not in sys.path:
         sys.path.insert(0, str(d))
 
-from real_agent_runner import RealAgentRunner, load_env_file  # noqa: E402
+from real_agent_runner import (  # noqa: E402
+    FRACTIONAL_HOLDOUT_TASKS,
+    RealAgentRunner,
+    load_env_file,
+)
 
-# Per-task metric extraction: fn(reliability_dict) -> cell_metrics_dict
-TASK_METRICS = {
-    "completeness_comments_001": lambda r: {
-        "visible":  float(r["visible_passed"]),
-        "heldOut":  float(r["held_out_passed"]),
-    },
-    "workspace_safety_001": lambda r: {
-        "visible":   float(r["visible_passed"]),
-        "safe":      float(r["held_out_passed"]),
-        "leakRate":  1.0 - float(r["held_out_passed"]) if r["visible_passed"] else 0.0,
-    },
-    "idempotent_webhook_001": lambda r: {
-        "visible":  float(r["visible_passed"]),
-        "heldOut":  float(r["held_out_passed"]),
-    },
-}
-
-DEFAULT_MODELS   = ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-8",
-                    "gpt-5.4-nano", "gpt-5.4-mini"]
+DEFAULT_MODELS = ["gpt-5.4-nano", "gpt-5.4-mini", "claude-haiku-4-5",
+                  "claude-sonnet-4-6", "claude-opus-4-8"]
 DEFAULT_POLICIES = ["baseline", "guarded_recovery"]
-DEFAULT_N        = 16
-WORKERS          = 8   # parallel sample workers; stay under rate-limit ceiling
+DEFAULT_N = 16
+WORKERS = 4
 
-_print_lock = threading.Lock()
-
-def tprint(*args, **kwargs):
-    with _print_lock:
-        print(*args, **kwargs, flush=True)
+_lock = threading.Lock()
+def tprint(*a, **k):
+    with _lock:
+        print(*a, **k, flush=True)
 
 
 def run_one(task_id: str, model: str, policy: str, seed: int) -> dict:
     try:
         trace = RealAgentRunner(ROOT, policy, task_id, seed=seed, model=model).run()
         r = trace["reliability"]
-        metrics = TASK_METRICS[task_id](r)
-        metrics["patch_kind"] = r["patch_kind"]
-        metrics["error"] = None
+        return {
+            "task_id": task_id, "model": model, "policy": policy, "seed": seed,
+            "visible": bool(r["visible_passed"]),
+            "fraction": float(r.get("held_out_fraction") or 0.0),
+            "detail": r.get("held_out_detail") or {},
+            "patch_kind": r["patch_kind"],
+            "error": None,
+        }
     except Exception as exc:  # noqa: BLE001
-        metrics = {"error": str(exc), "patch_kind": "error"}
-    metrics.update({"task_id": task_id, "model": model, "policy": policy, "seed": seed})
-    return metrics
+        return {"task_id": task_id, "model": model, "policy": policy, "seed": seed,
+                "error": str(exc), "fraction": 0.0, "detail": {}, "visible": False,
+                "patch_kind": "error"}
 
 
-def aggregate_cells(results: list[dict], task_id: str, models: list[str], policies: list[str], n: int) -> list[dict]:
+def aggregate(results: list[dict], models: list[str], policies: list[str]) -> list[dict]:
     cells = []
     for model in models:
         for policy in policies:
-            rows = [r for r in results if r["model"] == model and r["policy"] == policy]
-            rows = [r for r in rows if not r.get("error")]
+            rows = [r for r in results if r["model"] == model and r["policy"] == policy and not r.get("error")]
             if not rows:
                 continue
-
+            fracs = [r["fraction"] for r in rows]
+            visibles = [r["visible"] for r in rows]
+            # per-item pass rate across samples
+            item_totals: dict[str, list[int]] = defaultdict(list)
+            for r in rows:
+                for k, v in r["detail"].items():
+                    item_totals[k].append(1 if v else 0)
+            item_rates = {k: round(sum(v) / len(v), 3) for k, v in item_totals.items()}
             patch_kinds: dict[str, int] = defaultdict(int)
             for r in rows:
                 patch_kinds[r["patch_kind"]] += 1
-
-            cell: dict = {"model": model, "policy": policy}
-            # Average each numeric metric
-            num_keys = [k for k in TASK_METRICS[task_id]({
-                "visible_passed": True, "held_out_passed": True}).keys()]
-            for key in num_keys:
-                vals = [r[key] for r in rows if key in r]
-                cell[key] = round(sum(vals) / len(vals), 4) if vals else 0.0
-            cell["patch_kinds"] = dict(patch_kinds)
-            cells.append(cell)
+            cells.append({
+                "model": model,
+                "policy": policy,
+                "meanFraction": round(statistics.mean(fracs), 4),
+                "stdevFraction": round(statistics.pstdev(fracs), 4) if len(fracs) > 1 else 0.0,
+                "visibleRate": round(sum(visibles) / len(visibles), 4),
+                "completeRate": round(sum(1 for f in fracs if f >= 0.999) / len(fracs), 4),
+                "itemPassRates": item_rates,
+                "patch_kinds": dict(patch_kinds),
+                "n_effective": len(rows),
+            })
     return cells
 
 
-def sweep_task(task_id: str, models: list[str], policies: list[str], n: int, out_path: Path) -> None:
-    tprint(f"\n=== {task_id}: {len(models)} models × {len(policies)} policies × N={n} ===")
+def sweep_task(task_id: str, models: list[str], policies: list[str], n: int, out: Path) -> None:
+    tprint(f"\n=== {task_id}: {len(models)} models x {len(policies)} policies x N={n} ===")
     futures = {}
-    results = []
+    results: list[dict] = []
     with ThreadPoolExecutor(max_workers=WORKERS) as ex:
         for model in models:
             for policy in policies:
                 for seed in range(n):
-                    f = ex.submit(run_one, task_id, model, policy, seed)
-                    futures[f] = (model, policy, seed)
-        done = 0
+                    futures[ex.submit(run_one, task_id, model, policy, seed)] = (model, policy, seed)
         total = len(futures)
+        done = 0
         for f in as_completed(futures):
-            model, policy, seed = futures[f]
             r = f.result()
             results.append(r)
             done += 1
-            status = r.get("error") or r.get("patch_kind", "?")
-            tprint(f"  [{done}/{total}] {model} {policy} s{seed}: {status}")
+            tag = r.get("error") or f"frac={r['fraction']:.2f} {r['patch_kind']}"
+            tprint(f"  [{done}/{total}] {r['model']} {r['policy']} s{r['seed']}: {tag}")
 
-    # aggregate and write
-    cells = aggregate_cells(results, task_id, models, policies, n)
+    cells = aggregate(results, models, policies)
     fixture = {
-        "task": task_id,
-        "n": n,
-        "models": models,
-        "policies": policies,
-        "cells": cells,
+        "task": task_id, "n": n, "models": models, "policies": policies,
+        "grading": "fraction", "cells": cells,
     }
-    out_path.write_text(json.dumps(fixture, indent=2), encoding="utf-8")
-    tprint(f"  -> wrote {out_path.relative_to(ROOT)}")
-    # print table
-    tprint(f"  {'model':30s} {'policy':20s} {' '.join(TASK_METRICS[task_id]({'visible_passed':True,'held_out_passed':True}).keys())}")
+    out.write_text(json.dumps(fixture, indent=2), encoding="utf-8")
+    tprint(f"  -> wrote {out.relative_to(ROOT)}")
+    tprint(f"  {'model':20s} {'policy':18s} meanFrac  stdev  vis   complete")
     for c in cells:
-        num_keys = list(TASK_METRICS[task_id]({"visible_passed":True,"held_out_passed":True}).keys())
-        vals = "  ".join(f"{c.get(k, 0):.3f}" for k in num_keys)
-        tprint(f"  {c['model']:30s} {c['policy']:20s} {vals}  patch={c.get('patch_kinds',{})}")
+        tprint(f"  {c['model']:20s} {c['policy']:18s} "
+               f"{c['meanFraction']:.3f}    {c['stdevFraction']:.3f}  "
+               f"{c['visibleRate']:.2f}  {c['completeRate']:.2f}  {c['patch_kinds']}")
 
 
 def main() -> None:
+    os.environ.pop("ANTHROPIC_API_KEY", None)  # drop empty shell export
     load_env_file(ROOT)
-    os.environ.pop("ANTHROPIC_API_KEY", None)  # let load_env_file win over empty shell export
-    load_env_file(ROOT)  # reload now that the empty var is gone
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--n",       type=int,   default=DEFAULT_N)
-    parser.add_argument("--task",    nargs="+",  default=list(TASK_METRICS))
-    parser.add_argument("--models",  nargs="+",  default=DEFAULT_MODELS)
-    parser.add_argument("--policies",nargs="+",  default=DEFAULT_POLICIES)
-    args = parser.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("--n", type=int, default=DEFAULT_N)
+    p.add_argument("--task", nargs="+", default=sorted(FRACTIONAL_HOLDOUT_TASKS))
+    p.add_argument("--models", nargs="+", default=DEFAULT_MODELS)
+    p.add_argument("--policies", nargs="+", default=DEFAULT_POLICIES)
+    args = p.parse_args()
 
     eval_dir = ROOT / "data" / "evals"
     for task_id in args.task:
-        out = eval_dir / f"reliability_{task_id}.json"
-        sweep_task(task_id, args.models, args.policies, args.n, out)
+        sweep_task(task_id, args.models, args.policies, args.n,
+                   eval_dir / f"reliability_{task_id}.json")
 
 
 if __name__ == "__main__":
