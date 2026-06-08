@@ -1,0 +1,9 @@
+{
+  "name": "toy-repo-config-audit",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node tests/summary.test.js"
+  },
+  "devDependencies": {}
+}
