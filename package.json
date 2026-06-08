@@ -36,7 +36,8 @@
     "router:fixture": "python packages/reward/bandit_router.py data/router_decisions.json",
     "build:harness": "AHE_DEPLOY_TARGET=cloudflare AHE_PUBLIC_BASE_PATH=/harness pnpm --filter @ahe/web build",
     "preview:harness": "wrangler dev --config wrangler.harness.jsonc --local --port 8787",
-    "deploy:harness": "wrangler deploy --config wrangler.harness.jsonc"
+    "deploy:harness": "wrangler deploy --config wrangler.harness.jsonc",
+    "ship:harness": "pnpm build:harness && pnpm deploy:harness"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
