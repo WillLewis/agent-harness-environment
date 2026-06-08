@@ -1,5 +1,4 @@
 {
-  "_sweep_status": "PARTIALLY CORRUPTED: claude-opus-4-8 cells are noop garbage (Anthropic API hit 'credit balance too low' mid-sweep). OpenAI + haiku/sonnet cells valid. Re-sweep after credit top-up.",
   "task": "compat_alias_migration_001",
   "n": 16,
   "models": [
@@ -19,13 +18,13 @@
       "model": "gpt-5.4-nano",
       "policy": "baseline",
       "meanFraction": 0.5729,
-      "stdevFraction": 0.1015,
+      "stdevFraction": 0.0827,
       "visibleRate": 1.0,
       "completeRate": 0.0,
       "itemPassRates": {
         "legacy_parser_importable": 1.0,
-        "account_parser_accepts_legacy": 0.062,
-        "legacy_api_payload": 0.375,
+        "account_parser_accepts_legacy": 0.0,
+        "legacy_api_payload": 0.438,
         "conflict_rejected": 1.0,
         "cli_caller_preserved": 0.0,
         "reexports_both": 1.0
@@ -51,64 +50,64 @@
         "reexports_both": 1.0
       },
       "patch_kinds": {
-        "partial": 15,
-        "complete": 1
+        "complete": 1,
+        "partial": 15
       },
       "n_effective": 16
     },
     {
       "model": "gpt-5.4-mini",
       "policy": "baseline",
-      "meanFraction": 0.7396,
-      "stdevFraction": 0.306,
+      "meanFraction": 0.7083,
+      "stdevFraction": 0.2795,
       "visibleRate": 1.0,
-      "completeRate": 0.5625,
+      "completeRate": 0.4375,
       "itemPassRates": {
-        "legacy_parser_importable": 0.688,
-        "account_parser_accepts_legacy": 0.562,
+        "legacy_parser_importable": 0.75,
+        "account_parser_accepts_legacy": 0.438,
         "legacy_api_payload": 0.562,
         "conflict_rejected": 1.0,
-        "cli_caller_preserved": 0.625,
+        "cli_caller_preserved": 0.5,
         "reexports_both": 1.0
       },
       "patch_kinds": {
-        "complete": 9,
-        "partial": 7
+        "partial": 9,
+        "complete": 7
       },
       "n_effective": 16
     },
     {
       "model": "gpt-5.4-mini",
       "policy": "guarded_recovery",
-      "meanFraction": 0.6667,
-      "stdevFraction": 0.2887,
+      "meanFraction": 0.8125,
+      "stdevFraction": 0.2348,
       "visibleRate": 1.0,
-      "completeRate": 0.375,
+      "completeRate": 0.5625,
       "itemPassRates": {
-        "legacy_parser_importable": 0.625,
-        "account_parser_accepts_legacy": 0.375,
-        "legacy_api_payload": 0.625,
+        "legacy_parser_importable": 0.938,
+        "account_parser_accepts_legacy": 0.562,
+        "legacy_api_payload": 0.75,
         "conflict_rejected": 1.0,
-        "cli_caller_preserved": 0.375,
+        "cli_caller_preserved": 0.625,
         "reexports_both": 1.0
       },
       "patch_kinds": {
-        "partial": 10,
-        "complete": 6
+        "partial": 7,
+        "complete": 9
       },
       "n_effective": 16
     },
     {
       "model": "claude-haiku-4-5",
       "policy": "baseline",
-      "meanFraction": 0.6458,
-      "stdevFraction": 0.0551,
+      "meanFraction": 0.6562,
+      "stdevFraction": 0.0403,
       "visibleRate": 1.0,
       "completeRate": 0.0,
       "itemPassRates": {
         "legacy_parser_importable": 1.0,
         "account_parser_accepts_legacy": 0.0,
-        "legacy_api_payload": 0.875,
+        "legacy_api_payload": 0.938,
         "conflict_rejected": 1.0,
         "cli_caller_preserved": 0.0,
         "reexports_both": 1.0
@@ -121,15 +120,15 @@
     {
       "model": "claude-haiku-4-5",
       "policy": "guarded_recovery",
-      "meanFraction": 0.6354,
-      "stdevFraction": 0.0651,
+      "meanFraction": 0.625,
+      "stdevFraction": 0.0932,
       "visibleRate": 1.0,
       "completeRate": 0.0,
       "itemPassRates": {
         "legacy_parser_importable": 1.0,
         "account_parser_accepts_legacy": 0.0,
         "legacy_api_payload": 0.812,
-        "conflict_rejected": 1.0,
+        "conflict_rejected": 0.938,
         "cli_caller_preserved": 0.0,
         "reexports_both": 1.0
       },
@@ -141,42 +140,41 @@
     {
       "model": "claude-sonnet-4-6",
       "policy": "baseline",
-      "meanFraction": 0.6979,
-      "stdevFraction": 0.2373,
+      "meanFraction": 0.6667,
+      "stdevFraction": 0.27,
       "visibleRate": 1.0,
       "completeRate": 0.375,
       "itemPassRates": {
-        "legacy_parser_importable": 1.0,
+        "legacy_parser_importable": 0.812,
         "account_parser_accepts_legacy": 0.375,
-        "legacy_api_payload": 0.438,
+        "legacy_api_payload": 0.375,
         "conflict_rejected": 1.0,
-        "cli_caller_preserved": 0.375,
+        "cli_caller_preserved": 0.438,
         "reexports_both": 1.0
       },
       "patch_kinds": {
-        "partial": 10,
-        "complete": 6
+        "complete": 6,
+        "partial": 10
       },
       "n_effective": 16
     },
     {
       "model": "claude-sonnet-4-6",
       "policy": "guarded_recovery",
-      "meanFraction": 0.375,
-      "stdevFraction": 0.2795,
-      "visibleRate": 0.4375,
+      "meanFraction": 0.5833,
+      "stdevFraction": 0.1863,
+      "visibleRate": 1.0,
       "completeRate": 0.125,
       "itemPassRates": {
-        "legacy_parser_importable": 1.0,
-        "account_parser_accepts_legacy": 0.125,
-        "legacy_api_payload": 0.125,
-        "conflict_rejected": 0.438,
+        "legacy_parser_importable": 0.938,
+        "account_parser_accepts_legacy": 0.188,
+        "legacy_api_payload": 0.25,
+        "conflict_rejected": 1.0,
         "cli_caller_preserved": 0.125,
-        "reexports_both": 0.438
+        "reexports_both": 1.0
       },
       "patch_kinds": {
-        "partial": 5,
-        "noop": 9,
+        "partial": 14,
         "complete": 2
       },
       "n_effective": 16
@@ -184,40 +182,40 @@
     {
       "model": "claude-opus-4-8",
       "policy": "baseline",
-      "meanFraction": 0.1667,
+      "meanFraction": 1.0,
       "stdevFraction": 0.0,
-      "visibleRate": 0.0,
-      "completeRate": 0.0,
+      "visibleRate": 1.0,
+      "completeRate": 1.0,
       "itemPassRates": {
         "legacy_parser_importable": 1.0,
-        "account_parser_accepts_legacy": 0.0,
-        "legacy_api_payload": 0.0,
-        "conflict_rejected": 0.0,
-        "cli_caller_preserved": 0.0,
-        "reexports_both": 0.0
+        "account_parser_accepts_legacy": 1.0,
+        "legacy_api_payload": 1.0,
+        "conflict_rejected": 1.0,
+        "cli_caller_preserved": 1.0,
+        "reexports_both": 1.0
       },
       "patch_kinds": {
-        "noop": 16
+        "complete": 16
       },
       "n_effective": 16
     },
     {
       "model": "claude-opus-4-8",
       "policy": "guarded_recovery",
-      "meanFraction": 0.1667,
+      "meanFraction": 1.0,
       "stdevFraction": 0.0,
-      "visibleRate": 0.0,
-      "completeRate": 0.0,
+      "visibleRate": 1.0,
+      "completeRate": 1.0,
       "itemPassRates": {
         "legacy_parser_importable": 1.0,
-        "account_parser_accepts_legacy": 0.0,
-        "legacy_api_payload": 0.0,
-        "conflict_rejected": 0.0,
-        "cli_caller_preserved": 0.0,
-        "reexports_both": 0.0
+        "account_parser_accepts_legacy": 1.0,
+        "legacy_api_payload": 1.0,
+        "conflict_rejected": 1.0,
+        "cli_caller_preserved": 1.0,
+        "reexports_both": 1.0
       },
       "patch_kinds": {
-        "noop": 16
+        "complete": 16
       },
       "n_effective": 16
     }

@@ -1,5 +1,4 @@
 {
-  "_sweep_status": "STALE: 9-item held-out; the committed task now has 12 items (widened malformed-delimiter tail). Re-sweep after Anthropic credit top-up.",
   "task": "completeness_comments_001",
   "n": 16,
   "models": [
@@ -18,55 +17,61 @@
     {
       "model": "gpt-5.4-nano",
       "policy": "baseline",
-      "meanFraction": 0.9167,
-      "stdevFraction": 0.0481,
+      "meanFraction": 0.7604,
+      "stdevFraction": 0.0972,
       "visibleRate": 1.0,
-      "completeRate": 0.25,
+      "completeRate": 0.125,
       "itemPassRates": {
         "block_basic": 1.0,
         "line_basic": 1.0,
         "mixed": 1.0,
-        "multiline_block": 1.0,
-        "hash_in_block": 1.0,
+        "multiline_block": 0.938,
+        "hash_in_block": 0.812,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
-        "unterminated_block": 0.25,
-        "adjacent_block": 1.0
+        "adjacent_block": 1.0,
+        "unterminated_block": 0.125,
+        "unterminated_after_valid": 0.125,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.125
       },
       "patch_kinds": {
-        "complete": 4,
-        "partial": 12
+        "complete": 2,
+        "partial": 14
       },
       "n_effective": 16
     },
     {
       "model": "gpt-5.4-nano",
       "policy": "guarded_recovery",
-      "meanFraction": 0.9236,
-      "stdevFraction": 0.0648,
+      "meanFraction": 0.7552,
+      "stdevFraction": 0.0857,
       "visibleRate": 1.0,
-      "completeRate": 0.375,
+      "completeRate": 0.0625,
       "itemPassRates": {
         "block_basic": 1.0,
         "line_basic": 1.0,
         "mixed": 1.0,
         "multiline_block": 1.0,
-        "hash_in_block": 0.938,
+        "hash_in_block": 0.688,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
-        "unterminated_block": 0.375,
-        "adjacent_block": 1.0
+        "adjacent_block": 1.0,
+        "unterminated_block": 0.125,
+        "unterminated_after_valid": 0.125,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.125
       },
       "patch_kinds": {
-        "partial": 10,
-        "complete": 6
+        "partial": 15,
+        "complete": 1
       },
       "n_effective": 16
     },
     {
       "model": "gpt-5.4-mini",
       "policy": "baseline",
-      "meanFraction": 0.8889,
+      "meanFraction": 0.75,
       "stdevFraction": 0.0,
       "visibleRate": 1.0,
       "completeRate": 0.0,
@@ -78,8 +83,11 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 0.0,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 0.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.0
       },
       "patch_kinds": {
         "partial": 16
@@ -89,7 +97,7 @@
     {
       "model": "gpt-5.4-mini",
       "policy": "guarded_recovery",
-      "meanFraction": 0.8889,
+      "meanFraction": 0.75,
       "stdevFraction": 0.0,
       "visibleRate": 1.0,
       "completeRate": 0.0,
@@ -101,8 +109,11 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 0.0,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 0.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.0
       },
       "patch_kinds": {
         "partial": 16
@@ -112,48 +123,54 @@
     {
       "model": "claude-haiku-4-5",
       "policy": "baseline",
-      "meanFraction": 0.9028,
-      "stdevFraction": 0.0867,
-      "visibleRate": 1.0,
-      "completeRate": 0.375,
-      "itemPassRates": {
-        "block_basic": 1.0,
-        "line_basic": 1.0,
-        "mixed": 1.0,
-        "multiline_block": 0.5,
-        "hash_in_block": 1.0,
-        "blockstart_in_line": 1.0,
-        "two_blocks_one_line": 1.0,
-        "unterminated_block": 0.625,
-        "adjacent_block": 1.0
-      },
-      "patch_kinds": {
-        "partial": 10,
-        "complete": 6
-      },
-      "n_effective": 16
-    },
-    {
-      "model": "claude-haiku-4-5",
-      "policy": "guarded_recovery",
-      "meanFraction": 0.9167,
-      "stdevFraction": 0.0621,
+      "meanFraction": 0.8229,
+      "stdevFraction": 0.1313,
       "visibleRate": 1.0,
       "completeRate": 0.3125,
       "itemPassRates": {
         "block_basic": 1.0,
         "line_basic": 1.0,
         "mixed": 1.0,
-        "multiline_block": 0.875,
+        "multiline_block": 0.75,
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 0.375,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 0.375,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.375
       },
       "patch_kinds": {
-        "complete": 5,
-        "partial": 11
+        "partial": 11,
+        "complete": 5
+      },
+      "n_effective": 16
+    },
+    {
+      "model": "claude-haiku-4-5",
+      "policy": "guarded_recovery",
+      "meanFraction": 0.8281,
+      "stdevFraction": 0.1457,
+      "visibleRate": 1.0,
+      "completeRate": 0.375,
+      "itemPassRates": {
+        "block_basic": 1.0,
+        "line_basic": 1.0,
+        "mixed": 1.0,
+        "multiline_block": 0.625,
+        "hash_in_block": 1.0,
+        "blockstart_in_line": 1.0,
+        "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
+        "unterminated_block": 0.438,
+        "unterminated_after_valid": 0.438,
+        "stray_close": 1.0,
+        "unterminated_whole": 0.438
+      },
+      "patch_kinds": {
+        "complete": 6,
+        "partial": 10
       },
       "n_effective": 16
     },
@@ -172,8 +189,11 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 1.0,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 1.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 1.0
       },
       "patch_kinds": {
         "complete": 16
@@ -195,8 +215,11 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 1.0,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 1.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 1.0
       },
       "patch_kinds": {
         "complete": 16
@@ -206,10 +229,10 @@
     {
       "model": "claude-opus-4-8",
       "policy": "baseline",
-      "meanFraction": 0.9861,
-      "stdevFraction": 0.0367,
+      "meanFraction": 1.0,
+      "stdevFraction": 0.0,
       "visibleRate": 1.0,
-      "completeRate": 0.875,
+      "completeRate": 1.0,
       "itemPassRates": {
         "block_basic": 1.0,
         "line_basic": 1.0,
@@ -218,12 +241,14 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
-        "unterminated_block": 0.875,
-        "adjacent_block": 1.0
+        "adjacent_block": 1.0,
+        "unterminated_block": 1.0,
+        "unterminated_after_valid": 1.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 1.0
       },
       "patch_kinds": {
-        "complete": 14,
-        "partial": 2
+        "complete": 16
       },
       "n_effective": 16
     },
@@ -242,8 +267,11 @@
         "hash_in_block": 1.0,
         "blockstart_in_line": 1.0,
         "two_blocks_one_line": 1.0,
+        "adjacent_block": 1.0,
         "unterminated_block": 1.0,
-        "adjacent_block": 1.0
+        "unterminated_after_valid": 1.0,
+        "stray_close": 1.0,
+        "unterminated_whole": 1.0
       },
       "patch_kinds": {
         "complete": 16
