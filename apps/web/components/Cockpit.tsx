@@ -231,19 +231,18 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
         <div className="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
           <div>
             <p className="section-chapter">
-              <span className="text-text-muted">05</span>
+              <span className="text-text-muted">02</span>
               <span className="mx-2 text-text-muted">—</span>
               <span className="section-label">cockpit</span>
               <span className="sr-only">Interactive cockpit</span>
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-              Replay a real run, then watch the held-out battery decide
+              Watch it pass its own tests and get rejected.
             </h2>
           </div>
           <p className="max-w-2xl text-xs leading-relaxed text-text-muted sm:text-sm">
-            Press play to watch a model clear the visible suite and still get rejected. Toggle the{' '}
-            <span className="font-mono text-text-muted">stronger model</span> and watch the same task pass the held-out
-            battery. The visible suite agrees with both — only the held-out check separates them.
+            Press play to step through a real run, then toggle the stronger model on the same task. The visible suite
+            agrees with both — only the held-out battery separates them.
           </p>
         </div>
 

@@ -16,16 +16,17 @@ export function EvalTable() {
     <div className="surface-card overflow-hidden">
       <div className="border-b border-border-subtle p-4 sm:p-5">
         <p className="section-chapter">
-          <span className="text-text-muted">07</span>
+          <span className="text-text-muted">03</span>
           <span className="mx-2 text-text-muted">—</span>
-          <span className="section-label">Held-out eval · card × model · baseline policy</span>
+          <span className="section-label">eval results</span>
         </p>
-        <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">Eval report</h3>
+        <h3 className="mt-2 text-xl font-semibold text-text sm:text-2xl">
+          Visible says 100%. Held-out reveals the gradient.
+        </h3>
         <p className="mt-2 max-w-3xl text-xs leading-relaxed text-text-muted sm:text-sm">
-          One row per task, one column per model (GPT-5.4-nano → Opus 4.8). The{' '}
-          <span className="text-text">Visible</span> column is the agent&apos;s own suite — 100% for every model. The
-          per-model cells are the <span className="text-text">held-out mean-fraction</span>: same task, same visible
-          pass, different model, different real outcome.
+          One row per task, one column per model from GPT-5.4-nano to Opus 4.8. The visible column is flat at 100% by
+          construction; each per-model cell is the <span className="text-text">held-out mean-fraction</span> — same
+          task, same green suite, different real outcome.
         </p>
       </div>
 

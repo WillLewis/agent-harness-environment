@@ -24,10 +24,10 @@ export function TakeawaysSection() {
   return (
     <section id="takeaways" className="mx-auto max-w-7xl px-4 py-14 pb-20 sm:px-6 sm:py-16 lg:px-8">
       <SectionHeader
-        chapter="10"
+        chapter="09"
         label="takeaways"
-        title="What this demo proves"
-        description="Static hosted demo — precomputed traces only. Local runner, MCP tools, and live adapter uploads ship in-repo for development."
+        title="What this demo proves."
+        description="The visible suite passes from the smallest model to the frontier; the held-out battery it never sees is what separates real capability — traceable, deterministic, and reproducible locally."
         className="mb-8"
       />
       <ol className="grid gap-3 sm:grid-cols-2">

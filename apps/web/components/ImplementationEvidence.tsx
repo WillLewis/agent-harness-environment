@@ -30,11 +30,11 @@ export function ImplementationEvidence() {
       className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8"
     >
       <SectionHeader
-        chapter="09"
-        label="Implementation evidence"
-        title="What this repo implements today"
+        chapter="08"
+        label="implementation"
+        title="What the repo actually implements today."
         titleId="architecture-heading"
-        description="The hosted page is a static flight recorder. Local Python evals, the runner, MCP tools, and export adapters live in-repo; nothing here calls a live LLM or backend API at runtime."
+        description="The building blocks behind the demo — task fixtures, trace replay, deterministic scorers, the local runner, MCP tools, and dry-run export adapters. Status reflects the current repository, not a roadmap; nothing here calls a live LLM at runtime."
       />
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

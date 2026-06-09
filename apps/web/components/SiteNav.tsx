@@ -1,11 +1,11 @@
 import { Github } from 'lucide-react';
 
 const navLinks = [
-  { href: '#premise', label: 'Why Harnesses Matter' },
   { href: '#tasks', label: 'Tasks' },
   { href: '#cockpit', label: 'Cockpit' },
-  { href: '#evals', label: 'Evals' },
+  { href: '#evals', label: 'Eval results' },
   { href: '#capability-value', label: 'Capability' },
+  { href: '#why', label: 'Why' },
   { href: '#architecture', label: 'Architecture' }
 ] as const;
 

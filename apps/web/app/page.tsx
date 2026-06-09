@@ -1,9 +1,7 @@
 import { DemoFlow } from '../components/DemoFlow';
 import { CapabilityValueChart } from '../components/CapabilityValueChart';
 import { EvalTable } from '../components/EvalTable';
-import { ReliabilityPanel } from '../components/ReliabilityPanel';
 import { FailureTaxonomySection } from '../components/FailureTaxonomySection';
-import { HarnessPrimitives } from '../components/HarnessPrimitives';
 import { ImplementationEvidence } from '../components/ImplementationEvidence';
 import { SectionHeader } from '../components/SectionHeader';
 import { SurfaceCard } from '../components/ui/SurfaceCard';
@@ -132,13 +130,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 01 — Premise */}
-      <section id="premise" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+      {/* 01 — Tasks + 02 — Cockpit */}
+      <DemoFlow />
+
+      {/* 03 — Eval results */}
+      <section id="evals" className="mx-auto min-w-0 max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <EvalTable />
+      </section>
+
+      {/* 04 — Capability value */}
+      <section id="capability-value" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <SectionHeader
-          chapter="01"
-          label="premise"
-          title="Why harnesses matter"
-          description="When an agent fails, the product question is not only “was the model wrong?” The harness determines whether the agent plans, reads files, edits code, runs commands, recovers, asks for help, stops, or escalates."
+          chapter="04"
+          label="capability"
+          title="The gap doesn&apos;t close, even at the frontier."
+          description={
+            <>
+              Each line is one task&apos;s held-out fraction climbing across the model tier while the visible suite
+              stays pinned at 1.0. Latent-defect discovery is the steepest climb — Opus 4.8 still leaves items on the
+              table at 79%.
+            </>
+          }
+          className="mb-8"
+        />
+        <CapabilityValueChart />
+        <p className="mt-4 max-w-3xl text-[11px] leading-relaxed text-text-faint">
+          Measured, not drawn: held-out mean-fraction per model from the real run fixtures (
+          <code className="text-text-muted">data/evals/reliability_*.json</code>, baseline policy). Visible is 1.0 by
+          construction; the separation is the held-out gradient.
+        </p>
+      </section>
+
+      {/* 05 — Why */}
+      <section id="why" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <SectionHeader
+          chapter="05"
+          label="why"
+          title="Why a green suite isn&apos;t the same as a working agent."
+          description="An agent&apos;s own checks clear the happy path for every model, nano to frontier — while missing malformed inputs, broken legacy callers, and the neighbouring defects no ticket has filed. The held-out battery it never sees is the only thing that scores what the visible suite skips."
         />
         <div className="mt-8 grid gap-3 md:grid-cols-3">
           {premisePillars.map((pillar) => (
@@ -150,13 +179,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 02 — Protocol / vocabulary */}
-      <section id="protocol" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 sm:pb-16 lg:px-8">
+      {/* 06 — Failure taxonomy */}
+      <FailureTaxonomySection />
+
+      {/* 07 — Protocol */}
+      <section id="protocol" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
         <SectionHeader
-          chapter="02"
-          label="vocabulary"
-          title="The protocol we measure"
-          description="Every run emits the same typed events and is scored against the same metrics. Both are deterministic — they ship in the repo as code, not vibes."
+          chapter="07"
+          label="protocol"
+          title="The events and metrics we measure."
+          description="Every run emits the same typed events and is scored against the same metrics — both deterministic, both shipped in the repo as code, not vibes."
           className="mb-8"
         />
         <div className="space-y-8">
@@ -188,50 +220,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 03 — Primitives */}
-      <HarnessPrimitives />
-
-      {/* 04 — Tasks + 05 — Cockpit */}
-      <DemoFlow />
-
-      {/* 06 — Failure taxonomy */}
-      <FailureTaxonomySection />
-
-      {/* 07 — Eval comparison */}
-      <section id="evals" className="mx-auto min-w-0 max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <EvalTable />
-        <ReliabilityPanel />
-      </section>
-
-      {/* 08 — Capability value */}
-      <section id="capability-value" className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-        <SectionHeader
-          chapter="08"
-          label="capability value"
-          title="The capability axis for real models"
-          description={
-            <>
-              The capability axis is the real model tier (
-              <span className="text-text">GPT-5.4-nano → Opus 4.8</span>). Each line is one task&apos;s held-out
-              mean-fraction climbing across the tier, while the <span className="text-text">visible suite stays pinned
-              at 1.0</span> for every model. The gap between the flat visible reference and each climbing line is exactly
-              what the held-out battery buys you.
-            </>
-          }
-          className="mb-8"
-        />
-        <CapabilityValueChart />
-        <p className="mt-4 max-w-3xl text-[11px] leading-relaxed text-text-faint">
-          Measured, not drawn: held-out mean-fraction per model from the real run fixtures (
-          <code className="text-text-muted">data/evals/reliability_*.json</code>, baseline policy). Visible is 1.0 by
-          construction; the separation is the held-out gradient.
-        </p>
-      </section>
-
-      {/* 09 — Implementation evidence */}
+      {/* 08 — Implementation evidence (primitives folded in) */}
       <ImplementationEvidence />
 
-      {/* 10 — Takeaways */}
+      {/* 09 — Takeaways */}
       <TakeawaysSection />
     </main>
   );

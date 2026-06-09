@@ -141,13 +141,12 @@ export function FailureTaxonomySection() {
         <SectionHeader
           chapter="06"
           label="failure taxonomy"
-          title="What the held-out battery catches"
+          title="What the held-out battery catches."
           description={
             <>
-              The real shapes these cards exhibit, derived from the worst-passing held-out items at the Sonnet /
-              baseline tier. Each one clears the visible suite and only fails the harness&apos;s held-out battery — that
-              gap is the whole point. Click a shape to inspect the failing items and the held-out coverage that catches
-              it.
+              The real shapes these runs exhibit at the baseline tier — missed malformed delimiters, a broken legacy
+              caller, a narrowed parser, neighbouring latent defects. Each one clears the visible suite and only fails
+              the held-out check; click a shape to inspect the failing items.
             </>
           }
           className="mb-8"

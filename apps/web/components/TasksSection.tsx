@@ -52,20 +52,18 @@ export function TasksSection({ activeTaskId, onTrigger }: TasksSectionProps) {
     <section id="tasks" className="border-b border-border-subtle" aria-label="Task stories">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
         <p className="section-chapter">
-          <span className="text-text-muted">04</span>
+          <span className="text-text-muted">01</span>
           <span className="mx-2 text-text-muted">—</span>
           <span className="section-label">tasks</span>
         </p>
         <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-          Three tasks. Three failure shapes.
+          Three tasks. Three failure shapes. Pick one to replay.
         </h2>
         <p className="sr-only">COMPLETENESS COMPAT-MIGRATION LATENT-DEFECTS</p>
         <p className="mt-6 max-w-3xl text-sm leading-relaxed text-text-muted sm:text-base">
-          Before you watch the cockpit replay, meet the work. Each task below is a real shape we see in production
-          agent traces — a two-part completeness fix, a back-compat API migration, a latent-defect review. The visible
-          suite passes for every model; the held-out battery is what separates them. Open{' '}
-          <span className="font-mono text-text-muted">The Backstory</span> for the situation a PM would recognize, or
-          hit <span className="font-mono text-text-muted">Trigger It</span> to load the task into the cockpit.
+          Each card is a real shape we see in production agent traces — a completeness fix, a back-compat migration, a
+          latent-defect review. Click one and it loads into the cockpit below; open the backstory for the situation a PM
+          would recognize.
         </p>
 
         <div className="mt-6 grid items-start gap-4 md:grid-cols-3">
