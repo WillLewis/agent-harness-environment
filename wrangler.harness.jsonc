@@ -5,7 +5,10 @@
   "compatibility_date": "2026-05-30",
   "workers_dev": false,
   "keep_vars": true,
-  "routes": [{ "pattern": "wxl3.com/agent-harness*", "zone_name": "wxl3.com" }],
+  "routes": [
+    { "pattern": "wxl3.com/agent-harness*", "zone_name": "wxl3.com" },
+    { "pattern": "wxl3.com/harness*", "zone_name": "wxl3.com" }
+  ],
   "assets": {
     "directory": "./apps/web/out",
     "binding": "ASSETS",

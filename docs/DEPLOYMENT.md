@@ -105,7 +105,8 @@ The repo now ships an opt-in **static-export** path for Cloudflare (mirrors the 
 | Deploy | `pnpm deploy:harness` (needs Cloudflare auth) |
 | Build + deploy | `pnpm ship:harness` |
 | Worker | `workers/harness-static.js` (strips the `/agent-harness` prefix, serves `apps/web/out/`) |
-| Route / config | `wrangler.harness.jsonc` → `wxl3.com/agent-harness*` |
+| Route / config | `wrangler.harness.jsonc` → `wxl3.com/agent-harness*` (+ legacy `wxl3.com/harness*`) |
+| Legacy redirect | Old slug `wxl3.com/harness*` → `302` → `/agent-harness…` (a resume shipped with the old URL). Same Worker, `LEGACY_PATH` branch; 302 is intentional so it never browser-caches stale across a future rename. |
 
 **Build-time env vars** (set only by `build:harness`; not runtime, not secrets, safe defaults):
 
