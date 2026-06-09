@@ -88,15 +88,11 @@ export default function Home() {
             Agent Harness Environment
           </h1>
           <p className="mt-4 max-w-3xl text-xl font-medium tracking-tight text-text-muted sm:text-2xl">
-            A flight recorder for coding agents.
+            Coding agents passing every test they wrote for themselves and still shipping bugs.
           </p>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-text-muted sm:text-base">
-            <span className="text-text">Static hosted demo</span>: replay precomputed real-model traces for
-            completeness, back-compat migration, and latent-defect discovery tasks.{' '}
-            <span className="text-text">No live LLM</span>, runner, or API calls in the browser.
-          </p>
-          <p className="mt-4 font-mono text-xs text-accent-muted sm:text-sm">
-            Same repo. Same task. Different model. The visible suite passes — the held-out battery decides.
+            This is the flight recorder that shows you the gap. Replay a real run. Same repo, same task, different
+            model: the visible suite passes, <span className="text-accent-muted">the held-out battery decides</span>.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#cockpit" className="btn-primary">

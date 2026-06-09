@@ -228,19 +228,17 @@ export function Cockpit({ activeTaskId, onTaskChange, autoplayToken }: CockpitPr
   return (
     <section id="cockpit" className="border-b border-border-subtle" aria-label="Interactive cockpit">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
-        <div className="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
-          <div>
-            <p className="section-chapter">
-              <span className="text-text-muted">02</span>
-              <span className="mx-2 text-text-muted">—</span>
-              <span className="section-label">cockpit</span>
-              <span className="sr-only">Interactive cockpit</span>
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
-              Watch it pass its own tests and get rejected.
-            </h2>
-          </div>
-          <p className="max-w-2xl text-xs leading-relaxed text-text-muted sm:text-sm">
+        <div className="mb-6">
+          <p className="section-chapter">
+            <span className="text-text-muted">02</span>
+            <span className="mx-2 text-text-muted">—</span>
+            <span className="section-label">cockpit</span>
+            <span className="sr-only">Interactive cockpit</span>
+          </p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-3xl">
+            Watch it pass its own tests and get rejected.
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-text-muted">
             Press play to step through a real run, then toggle the stronger model on the same task. The visible suite
             agrees with both — only the held-out battery separates them.
           </p>
