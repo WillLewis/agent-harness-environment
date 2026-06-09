@@ -473,6 +473,7 @@ def perform_live_export(
         "config": config,
         "summary": {
             "project": project_name,
+            "url": f"https://wandb.ai/{project_name}/weave",
             "traces": uploaded_traces,
             "evaluations": uploaded_evaluations,
             "suite_trace_count": eval_batch.get("trace_count"),
