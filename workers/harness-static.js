@@ -1,4 +1,4 @@
-const BASE_PATH = "/harness";   // <- slug (1 of 3)
+const BASE_PATH = "/agent-harness";   // <- slug (1 of 3)
 
 export default {
   async fetch(request, env) {

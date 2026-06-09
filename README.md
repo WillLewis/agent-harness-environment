@@ -20,7 +20,7 @@ For external reviewers or portfolio walkthroughs:
 | Goal | Command / link |
 | --- | --- |
 | Run hosted demo locally | `pnpm install` → `pnpm dev` → [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) manual checklist or jump to `#cockpit`, `#evals`, `#architecture` |
-| Deploy hosted demo | Cloudflare static export: `pnpm ship:harness` (= `build:harness && deploy:harness`) → `wxl3.com/harness`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Cloudflare. (Vercel/Netlify also supported via `pnpm build`.) |
+| Deploy hosted demo | Cloudflare static export: `pnpm ship:harness` (= `build:harness && deploy:harness`) → `wxl3.com/agent-harness`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Cloudflare. (Vercel/Netlify also supported via `pnpm build`.) |
 | Manual browser checklist | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Post-deploy smoke checklist |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
@@ -86,7 +86,7 @@ pnpm router:export-fixture    # Export learned decisions to data/router_decision
 pnpm deploy:check             # Hosted demo deployment readiness (local)
 pnpm build:harness            # Cloudflare static export -> apps/web/out/
 pnpm preview:harness          # Local Worker preview of the export (port 8787, offline)
-pnpm deploy:harness           # Deploy to Cloudflare (wxl3.com/harness; needs auth)
+pnpm deploy:harness           # Deploy to Cloudflare (wxl3.com/agent-harness; needs auth)
 pnpm ship:harness             # build:harness && deploy:harness (one-shot deploy)
 pnpm preview                  # Serve production build locally (after pnpm build)
 pnpm smoke:hosted:local       # HTML smoke vs http://localhost:3000 (needs preview/dev)

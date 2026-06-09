@@ -93,7 +93,7 @@ To use GitHub Pages you would need (out of scope for this repo today):
 
 Document for reviewers: use Vercel or Netlify Next runtime instead.
 
-### Cloudflare Workers — `wxl3.com/harness` (implemented)
+### Cloudflare Workers — `wxl3.com/agent-harness` (implemented)
 
 The repo now ships an opt-in **static-export** path for Cloudflare (mirrors the existing
 `wxl3.com/<slug>` Worker pattern). It does not affect local `pnpm dev` / `pnpm build`.
@@ -104,15 +104,15 @@ The repo now ships an opt-in **static-export** path for Cloudflare (mirrors the 
 | Local Worker preview | `pnpm preview:harness` (offline `wrangler dev`, port 8787) |
 | Deploy | `pnpm deploy:harness` (needs Cloudflare auth) |
 | Build + deploy | `pnpm ship:harness` |
-| Worker | `workers/harness-static.js` (strips the `/harness` prefix, serves `apps/web/out/`) |
-| Route / config | `wrangler.harness.jsonc` → `wxl3.com/harness*` |
+| Worker | `workers/harness-static.js` (strips the `/agent-harness` prefix, serves `apps/web/out/`) |
+| Route / config | `wrangler.harness.jsonc` → `wxl3.com/agent-harness*` |
 
 **Build-time env vars** (set only by `build:harness`; not runtime, not secrets, safe defaults):
 
 | Var | Purpose | Default |
 |---|---|---|
 | `AHE_DEPLOY_TARGET` | `cloudflare` switches `next build` into `output: 'export'` | unset → normal build |
-| `AHE_PUBLIC_BASE_PATH` | asset base path the Worker strips | `/harness` |
+| `AHE_PUBLIC_BASE_PATH` | asset base path the Worker strips | `/agent-harness` |
 
 To change the slug, edit it in three places: `workers/harness-static.js` (`BASE_PATH`),
 `wrangler.harness.jsonc` (`routes.pattern`), and the `build:harness` script
