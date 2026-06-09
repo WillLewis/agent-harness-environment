@@ -1,32 +1,15 @@
-# Agent Harness Environment Starter
+# Agent Harness Environment
 
-Agent Harness Environment is a flight recorder, eval harness, and policy-comparison surface for coding agents. This starter repo is designed to open directly in Cursor and give the agent enough structure to start building without repeatedly re-explaining the product.
+Agent Harness Environment is a flight recorder, eval harness, and capability-separation surface for coding agents. The hosted demo replays **real-model** runs (Haiku 4.5 → Sonnet 4.6 → Opus 4.8) on three tasks where the agent's own visible suite passes for every model — and a held-out battery it never sees reveals the real capability gradient. The repo also opens directly in Cursor with rules/skills for repeatable agent work.
+
+**Latest (P5 — real-model validation + hosting):** the capability axis is grounded in real models. Three separation tasks (completeness fix, back-compat migration, latent-defect review) are replayed across the model tier; visible pass saturates at 100% while the held-out mean-fraction separates — e.g. latent-defect discovery climbs from ~32% on the smallest model to ~79% on Opus 4.8. The hosted page is a static export deployed to Cloudflare with `pnpm ship:harness`. Observability (live Braintrust + W&B export) is the next phase.
 
 **Documentation map:** [docs/INDEX.md](docs/INDEX.md) — demo path, verification, eval design, architecture, runner/MCP, backlog.
 
-## v0.1 reviewer path
-
-Static/demo milestone handoff (no git tag created in-repo):
-
-| Step | Link / command |
-| --- | --- |
-| What v0.1 includes (and excludes) | [docs/RELEASE_NOTES_v0.1.md](docs/RELEASE_NOTES_v0.1.md) |
-| 5–10 min hosted walkthrough | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Post-deploy smoke checklist |
-| Risks, backlog, non-claims | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
-| Deploy settings + HTML smoke | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) |
-| Pre-tag checklist | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) §8 |
-
-```bash
-pnpm install && pip install -r requirements-dev.txt
-pnpm dev                                    # hosted demo
-pnpm eval:ci && python -m pytest && pnpm build   # verification
-pnpm deploy:check && pnpm smoke:hosted:local     # optional; preview must be running
-```
-
 ## What is included
 
-- Static hosted demo (Lovable-style numbered narrative): sticky nav, premise → protocol → primitives → cockpit → failure taxonomy → eval comparison → router → implementation evidence → takeaways. **3 task classes** (bugfix, adversarial, multi-agent) with precomputed traces; no live LLM in the browser.
-- Deterministic Python scorers, static eval suite + CI gate, and synthetic policy-comparison fixture for the hosted table.
+- Static hosted demo (numbered narrative): sticky nav, tasks → cockpit → eval results → capability → why → failure taxonomy → protocol → implementation → takeaways. **3 real-model tasks** (completeness fix, back-compat migration, latent-defect review) replayed across the model tier (Haiku 4.5 → Sonnet 4.6 → Opus 4.8): the visible suite passes for every model, the held-out battery reveals the capability gradient. Precomputed real-model traces; no live LLM in the browser.
+- Deterministic Python scorers + static eval suite + CI gate (the reproducible seeded methodology backbone), and the real-model reliability fixtures (`data/evals/reliability_*_001.json`) behind the hosted eval table + capability chart.
 - Local runner MVP, MCP tools, and Braintrust/Weave export adapters (dry-run by default; optional live upload).
 - Cursor rules, skills, MCP config, and product/UX/eval docs.
 
@@ -37,7 +20,7 @@ For external reviewers or portfolio walkthroughs:
 | Goal | Command / link |
 | --- | --- |
 | Run hosted demo locally | `pnpm install` → `pnpm dev` → [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) manual checklist or jump to `#cockpit`, `#evals`, `#architecture` |
-| Deploy hosted demo (review) | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Vercel recommended; `pnpm deploy:check` then `pnpm build` |
+| Deploy hosted demo | Cloudflare static export: `pnpm ship:harness` (= `build:harness && deploy:harness`) → `wxl3.com/harness`. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Cloudflare. (Vercel/Netlify also supported via `pnpm build`.) |
 | Manual browser checklist | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) § Post-deploy smoke checklist |
 | Pre-release verification | [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) |
 | Final audit + backlog | [docs/FINAL_AUDIT.md](docs/FINAL_AUDIT.md) |
@@ -52,7 +35,7 @@ For external reviewers or portfolio walkthroughs:
 | Optional Weave upload | `pip install -r requirements-weave.txt` + `WANDB_API_KEY` → `pnpm export:weave:live` |
 
 **Hosted page:** replays static fixtures only — no live LLM, runner, or external APIs in the browser.  
-**Eval table metrics:** synthetic portfolio fixture, not production telemetry.  
+**Eval table + capability chart:** real held-out mean-fraction from offline real-model runs (N=16, baseline policy), not production telemetry.  
 **Adapters:** dry-run JSON locally by default. Live Braintrust/Weave upload is opt-in (`--live` + API key + optional requirements files).
 
 ## Fast start
@@ -64,7 +47,7 @@ pip install -r requirements-dev.txt
 pnpm dev
 ```
 
-Open the URL Next.js prints. Default cockpit: bugfix task, baseline policy (rejected).
+Open the URL Next.js prints. Default cockpit: the back-compat migration on Sonnet 4.6 — the visible suite passes but the held-out battery rejects it; toggle Opus 4.8 to watch the same task pass.
 
 Quick local eval smoke:
 
@@ -101,6 +84,10 @@ pnpm router:decision -- bugfix_date_parser_001
 pnpm router:train             # Train local contextual-bandit state under runs/router/
 pnpm router:export-fixture    # Export learned decisions to data/router_decisions.json
 pnpm deploy:check             # Hosted demo deployment readiness (local)
+pnpm build:harness            # Cloudflare static export -> apps/web/out/
+pnpm preview:harness          # Local Worker preview of the export (port 8787, offline)
+pnpm deploy:harness           # Deploy to Cloudflare (wxl3.com/harness; needs auth)
+pnpm ship:harness             # build:harness && deploy:harness (one-shot deploy)
 pnpm preview                  # Serve production build locally (after pnpm build)
 pnpm smoke:hosted:local       # HTML smoke vs http://localhost:3000 (needs preview/dev)
 pnpm smoke:hosted -- --url URL  # HTML smoke vs local or deployed demo URL
@@ -191,11 +178,11 @@ pnpm eval:suite          # full suite table + JSON summary (same scoring as eval
 
 | Surface | Data source | Use |
 | --- | --- | --- |
-| Hosted cockpit / eval table / router | `data/traces/`, `data/evals/` JSON | Demo replay; no network |
+| Hosted cockpit / eval table / capability chart | `data/cockpit_traces/`, `data/evals/reliability_*_001.json` | Real-model replay; no network |
 | `pnpm eval` / `pnpm eval:ci` | Same fixtures | **Real** deterministic scorer output |
-| Hosted eval table (`#evals`) | `data/evals/policy_comparison.json` | **Synthetic** portfolio fixture — not `eval:ci` output |
+| Hosted eval table + capability chart (`#evals`, `#capability-value`) | `data/evals/reliability_*_001.json` | **Real** held-out mean-fraction by model (N=16, offline real-model runs) |
 | Local RL-lite router | `runs/router/history.jsonl`, `runs/router/state.json` | Contextual-bandit policy learning; explicit local command |
-| Hosted router fixture | `data/router_decisions.json` | Static export from learned router state; no browser training |
+| Router fixture (local relic) | `data/router_decisions.json` | Learned-router export; **no longer surfaced** on the hosted page |
 | `python …/audit_metric_drift.py` | Compares sources above | Drift/ambiguity report; does not change fixtures |
 | `services/runner/` | Toy repos → `runs/` | Local execution; not used by hosted page |
 | Adapter dry-runs | Fixtures → export JSON | Shape preview; no network |

@@ -37,5 +37,6 @@ docs/DEMO_SCRIPT.md
 docs/METHODOLOGY_RIGOR_PLAN.md
 docs/P4_HANDOFF.md
 docs/P5_REAL_MODEL_AND_HOSTING_PLAN.md
+docs/P5_4_OBSERVABILITY_PLAN.md
 .vercel
 apps/web/out/
