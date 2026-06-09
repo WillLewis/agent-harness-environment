@@ -9,7 +9,7 @@ const navLinks = [
   { href: '#architecture', label: 'Architecture' }
 ] as const;
 
-const GITHUB_URL = 'https://github.com';
+const GITHUB_URL = 'https://github.com/WillLewis/agent-harness-environment';
 
 export function SiteNav() {
   return (

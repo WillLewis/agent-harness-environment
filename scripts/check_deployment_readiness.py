@@ -79,19 +79,33 @@ def _check_no_api_routes() -> list[dict[str, str]]:
     return []
 
 
+# Build-time deploy toggles for the Cloudflare static export. These are NOT runtime
+# secrets: they only switch `next build` into static-export mode and set the asset
+# base path, both have safe defaults (unset => normal build; base path => "/harness"),
+# and they are documented in docs/DEPLOYMENT.md. The hosted bundle ships no runtime
+# env dependency, so these are allowed; anything else under process.env is still flagged.
+ALLOWED_BUILD_ENV = {"AHE_DEPLOY_TARGET", "AHE_PUBLIC_BASE_PATH"}
+
+
 def _check_env_usage() -> list[dict[str, str]]:
     issues: list[dict[str, str]] = []
     for path in WEB_ROOT.rglob("*"):
         if path.suffix not in {".ts", ".tsx", ".js", ".jsx", ".mjs"}:
             continue
-        if "node_modules" in path.parts or ".next" in path.parts:
+        if {"node_modules", ".next", "out"} & set(path.parts):
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
-        if "process.env" in text:
+        if "process.env" not in text:
+            continue
+        referenced = set(re.findall(r"process\.env\.([A-Za-z_][A-Za-z0-9_]*)", text))
+        bare_env = re.search(r"process\.env(?!\.[A-Za-z_])", text) is not None
+        disallowed = referenced - ALLOWED_BUILD_ENV
+        if bare_env or disallowed:
+            detail = ", ".join(sorted(disallowed)) if disallowed else "process.env"
             issues.append(
                 {
                     "code": "env_var_usage",
-                    "message": f"process.env found in {path.relative_to(PROJECT_ROOT)} — document in DEPLOYMENT.md",
+                    "message": f"undocumented process.env ({detail}) in {path.relative_to(PROJECT_ROOT)} — document in docs/DEPLOYMENT.md",
                 }
             )
     return issues
