@@ -20,6 +20,17 @@ ADAPTER_NAME = "braintrust"
 FORMAT_VERSION = "1"
 DEFAULT_PROJECT = "agent-harness-environment"
 
+# This adapter powers a PUBLIC hosted demo: experiments are uploaded with
+# is_public=True so anonymous visitors can open the dashboard link without
+# signing in. Braintrust experiments default to private otherwise.
+EXPERIMENTS_PUBLIC = True
+
+REAL_CARD_FILES = (
+    "reliability_completeness_comments_001.json",
+    "reliability_compat_alias_migration_001.json",
+    "reliability_latent_defects_001.json",
+)
+
 
 def _failure_labels(trace: dict[str, Any]) -> list[str]:
     labels: list[str] = []
@@ -87,6 +98,32 @@ def coding_task_row_to_braintrust_dataset_row(row: dict[str, Any]) -> dict[str, 
         "metadata": {
             "failure_modes_to_watch": row.get("failure_modes_to_watch", []),
             "source": "packages/evals/datasets/coding_tasks.jsonl",
+        },
+    }
+
+
+def reliability_cell_to_braintrust_dataset_row(
+    task_id: str, cell: dict[str, Any], source_file: str
+) -> dict[str, Any]:
+    """Map one cell from a reliability_*_001.json file to a Braintrust dataset row."""
+    row_id = f"{task_id}::{cell['model']}::{cell['policy']}"
+    return {
+        "id": row_id,
+        "input": {
+            "task_id": task_id,
+            "model": cell["model"],
+            "policy": cell["policy"],
+            "n_effective": cell["n_effective"],
+        },
+        "expected": {
+            "meanFraction": cell["meanFraction"],
+            "completeRate": cell["completeRate"],
+        },
+        "metadata": {
+            "visibleRate": cell["visibleRate"],
+            "stdevFraction": cell["stdevFraction"],
+            "source": source_file,
+            "card": task_id,
         },
     }
 
@@ -194,8 +231,8 @@ def _load_coding_tasks_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
-def build_export_batch(project_root: Path) -> dict[str, Any]:
-    """Assemble a full local export batch from static AHE fixtures (no network)."""
+def _build_seeded_export_batch(project_root: Path) -> dict[str, Any]:
+    """Assemble an export batch from seeded (curated) AHE fixtures."""
     traces_dir = project_root / "data" / "traces"
     tasks = _load_tasks(project_root / "data" / "tasks.json")
     coding_tasks = _load_coding_tasks_jsonl(
@@ -214,6 +251,7 @@ def build_export_batch(project_root: Path) -> dict[str, Any]:
         "adapter": ADAPTER_NAME,
         "format_version": FORMAT_VERSION,
         "project": get_braintrust_config()["project"],
+        "source": "seeded",
         "datasets": [
             {
                 "name": "ahe_tasks",
@@ -232,6 +270,88 @@ def build_export_batch(project_root: Path) -> dict[str, Any]:
         ],
         "suite_batch": suite_output_to_export_batch(suite_summary),
     }
+
+
+def _build_real_export_batch(project_root: Path) -> dict[str, Any]:
+    """Assemble an export batch from real-model run data (cockpit traces + reliability aggregates)."""
+    cockpit_dir = project_root / "data" / "cockpit_traces"
+    evals_dir = project_root / "data" / "evals"
+
+    trace_examples: list[dict[str, Any]] = []
+    for path in sorted(cockpit_dir.glob("*.json")):
+        trace = json.loads(path.read_text(encoding="utf-8"))
+        eval_result = run_eval(path)
+        example = trace_to_braintrust_example(trace, eval_result)
+        example["metadata"]["model"] = trace.get("model")
+        example["metadata"]["source"] = "data/cockpit_traces"
+        trace_examples.append(example)
+
+    reliability_rows: list[dict[str, Any]] = []
+    for fname in REAL_CARD_FILES:
+        rf_path = evals_dir / fname
+        if not rf_path.exists():
+            continue
+        data = json.loads(rf_path.read_text(encoding="utf-8"))
+        task_id = data["task"]
+        for cell in data["cells"]:
+            reliability_rows.append(
+                reliability_cell_to_braintrust_dataset_row(task_id, cell, rf_path.name)
+            )
+
+    return {
+        "adapter": ADAPTER_NAME,
+        "format_version": FORMAT_VERSION,
+        "project": get_braintrust_config()["project"],
+        "source": "real",
+        "datasets": [
+            {
+                "name": "ahe_real_reliability",
+                "rows": reliability_rows,
+            }
+        ],
+        "experiments": [
+            {
+                "name": "ahe_real_cockpit_traces",
+                "examples": trace_examples,
+            }
+        ],
+        "suite_batch": {
+            "kind": "ahe_suite_export_batch",
+            "format_version": FORMAT_VERSION,
+            "suite_version": None,
+            "trace_count": None,
+            "validation_ok": None,
+            "gates_ok": None,
+            "experiments": [],
+        },
+    }
+
+
+
+def _load_dot_env(project_root: Path) -> None:
+    """Load .env into os.environ, filling only absent-or-empty keys (no dotenv dep)."""
+    env_path = project_root / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and value and not os.environ.get(key):
+            os.environ[key] = value
+
+def build_export_batch(project_root: Path, source: str = "real") -> dict[str, Any]:
+    """Assemble a full local export batch from AHE fixtures (no network).
+
+    source="real" (default): uses data/cockpit_traces + data/evals/reliability_*_001.json.
+    source="seeded": uses data/traces + data/tasks.json (curated static fixtures).
+    """
+    if source == "seeded":
+        return _build_seeded_export_batch(project_root)
+    return _build_real_export_batch(project_root)
 
 
 def _not_configured_result(config: dict[str, Any]) -> dict[str, Any]:
@@ -289,8 +409,14 @@ def _example_log_kwargs(example: dict[str, Any]) -> dict[str, Any]:
     metadata = dict(example.get("metadata") or {})
     if example.get("id") is not None:
         metadata.setdefault("ahe_example_id", example["id"])
+    # Braintrust requires output; use verdict + quality as the agent's actual result
+    expected = example.get("expected") or {}
+    output: dict[str, Any] = {"verdict": expected.get("verdict")}
+    if metadata.get("aggregate_run_quality") is not None:
+        output["aggregate_run_quality"] = metadata["aggregate_run_quality"]
     kwargs: dict[str, Any] = {
         "input": example.get("input"),
+        "output": output,
         "expected": example.get("expected"),
         "scores": scores or None,
         "metadata": metadata or None,
@@ -332,14 +458,30 @@ def perform_live_export(
 
         uploaded_experiments: list[dict[str, Any]] = []
         for experiment_spec in experiment_specs:
-            experiment = bt.init(project=project, experiment=experiment_spec["name"])
+            experiment = bt.init(
+                project=project,
+                experiment=experiment_spec["name"],
+                is_public=EXPERIMENTS_PUBLIC,
+            )
             example_count = 0
             for example in experiment_spec.get("examples", []):
                 experiment.log(**_example_log_kwargs(example))
                 example_count += 1
             experiment.flush()
+            exp_url = None
+            summarize_fn = getattr(experiment, "summarize", None)
+            if callable(summarize_fn):
+                try:
+                    summary = summarize_fn()
+                    exp_url = getattr(summary, "experiment_url", None)
+                except Exception:  # noqa: BLE001
+                    pass
             uploaded_experiments.append(
-                {"name": experiment_spec["name"], "example_count": example_count}
+                {
+                    "name": experiment_spec["name"],
+                    "example_count": example_count,
+                    "url": exp_url,
+                }
             )
     except Exception as exc:  # noqa: BLE001 — surface SDK/network failures to CLI
         return {
@@ -394,13 +536,13 @@ def export_to_braintrust(
     return perform_live_export(batch)
 
 
-def run_dry_run(project_root: Path) -> dict[str, Any]:
-    batch = build_export_batch(project_root)
+def run_dry_run(project_root: Path, source: str = "real") -> dict[str, Any]:
+    batch = build_export_batch(project_root, source=source)
     return export_to_braintrust(batch, dry_run=True)
 
 
-def run_live_export(project_root: Path) -> dict[str, Any]:
-    batch = build_export_batch(project_root)
+def run_live_export(project_root: Path, source: str = "real") -> dict[str, Any]:
+    batch = build_export_batch(project_root, source=source)
     return export_to_braintrust(batch, dry_run=False)
 
 
@@ -417,7 +559,16 @@ def main() -> int:
     mode.add_argument(
         "--live",
         action="store_true",
-        help="Upload static fixtures to Braintrust (requires --live, braintrust package, BRAINTRUST_API_KEY).",
+        help="Upload fixtures to Braintrust (requires --live, braintrust package, BRAINTRUST_API_KEY).",
+    )
+    parser.add_argument(
+        "--source",
+        choices=["seeded", "real"],
+        default="real",
+        help=(
+            "Data source: 'real' (default) uses data/cockpit_traces + reliability aggregates; "
+            "'seeded' uses curated data/traces + data/tasks.json."
+        ),
     )
     parser.add_argument(
         "--project-root",
@@ -434,9 +585,10 @@ def main() -> int:
 
     root = args.project_root.resolve()
     if args.live:
-        result = run_live_export(root)
+        _load_dot_env(root)
+        result = run_live_export(root, source=args.source)
     else:
-        result = run_dry_run(root)
+        result = run_dry_run(root, source=args.source)
 
     indent = 2 if args.pretty else None
     print(

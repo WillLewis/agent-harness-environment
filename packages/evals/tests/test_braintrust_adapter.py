@@ -137,26 +137,27 @@ def test_export_to_braintrust_not_configured_without_credentials(
 
 
 def test_build_export_batch_covers_current_fixtures(project_root: Path):
+    # default source=real: one reliability dataset + cockpit trace experiment
     batch = build_export_batch(project_root)
 
-    task_rows = batch["datasets"][0]["rows"]
-    coding_rows = batch["datasets"][1]["rows"]
+    assert len(batch["datasets"]) == 1
+    reliability_rows = batch["datasets"][0]["rows"]
     examples = batch["experiments"][0]["examples"]
 
-    assert len(task_rows) == 3
-    assert len(coding_rows) == 3
-    assert len(examples) >= 7
-    assert batch["suite_batch"]["trace_count"] >= 7
+    assert len(reliability_rows) > 0  # cells from reliability_*_001.json files
+    assert len(examples) == 6  # cockpit traces
+    assert batch["suite_batch"]["trace_count"] is None  # no suite for real source
     assert all("scores" in example for example in examples)
 
 
 def test_run_dry_run_summarizes_all_tasks_traces_scores(project_root: Path):
+    # default source=real: reliability rows + cockpit trace examples
     result = run_dry_run(project_root)
 
     assert result["ok"] is True
-    assert result["summary"]["dataset_row_count"] == 6
-    assert result["summary"]["example_count"] >= 7
-    assert result["summary"]["suite_trace_count"] >= 7
+    assert result["summary"]["dataset_row_count"] > 0  # reliability cells
+    assert result["summary"]["example_count"] == 6  # cockpit traces
+    assert result["summary"]["suite_trace_count"] is None  # no suite for real source
 
 
 def test_export_dry_run_never_calls_live_export(monkeypatch: pytest.MonkeyPatch):
@@ -229,9 +230,11 @@ def test_perform_live_export_calls_fake_client(monkeypatch: pytest.MonkeyPatch):
             return ds
 
         @staticmethod
-        def init(*, project: str, experiment: str) -> FakeExperiment:
+        def init(*, project: str, experiment: str, is_public: bool = False) -> FakeExperiment:
             assert project == "test-project"
             assert experiment in {"ahe_static_trace_fixtures", "ahe_static_suite"}
+            # Public hosted demo: experiments must be uploaded publicly readable.
+            assert is_public is True
             exp = FakeExperiment()
             fake_experiments.append(exp)
             return exp

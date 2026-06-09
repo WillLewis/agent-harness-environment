@@ -20,6 +20,12 @@ ADAPTER_NAME = "weave"
 FORMAT_VERSION = "1"
 DEFAULT_PROJECT = "agent-harness-environment"
 
+REAL_CARD_FILES = (
+    "reliability_completeness_comments_001.json",
+    "reliability_compat_alias_migration_001.json",
+    "reliability_latent_defects_001.json",
+)
+
 
 def _failure_labels(trace: dict[str, Any]) -> list[str]:
     labels: list[str] = []
@@ -138,6 +144,36 @@ def scorer_output_to_weave_feedback(eval_result: dict[str, Any]) -> list[dict[st
     ]
 
 
+def reliability_cell_to_weave_evaluation(
+    task_id: str, cell: dict[str, Any], source_file: str
+) -> dict[str, Any]:
+    """Map one cell from a reliability_*_001.json file to a Weave evaluation record."""
+    eval_id = f"{task_id}::{cell['model']}::{cell['policy']}"
+    return {
+        "kind": "weave_evaluation",
+        "id": eval_id,
+        "attributes": {
+            "task_id": task_id,
+            "model": cell["model"],
+            "policy": cell["policy"],
+            "n_effective": cell["n_effective"],
+            "meanFraction": cell["meanFraction"],
+            "completeRate": cell["completeRate"],
+            "visibleRate": cell["visibleRate"],
+            "source": source_file,
+        },
+        "feedback": [
+            {
+                "kind": "weave_feedback",
+                "feedback_type": "score",
+                "name": "meanFraction",
+                "value": cell["meanFraction"],
+                "attributes": {"passed": cell["completeRate"] > 0.0},
+            }
+        ],
+    }
+
+
 def suite_output_to_weave_eval_batch(suite_summary: dict[str, Any]) -> dict[str, Any]:
     """Map `run_suite` JSON summary to a Weave-oriented evaluation batch."""
     evaluations = []
@@ -179,8 +215,8 @@ def suite_output_to_weave_eval_batch(suite_summary: dict[str, Any]) -> dict[str,
     }
 
 
-def build_export_batch(project_root: Path) -> dict[str, Any]:
-    """Assemble a full local Weave export batch from static AHE fixtures (no network)."""
+def _build_seeded_export_batch(project_root: Path) -> dict[str, Any]:
+    """Assemble a Weave export batch from seeded (curated) AHE fixtures."""
     traces_dir = project_root / "data" / "traces"
     weave_traces: list[dict[str, Any]] = []
 
@@ -197,9 +233,83 @@ def build_export_batch(project_root: Path) -> dict[str, Any]:
         "format_version": FORMAT_VERSION,
         "project": config["project"],
         "entity": config["entity"],
+        "source": "seeded",
         "traces": weave_traces,
         "eval_batch": suite_output_to_weave_eval_batch(suite_summary),
     }
+
+
+def _build_real_export_batch(project_root: Path) -> dict[str, Any]:
+    """Assemble a Weave export batch from real-model run data (cockpit traces + reliability aggregates)."""
+    cockpit_dir = project_root / "data" / "cockpit_traces"
+    evals_dir = project_root / "data" / "evals"
+    config = get_weave_config()
+
+    weave_traces: list[dict[str, Any]] = []
+    for path in sorted(cockpit_dir.glob("*.json")):
+        trace = json.loads(path.read_text(encoding="utf-8"))
+        eval_result = run_eval(path)
+        wt = trace_to_weave_trace(trace, eval_result)
+        wt["attributes"]["model"] = trace.get("model")
+        wt["attributes"]["source"] = "data/cockpit_traces"
+        weave_traces.append(wt)
+
+    evaluations: list[dict[str, Any]] = []
+    for fname in REAL_CARD_FILES:
+        rf_path = evals_dir / fname
+        if not rf_path.exists():
+            continue
+        data = json.loads(rf_path.read_text(encoding="utf-8"))
+        task_id = data["task"]
+        for cell in data["cells"]:
+            evaluations.append(
+                reliability_cell_to_weave_evaluation(task_id, cell, rf_path.name)
+            )
+
+    return {
+        "adapter": ADAPTER_NAME,
+        "format_version": FORMAT_VERSION,
+        "project": config["project"],
+        "entity": config["entity"],
+        "source": "real",
+        "traces": weave_traces,
+        "eval_batch": {
+            "kind": "ahe_weave_eval_batch",
+            "format_version": FORMAT_VERSION,
+            "suite_version": None,
+            "trace_count": None,
+            "validation_ok": None,
+            "gates_ok": None,
+            "evaluations": evaluations,
+        },
+    }
+
+
+
+def _load_dot_env(project_root: Path) -> None:
+    """Load .env into os.environ, filling only absent-or-empty keys (no dotenv dep)."""
+    env_path = project_root / ".env"
+    if not env_path.exists():
+        return
+    for line in env_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and value and not os.environ.get(key):
+            os.environ[key] = value
+
+def build_export_batch(project_root: Path, source: str = "real") -> dict[str, Any]:
+    """Assemble a full local Weave export batch from AHE fixtures (no network).
+
+    source="real" (default): uses data/cockpit_traces + data/evals/reliability_*_001.json.
+    source="seeded": uses data/traces (curated static fixtures).
+    """
+    if source == "seeded":
+        return _build_seeded_export_batch(project_root)
+    return _build_real_export_batch(project_root)
 
 
 def _not_configured_result(config: dict[str, Any]) -> dict[str, Any]:
@@ -399,13 +509,13 @@ def export_to_weave(
     return perform_live_export(batch)
 
 
-def run_dry_run(project_root: Path) -> dict[str, Any]:
-    batch = build_export_batch(project_root)
+def run_dry_run(project_root: Path, source: str = "real") -> dict[str, Any]:
+    batch = build_export_batch(project_root, source=source)
     return export_to_weave(batch, dry_run=True)
 
 
-def run_live_export(project_root: Path) -> dict[str, Any]:
-    batch = build_export_batch(project_root)
+def run_live_export(project_root: Path, source: str = "real") -> dict[str, Any]:
+    batch = build_export_batch(project_root, source=source)
     return export_to_weave(batch, dry_run=False)
 
 
@@ -422,7 +532,16 @@ def main() -> int:
     mode.add_argument(
         "--live",
         action="store_true",
-        help="Upload static fixtures to Weave (requires --live, weave package, WANDB_API_KEY).",
+        help="Upload fixtures to Weave (requires --live, weave package, WANDB_API_KEY).",
+    )
+    parser.add_argument(
+        "--source",
+        choices=["seeded", "real"],
+        default="real",
+        help=(
+            "Data source: 'real' (default) uses data/cockpit_traces + reliability aggregates; "
+            "'seeded' uses curated data/traces."
+        ),
     )
     parser.add_argument(
         "--project-root",
@@ -439,9 +558,10 @@ def main() -> int:
 
     root = args.project_root.resolve()
     if args.live:
-        result = run_live_export(root)
+        _load_dot_env(root)
+        result = run_live_export(root, source=args.source)
     else:
-        result = run_dry_run(root)
+        result = run_dry_run(root, source=args.source)
 
     indent = 2 if args.pretty else None
     print(

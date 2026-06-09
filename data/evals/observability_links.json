@@ -1,7 +1,59 @@
 {
-  "generated_at": null,
-  "observability_mode": "off",
+  "generated_at": "2026-06-09T03:03:38+00:00",
+  "observability_mode": "braintrust",
   "observability_version": "1",
-  "runs": {},
-  "warnings": []
+  "runs": {
+    "compat_alias_migration_001::claude-opus-4-8": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    },
+    "compat_alias_migration_001::claude-sonnet-4-6": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    },
+    "completeness_comments_001::claude-haiku-4-5": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    },
+    "completeness_comments_001::claude-sonnet-4-6": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    },
+    "latent_defects_001::claude-opus-4-8": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    },
+    "latent_defects_001::claude-sonnet-4-6": {
+      "braintrust_experiment_id": "ahe_real_cockpit_traces",
+      "braintrust_url": "https://www.braintrust.dev/app/Strand/p/coding-agent/experiments/ahe_real_cockpit_traces",
+      "last_observed_at": "2026-06-09T03:03:38+00:00",
+      "observability_mode": "braintrust",
+      "wandb_run_id": null,
+      "wandb_url": null
+    }
+  },
+  "warnings": [
+    "W&B not configured (WANDB_API_KEY empty); only Braintrust links available.",
+    "Braintrust experiment uploaded with is_public=True; viewable without sign-in."
+  ]
 }

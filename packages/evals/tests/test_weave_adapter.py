@@ -124,22 +124,25 @@ def test_export_to_weave_not_configured_without_credentials(
 
 
 def test_build_export_batch_covers_current_fixtures(project_root: Path):
+    # default source=real: cockpit traces + reliability evaluations
     batch = build_export_batch(project_root)
 
-    assert len(batch["traces"]) >= 7
-    assert batch["eval_batch"]["trace_count"] >= 7
+    assert len(batch["traces"]) == 6  # cockpit traces
+    assert batch["eval_batch"]["trace_count"] is None  # no suite trace count for real source
+    assert len(batch["eval_batch"]["evaluations"]) > 0  # reliability cells
     assert all(trace["spans"] for trace in batch["traces"])
     assert all("feedback" in trace for trace in batch["traces"])
 
 
 def test_run_dry_run_summarizes_traces_and_scores(project_root: Path):
+    # default source=real: 6 cockpit traces + reliability evaluation cells
     result = run_dry_run(project_root)
 
     assert result["ok"] is True
-    assert result["summary"]["trace_count"] >= 7
+    assert result["summary"]["trace_count"] == 6  # cockpit traces
     assert result["summary"]["span_count"] > 0
     assert result["summary"]["feedback_count"] > 0
-    assert result["summary"]["suite_evaluation_count"] >= 7
+    assert result["summary"]["suite_evaluation_count"] > 0  # reliability cells
 
 
 def test_export_dry_run_never_calls_live_export(monkeypatch: pytest.MonkeyPatch):
