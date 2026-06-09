@@ -16,7 +16,7 @@ const takeaways = [
   },
   {
     chapter: '04',
-    text: 'Optional Braintrust and Weave adapters export evidence shapes in dry-run — the core harness stays fixture-driven.'
+    text: 'Braintrust and W&B Weave export is wired and live — but optional and offline. The core harness stays fixture-driven; nothing calls a vendor at runtime.'
   }
 ] as const;
 
@@ -42,10 +42,6 @@ export function TakeawaysSection() {
           </li>
         ))}
       </ol>
-      <p className="mt-6 font-mono text-xs text-text-faint">
-        No live LLM · no runner · no API calls in the browser. The eval table and capability chart are real held-out
-        fractions (3 tasks × 5 models, baseline policy); cockpit traces are 6 real-model runs.
-      </p>
     </section>
   );
 }

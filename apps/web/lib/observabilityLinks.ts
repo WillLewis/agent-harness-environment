@@ -58,3 +58,18 @@ export function getObservabilityLink(taskId: string, policyId: string): Observab
 }
 
 export const hasAnyObservabilityLinks = Object.values(artifact.runs ?? {}).some(hasVendorLink);
+
+/**
+ * Distinct vendor dashboard links across all exported runs (every run shares the
+ * same experiment/project URL). Used by the implementation map to link out to the
+ * live Braintrust / W&B dashboards. Empty when observability is off.
+ */
+export const observabilityVendorLinks: { label: string; href: string }[] = (() => {
+  const runs = Object.values(artifact.runs ?? {});
+  const braintrustUrl = runs.find((raw) => raw.braintrust_url)?.braintrust_url ?? null;
+  const wandbUrl = runs.find((raw) => raw.wandb_url)?.wandb_url ?? null;
+  const links: { label: string; href: string }[] = [];
+  if (braintrustUrl) links.push({ label: 'Braintrust', href: braintrustUrl });
+  if (wandbUrl) links.push({ label: 'W&B Weave', href: wandbUrl });
+  return links;
+})();

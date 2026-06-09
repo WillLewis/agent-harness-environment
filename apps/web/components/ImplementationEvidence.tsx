@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react';
 import {
   implementationStats,
   statusLabels,
@@ -31,10 +32,10 @@ export function ImplementationEvidence() {
     >
       <SectionHeader
         chapter="08"
-        label="implementation"
+        label="Architecture"
         title="What the repo actually implements today."
         titleId="architecture-heading"
-        description="The building blocks behind the demo — task fixtures, trace replay, deterministic scorers, the local runner, MCP tools, and dry-run export adapters. Status reflects the current repository, not a roadmap; nothing here calls a live LLM at runtime."
+        description="The building blocks behind the demo — trace fixtures, deterministic scorers, the eval suite + CI gate, the local runner, MCP tools, and live Braintrust / W&B export. Status reflects the current repository, not a roadmap; nothing here calls a live LLM at runtime."
       />
 
       <dl className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -43,7 +44,7 @@ export function ImplementationEvidence() {
           <dd className="mt-1.5 font-mono text-2xl tabular-nums text-accent-muted">{implementationStats.taskCount}</dd>
         </SurfaceCard>
         <SurfaceCard className="p-3 sm:p-4">
-          <dt className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Trace fixtures</dt>
+          <dt className="font-mono text-[10px] uppercase tracking-wider text-text-faint">Real traces</dt>
           <dd className="mt-1.5 font-mono text-2xl tabular-nums text-accent-muted">{implementationStats.traceCount}</dd>
         </SurfaceCard>
         <SurfaceCard className="p-3 sm:p-4">
@@ -65,15 +66,17 @@ export function ImplementationEvidence() {
             Status reflects the current repository — not a roadmap slide.
           </p>
           <ul className="mt-3 flex flex-wrap gap-2 text-xs" aria-label="Status legend">
-            {(Object.keys(statusLabels) as CapabilityStatus[]).map((status) => (
-              <li
-                key={status}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[10px] ${statusStyles[status].badge}`}
-              >
-                <span className={`h-1.5 w-1.5 rounded-full ${statusStyles[status].dot}`} aria-hidden="true" />
-                {statusLabels[status]}
-              </li>
-            ))}
+            {(Object.keys(statusLabels) as CapabilityStatus[])
+              .filter((status) => systemCapabilities.some((capability) => capability.status === status))
+              .map((status) => (
+                <li
+                  key={status}
+                  className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[10px] ${statusStyles[status].badge}`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${statusStyles[status].dot}`} aria-hidden="true" />
+                  {statusLabels[status]}
+                </li>
+              ))}
           </ul>
         </div>
         <ul className="divide-y divide-border-subtle">
@@ -97,6 +100,22 @@ export function ImplementationEvidence() {
                 {capability.commands?.length ? (
                   <p className="mt-1.5 break-all font-mono text-[10px] leading-5 text-accent-muted">
                     {capability.commands.join(' · ')}
+                  </p>
+                ) : null}
+                {capability.links?.length ? (
+                  <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] leading-5">
+                    {capability.links.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="focus-ring inline-flex items-center gap-1 text-accent-muted underline-offset-2 transition hover:underline"
+                      >
+                        {link.label}
+                        <ExternalLink className="size-3" aria-hidden="true" />
+                      </a>
+                    ))}
                   </p>
                 ) : null}
               </li>
